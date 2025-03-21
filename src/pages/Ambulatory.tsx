@@ -142,208 +142,207 @@ const Ambulatory = () => {
                   Observação
                 </TabsTrigger>
               </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent className="px-6 pt-6">
-            <TabsContent value="waiting" className="mt-0 space-y-4">
-              {getFilteredPatients().map((patient: any) => (
-                <div 
-                  key={patient.id} 
-                  className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <User className="h-5 w-5 mr-2 text-muted-foreground" />
-                      <div>
-                        <h3 className="font-medium">{patient.name}</h3>
-                        <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex flex-col items-end">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{patient.time}</span>
-                        </div>
-                        {getPriorityBadge(patient.priority)}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {patient.triage && (
-                    <div className="bg-medgray-100 p-3 rounded-md mb-4">
-                      <div className="flex items-center mb-2">
-                        <Stethoscope className="h-4 w-4 mr-1 text-muted-foreground" />
-                        <h4 className="text-sm font-medium">Acolhimento</h4>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
+              
+              <TabsContent value="waiting" className="mt-0 space-y-4">
+                {getFilteredPatients().map((patient: any) => (
+                  <div 
+                    key={patient.id} 
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 mr-2 text-muted-foreground" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Temperatura</p>
-                          <p className="text-sm">{patient.triage.temp}</p>
+                          <h3 className="font-medium">{patient.name}</h3>
+                          <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
                         </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Pressão</p>
-                          <p className="text-sm">{patient.triage.pressure}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Sintomas</p>
-                          <p className="text-sm">{patient.triage.symptoms}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{patient.time}</span>
+                          </div>
+                          {getPriorityBadge(patient.priority)}
                         </div>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="flex items-center justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCallPatient(patient)}
-                    >
-                      Chamar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
-                      onClick={() => handleCancelPatient(patient)}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Desistência
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleStartConsult(patient)}
-                    >
-                      <Stethoscope className="h-4 w-4 mr-1" />
-                      Atender
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </TabsContent>
-            
-            <TabsContent value="today" className="mt-0 space-y-4">
-              {getFilteredPatients().map((patient: any) => (
-                <div 
-                  key={patient.id} 
-                  className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <User className="h-5 w-5 mr-2 text-muted-foreground" />
-                      <div>
-                        <h3 className="font-medium">{patient.name}</h3>
-                        <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex flex-col items-end">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{patient.time}</span>
+                    
+                    {patient.triage && (
+                      <div className="bg-medgray-100 p-3 rounded-md mb-4">
+                        <div className="flex items-center mb-2">
+                          <Stethoscope className="h-4 w-4 mr-1 text-muted-foreground" />
+                          <h4 className="text-sm font-medium">Acolhimento</h4>
                         </div>
-                        {getStatusBadge(patient.status)}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Temperatura</p>
+                            <p className="text-sm">{patient.triage.temp}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Pressão</p>
+                            <p className="text-sm">{patient.triage.pressure}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Sintomas</p>
+                            <p className="text-sm">{patient.triage.symptoms}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-end space-x-2">
-                    {patient.status !== "Finalizado" && (
+                    )}
+                    
+                    <div className="flex items-center justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCallPatient(patient)}
+                      >
+                        Chamar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        onClick={() => handleCancelPatient(patient)}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Desistência
+                      </Button>
                       <Button
                         size="sm"
                         onClick={() => handleStartConsult(patient)}
                       >
                         <Stethoscope className="h-4 w-4 mr-1" />
-                        {patient.status === "Em Atendimento" ? "Continuar" : "Atender"}
+                        Atender
                       </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </TabsContent>
-            
-            <TabsContent value="return" className="mt-0 space-y-4">
-              {getFilteredPatients().map((patient: any) => (
-                <div 
-                  key={patient.id} 
-                  className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <User className="h-5 w-5 mr-2 text-muted-foreground" />
-                      <div>
-                        <h3 className="font-medium">{patient.name}</h3>
-                        <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
-                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex flex-col items-end">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{patient.time}</span>
+                  </div>
+                ))}
+              </TabsContent>
+              
+              <TabsContent value="today" className="mt-0 space-y-4">
+                {getFilteredPatients().map((patient: any) => (
+                  <div 
+                    key={patient.id} 
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 mr-2 text-muted-foreground" />
+                        <div>
+                          <h3 className="font-medium">{patient.name}</h3>
+                          <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
                         </div>
-                        <Badge variant="outline">{patient.reason}</Badge>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCallPatient(patient)}
-                    >
-                      Chamar
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleStartConsult(patient)}
-                    >
-                      <Stethoscope className="h-4 w-4 mr-1" />
-                      Atender
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </TabsContent>
-            
-            <TabsContent value="observation" className="mt-0 space-y-4">
-              {getFilteredPatients().map((patient: any) => (
-                <div 
-                  key={patient.id} 
-                  className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <User className="h-5 w-5 mr-2 text-muted-foreground" />
-                      <div>
-                        <h3 className="font-medium">{patient.name}</h3>
-                        <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex flex-col items-end">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{patient.time} ({patient.duration})</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{patient.time}</span>
+                          </div>
+                          {getStatusBadge(patient.status)}
                         </div>
-                        <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">{patient.reason}</Badge>
                       </div>
                     </div>
+                    
+                    <div className="flex items-center justify-end space-x-2">
+                      {patient.status !== "Finalizado" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStartConsult(patient)}
+                        >
+                          <Stethoscope className="h-4 w-4 mr-1" />
+                          {patient.status === "Em Atendimento" ? "Continuar" : "Atender"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center justify-end space-x-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleStartConsult(patient)}
-                    >
-                      <Stethoscope className="h-4 w-4 mr-1" />
-                      Avaliar
-                    </Button>
+                ))}
+              </TabsContent>
+              
+              <TabsContent value="return" className="mt-0 space-y-4">
+                {getFilteredPatients().map((patient: any) => (
+                  <div 
+                    key={patient.id} 
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 mr-2 text-muted-foreground" />
+                        <div>
+                          <h3 className="font-medium">{patient.name}</h3>
+                          <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{patient.time}</span>
+                          </div>
+                          <Badge variant="outline">{patient.reason}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCallPatient(patient)}
+                      >
+                        Chamar
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleStartConsult(patient)}
+                      >
+                        <Stethoscope className="h-4 w-4 mr-1" />
+                        Atender
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </TabsContent>
+                ))}
+              </TabsContent>
+              
+              <TabsContent value="observation" className="mt-0 space-y-4">
+                {getFilteredPatients().map((patient: any) => (
+                  <div 
+                    key={patient.id} 
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <User className="h-5 w-5 mr-2 text-muted-foreground" />
+                        <div>
+                          <h3 className="font-medium">{patient.name}</h3>
+                          <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{patient.time} ({patient.duration})</span>
+                          </div>
+                          <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">{patient.reason}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-end space-x-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleStartConsult(patient)}
+                      >
+                        <Stethoscope className="h-4 w-4 mr-1" />
+                        Avaliar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
