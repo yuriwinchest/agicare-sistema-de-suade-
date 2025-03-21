@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
@@ -127,6 +126,9 @@ const Ambulatory = () => {
         
         <Card className="section-fade" style={{ animationDelay: "0.1s" }}>
           <CardHeader className="px-6 pt-6 pb-0">
+            <CardTitle>Pacientes</CardTitle>
+          </CardHeader>
+          <CardContent>
             <Tabs defaultValue="waiting" onValueChange={setActiveTab}>
               <TabsList className="w-full bg-medgray-200 grid grid-cols-4 h-auto">
                 <TabsTrigger value="waiting" className="data-[state=active]:bg-white py-3">
