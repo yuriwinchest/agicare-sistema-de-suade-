@@ -11,7 +11,7 @@ export interface TextareaProps
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, contentEditable, dangerouslySetInnerHTML, ...props }, ref) => {
-    // Criar uma referência local se não for fornecida
+    // Create a local reference if not provided
     const innerRef = React.useRef<HTMLTextAreaElement>(null);
     const resolvedRef = ref || innerRef;
 
