@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -50,69 +49,63 @@ const Login = () => {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-medgray-100 p-4">
-      <div className="w-full max-w-md">
-        <div className="glass-card overflow-hidden animate-fadeIn">
-          <div className="bg-primary p-6 flex flex-col items-center">
-            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-3">
-              <span className="text-primary font-bold text-xl">S</span>
-            </div>
-            <h1 className="text-white text-2xl font-semibold">Salutem EMR</h1>
-            <p className="text-primary-foreground/80 text-sm mt-1">Prontuário Eletrônico</p>
-          </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600">
+      <div className="absolute inset-0 bg-[url('/lovable-uploads/cda3aca0-da8b-449c-999e-d0de18cac3af.png')] bg-cover bg-center opacity-40"></div>
+      
+      <div className="relative z-10 flex flex-col items-center mb-8">
+        <div className="w-16 h-8">
+          <svg viewBox="0 0 120 40" className="w-full h-full">
+            <path d="M10,30 C20,10 40,10 50,30 M70,30 C80,10 100,10 110,30" 
+                  fill="none" 
+                  stroke="#a3e6e0" 
+                  strokeWidth="4" 
+                  strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+      
+      <div className="w-full max-w-sm relative z-10">
+        <div className="backdrop-blur-sm bg-white/10 rounded-lg border border-white/20 p-6">
+          <p className="text-white/70 text-sm mb-6 text-center">Faça login</p>
           
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="username">Usuário</Label>
-                <Input 
-                  id="username"
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="h-11"
-                  placeholder="Digite seu nome de usuário"
-                  autoComplete="username"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Senha</Label>
-                  <a href="#" className="text-xs text-primary hover:underline">
-                    Esqueceu a senha?
-                  </a>
-                </div>
-                <Input 
-                  id="password"
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-11"
-                  placeholder="Digite sua senha"
-                  autoComplete="current-password"
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full h-11"
-                disabled={isLoading}
-              >
-                {isLoading ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
-            
-            <div className="mt-8 pt-6 border-t border-border">
-              <p className="text-center text-sm text-muted-foreground">
-                Para fins de demonstração, você pode usar:
-              </p>
-              <p className="text-center text-xs text-muted-foreground mt-1">
-                <code>admin / senha</code>
-              </p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-10"
+                placeholder="Usuário"
+                autoComplete="username"
+              />
             </div>
+            
+            <div>
+              <Input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-10"
+                placeholder="Senha"
+                autoComplete="current-password"
+              />
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-teal-400 hover:bg-teal-500 text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
+          
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <p className="text-center text-xs text-white/50">
+              Para fins de demonstração: <code className="bg-white/10 px-1 rounded">admin / senha</code>
+            </p>
           </div>
         </div>
       </div>
