@@ -341,7 +341,7 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
-                {/* Rich Text Editor with your API key */}
+                {/* Rich Text Editor with corrected API key */}
                 <Editor
                   apiKey="rsh41jbv58da92e62s3kr4soxukqv8qbf8q7n4gxc897n3ar"
                   onInit={(evt, editor) => editorRef.current = editor}
