@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -132,6 +131,7 @@ const PatientRecord = () => {
                 </TabsTrigger>
               </TabsList>
               
+              
               <TabsContent value="summary" className="p-6">
                 <SummaryTab 
                   vitalSigns={patientInfo.vitalSigns}
@@ -162,6 +162,7 @@ const PatientRecord = () => {
               <TabsContent value="laudo" className="p-6">
                 <LaudoTab />
               </TabsContent>
+              
               
               <TabsContent value="prescription" className="p-6">
                 <div className="space-y-4">
