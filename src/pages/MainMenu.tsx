@@ -10,7 +10,7 @@ import {
   Stethoscope,
   FileClock,
   ClipboardList,
-  FileMedical,
+  FileText2,
   ImagePlus
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -49,7 +49,7 @@ const MainMenu = () => {
     { icon: Stethoscope, title: "Enfermagem", path: "/patient/nursing" },
     { icon: FileClock, title: "Prontuário Eletrônico Agenda", path: "/appointment" },
     { icon: ClipboardList, title: "Controle de Leito", path: "/beds" },
-    { icon: FileMedical, title: "Prontuário Eletrônico Internação", path: "/hospitalization" },
+    { icon: FileText, title: "Prontuário Eletrônico Internação", path: "/hospitalization" },
     { icon: ImagePlus, title: "Faturação Atendimento", path: "/billing" },
   ];
 
