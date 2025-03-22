@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 type SidebarContextType = {
   isOpen: boolean;
@@ -21,9 +21,9 @@ export const useSidebar = () => {
 export const SidebarProvider = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const toggle = () => setIsOpen(!isOpen);
-  const close = () => setIsOpen(false);
-  const open = () => setIsOpen(true);
+  const toggle = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const close = useCallback(() => setIsOpen(false), []);
+  const open = useCallback(() => setIsOpen(true), []);
 
   return (
     <SidebarContext.Provider value={{ isOpen, toggle, close, open }}>

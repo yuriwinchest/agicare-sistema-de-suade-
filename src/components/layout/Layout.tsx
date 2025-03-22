@@ -65,9 +65,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 };
 
 const Sidebar = () => {
-  const { isOpen, toggle } = useSidebar();
+  const { isOpen, toggle, close } = useSidebar();
   const location = useLocation();
   const { user, signout } = useAuth();
+  
+  // Close sidebar when route changes, except for the menu page
+  useEffect(() => {
+    if (location.pathname !== '/menu') {
+      close();
+    }
+  }, [location.pathname, close]);
 
   return (
     <>
@@ -189,6 +196,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   const { isOpen, toggle } = useSidebar();
   const { user, updateUserSettings } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const location = useLocation();
   
   return (
     <div className="flex-1 flex flex-col min-h-screen">
@@ -202,57 +210,60 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
             <Menu size={20} />
           </button>
           
-          <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="border-teal-500/30 text-teal-600">
-                {user?.unit ? `${user.unit} - Sala ${user.room}` : 'Selecionar Local'}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="system-modal">
-              <DialogHeader>
-                <DialogTitle>Configurar Local de Atendimento</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="unit">Recepção</Label>
-                  <Select 
-                    defaultValue={user?.unit || ""} 
-                    onValueChange={(value) => updateUserSettings({ unit: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a recepção" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recep-central">Recepção Central</SelectItem>
-                      <SelectItem value="recep-pediatria">Recepção Pediatria</SelectItem>
-                      <SelectItem value="recep-ortopedia">Recepção Ortopedia</SelectItem>
-                    </SelectContent>
-                  </Select>
+          {/* Only show unit selector if not on menu page */}
+          {location.pathname !== '/menu' && (
+            <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="border-teal-500/30 text-teal-600">
+                  {user?.unit ? `${user.unit} - Sala ${user.room}` : 'Selecionar Local'}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="system-modal">
+                <DialogHeader>
+                  <DialogTitle>Configurar Local de Atendimento</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="unit">Recepção</Label>
+                    <Select 
+                      defaultValue={user?.unit || ""} 
+                      onValueChange={(value) => updateUserSettings({ unit: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a recepção" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="recep-central">Recepção Central</SelectItem>
+                        <SelectItem value="recep-pediatria">Recepção Pediatria</SelectItem>
+                        <SelectItem value="recep-ortopedia">Recepção Ortopedia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="room">Sala</Label>
+                    <Select 
+                      defaultValue={user?.room || ""} 
+                      onValueChange={(value) => updateUserSettings({ room: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a sala" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Sala 1</SelectItem>
+                        <SelectItem value="2">Sala 2</SelectItem>
+                        <SelectItem value="3">Sala 3</SelectItem>
+                        <SelectItem value="4">Sala 4</SelectItem>
+                        <SelectItem value="5">Sala 5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="room">Sala</Label>
-                  <Select 
-                    defaultValue={user?.room || ""} 
-                    onValueChange={(value) => updateUserSettings({ room: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a sala" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Sala 1</SelectItem>
-                      <SelectItem value="2">Sala 2</SelectItem>
-                      <SelectItem value="3">Sala 3</SelectItem>
-                      <SelectItem value="4">Sala 4</SelectItem>
-                      <SelectItem value="5">Sala 5</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={() => setIsSettingsOpen(false)} className="bg-teal-500 hover:bg-teal-600">Salvar</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                <DialogFooter>
+                  <Button onClick={() => setIsSettingsOpen(false)} className="bg-teal-500 hover:bg-teal-600">Salvar</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
         
         <div className="flex items-center space-x-2">
