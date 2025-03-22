@@ -266,9 +266,9 @@ const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Escolha uma Ficha de Atendimento" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white border-0 shadow-lg">
                       {formTypes.map((form) => (
-                        <SelectItem key={form.id} value={form.id}>
+                        <SelectItem key={form.id} value={form.id} className="hover:bg-teal-50">
                           {form.id} - {form.name}
                         </SelectItem>
                       ))}
