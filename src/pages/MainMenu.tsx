@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { 
@@ -10,7 +9,6 @@ import {
   Stethoscope,
   FileClock,
   ClipboardList,
-  FileText2,
   ImagePlus
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
