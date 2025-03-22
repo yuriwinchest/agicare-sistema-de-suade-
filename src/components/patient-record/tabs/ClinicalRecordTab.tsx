@@ -6,8 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Plus, Search, ClipboardList } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { FileText, Plus, Search, ClipboardList, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useForm } from "react-hook-form";
 
 interface ClinicalRecordTabProps {
   clinicalRecords: {
@@ -25,6 +30,27 @@ interface ClinicalRecordTabProps {
   }[];
 }
 
+// Form types based on the provided images
+const formTypes = [
+  { id: "1", name: "FICHA DE ATENDIMENTO AMBULATORIAL" },
+  { id: "2", name: "EVOLUÇÃO MÉDICA" },
+  { id: "3", name: "INTERNAÇÃO" },
+  { id: "4", name: "RECEITUÁRIO CONTROLE ESPECIAL" },
+  { id: "5", name: "FICHA DE ATENDIMENTO ODONTOLÓGICO" },
+  { id: "6", name: "ANAMNESE MÉDICO DE ACOMPANHANTE" },
+  { id: "7", name: "ATENDIMENTO MÉDICO - PARCIAL DE URGÊNCIA" },
+];
+
+// Ambulatory form interface
+interface AmbulatoryFormValues {
+  avaliacao: string;
+  exameFisico: string;
+  conduta: string;
+  observacoes: string;
+  cid: string;
+  altaAposMedicacao: string;
+}
+
 const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({ 
   clinicalRecords,
   specialities
@@ -34,12 +60,181 @@ const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedSpeciality, setSelectedSpeciality] = useState("");
+  const [isNewRecordOpen, setIsNewRecordOpen] = useState(false);
+  const [selectedFormType, setSelectedFormType] = useState("");
+  
+  // Initialize the form
+  const ambulatoryForm = useForm<AmbulatoryFormValues>({
+    defaultValues: {
+      avaliacao: "",
+      exameFisico: "",
+      conduta: "",
+      observacoes: "",
+      cid: "",
+      altaAposMedicacao: "sim"
+    }
+  });
   
   const handleAddClinicalRecord = () => {
+    setIsNewRecordOpen(!isNewRecordOpen);
+  };
+  
+  const handleFormSubmit = (values: AmbulatoryFormValues) => {
+    console.log("Form submitted:", values);
     toast({
-      title: "Nova Ficha Clínica",
-      description: "Funcionalidade em desenvolvimento",
+      title: "Ficha Clínica Salva",
+      description: "A ficha clínica foi salva com sucesso",
     });
+    setIsNewRecordOpen(false);
+    setSelectedFormType("");
+    ambulatoryForm.reset();
+  };
+  
+  const renderSelectedForm = () => {
+    if (!selectedFormType) return null;
+    
+    if (selectedFormType === "1") {
+      return (
+        <Form {...ambulatoryForm}>
+          <form onSubmit={ambulatoryForm.handleSubmit(handleFormSubmit)} className="space-y-4 mt-4 border rounded-md p-4">
+            <FormField
+              control={ambulatoryForm.control}
+              name="avaliacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">AVALIAÇÃO / EVOLUÇÃO</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="min-h-24" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={ambulatoryForm.control}
+              name="exameFisico"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">EXAME FÍSICO</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="min-h-24" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={ambulatoryForm.control}
+              name="conduta"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">CONDUTA</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="min-h-24" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={ambulatoryForm.control}
+              name="observacoes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">OBSERVAÇÕES</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="min-h-24" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={ambulatoryForm.control}
+              name="cid"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">CID</FormLabel>
+                  <FormControl>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Informe o(s) CID" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A00">A00 - Cólera</SelectItem>
+                        <SelectItem value="J00">J00 - Nasofaringite aguda</SelectItem>
+                        <SelectItem value="I10">I10 - Hipertensão essencial</SelectItem>
+                        <SelectItem value="E11">E11 - Diabetes mellitus tipo 2</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={ambulatoryForm.control}
+              name="altaAposMedicacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">ALTA APÓS MEDICAÇÃO</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex items-center gap-8"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="sim" id="sim" />
+                        <Label htmlFor="sim">Sim</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="nao" id="nao" />
+                        <Label htmlFor="nao">Não</Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setSelectedFormType("")}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                Salvar
+              </Button>
+            </div>
+          </form>
+        </Form>
+      );
+    } else {
+      return (
+        <div className="p-4 mt-4 border rounded-md">
+          <p className="text-center text-muted-foreground">Formulário para {formTypes.find(f => f.id === selectedFormType)?.name} em desenvolvimento</p>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setSelectedFormType("")}>
+              Cancelar
+            </Button>
+            <Button 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                toast({
+                  title: "Formulário em desenvolvimento",
+                  description: "Esta funcionalidade ainda está sendo implementada",
+                });
+              }}
+            >
+              Salvar
+            </Button>
+          </div>
+        </div>
+      );
+    }
   };
   
   return (
@@ -54,6 +249,39 @@ const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({
       </div>
       
       <div className="space-y-6">
+        <Collapsible 
+          open={isNewRecordOpen} 
+          onOpenChange={setIsNewRecordOpen}
+          className="space-y-4"
+        >
+          <CollapsibleContent>
+            <Card className="shadow-md">
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <h3 className="font-medium text-lg">Nova Ficha</h3>
+                  <Select 
+                    value={selectedFormType} 
+                    onValueChange={setSelectedFormType}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Escolha uma Ficha de Atendimento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formTypes.map((form) => (
+                        <SelectItem key={form.id} value={form.id}>
+                          {form.id} - {form.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {renderSelectedForm()}
+                </div>
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+        
         <Card className="shadow-md">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
