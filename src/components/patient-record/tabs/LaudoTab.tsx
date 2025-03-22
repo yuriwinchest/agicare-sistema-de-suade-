@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { 
   Table,
   TableBody,
@@ -49,6 +49,33 @@ import {
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import ProfessionalSearchDialog from "../laudo/ProfessionalSearchDialog";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 // Sample data for laudo templates
 const templateData = [
@@ -74,6 +101,16 @@ const LaudoTab = () => {
   const [selectedProfessional, setSelectedProfessional] = useState<{id: string, name: string} | null>(null);
   const [reportText, setReportText] = useState("");
   const [currentTab, setCurrentTab] = useState("search"); // "search" or "edit"
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [fontStyle, setFontStyle] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    align: "left"
+  });
+  
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleSelectTemplate = (template: {codigo: string, nome: string}) => {
     setSelectedTemplate(template);
@@ -99,6 +136,106 @@ const LaudoTab = () => {
       title: "Laudo salvo",
       description: "O laudo foi salvo com sucesso.",
     });
+  };
+
+  const applyFormatting = (format: string) => {
+    if (!editorRef.current) return;
+    
+    const textarea = editorRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = reportText.substring(start, end);
+    let newText = reportText;
+    let newSelectionStart = start;
+    let newSelectionEnd = end;
+    
+    switch (format) {
+      case 'bold':
+        setFontStyle(prev => ({...prev, bold: !prev.bold}));
+        newText = `${reportText.substring(0, start)}**${selectedText}**${reportText.substring(end)}`;
+        newSelectionEnd = end + 4;
+        break;
+      case 'italic':
+        setFontStyle(prev => ({...prev, italic: !prev.italic}));
+        newText = `${reportText.substring(0, start)}_${selectedText}_${reportText.substring(end)}`;
+        newSelectionEnd = end + 2;
+        break;
+      case 'underline':
+        setFontStyle(prev => ({...prev, underline: !prev.underline}));
+        newText = `${reportText.substring(0, start)}__${selectedText}__${reportText.substring(end)}`;
+        newSelectionEnd = end + 4;
+        break;
+      case 'alignLeft':
+        setFontStyle(prev => ({...prev, align: "left"}));
+        break;
+      case 'alignCenter':
+        setFontStyle(prev => ({...prev, align: "center"}));
+        break;
+      case 'alignRight':
+        setFontStyle(prev => ({...prev, align: "right"}));
+        break;
+      case 'list':
+        newText = `${reportText.substring(0, start)}\n- ${selectedText.split('\n').join('\n- ')}${reportText.substring(end)}`;
+        newSelectionEnd = end + 3 + selectedText.split('\n').length - 1;
+        break;
+      case 'orderedList':
+        const lines = selectedText.split('\n');
+        let numberedList = '';
+        lines.forEach((line, index) => {
+          numberedList += `${index + 1}. ${line}${index < lines.length - 1 ? '\n' : ''}`;
+        });
+        newText = `${reportText.substring(0, start)}\n${numberedList}${reportText.substring(end)}`;
+        newSelectionEnd = start + numberedList.length + 1;
+        break;
+      case 'link':
+        newText = `${reportText.substring(0, start)}[${selectedText}](url)${reportText.substring(end)}`;
+        newSelectionEnd = end + 7;
+        break;
+      default:
+        break;
+    }
+    
+    setReportText(newText);
+    
+    // Set cursor position after format is applied
+    setTimeout(() => {
+      if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(newSelectionStart, newSelectionEnd);
+      }
+    }, 0);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const imgTag = `![${file.name}](${reader.result})`;
+      
+      if (editorRef.current) {
+        const textarea = editorRef.current;
+        const cursorPos = textarea.selectionStart;
+        const textBefore = reportText.substring(0, cursorPos);
+        const textAfter = reportText.substring(cursorPos);
+        
+        setReportText(`${textBefore}\n${imgTag}\n${textAfter}`);
+        setImageDialogOpen(false);
+        
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        
+        toast({
+          title: "Imagem inserida",
+          description: "A imagem foi inserida no laudo com sucesso.",
+        });
+      }
+    };
+    
+    reader.readAsDataURL(file);
   };
   
   return (
@@ -267,46 +404,129 @@ const LaudoTab = () => {
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
-                <div className="flex items-center space-x-1 p-2 bg-gray-50 border-b">
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                <div className="flex items-center p-2 bg-gray-50 border-b overflow-x-auto">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`w-8 h-8 p-0 ${fontStyle.bold ? 'bg-gray-200' : ''}`}
+                    onClick={() => applyFormatting('bold')}
+                  >
                     <Bold className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`w-8 h-8 p-0 ${fontStyle.italic ? 'bg-gray-200' : ''}`}
+                    onClick={() => applyFormatting('italic')}
+                  >
                     <Italic className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`w-8 h-8 p-0 ${fontStyle.underline ? 'bg-gray-200' : ''}`}
+                    onClick={() => applyFormatting('underline')}
+                  >
                     <Underline className="h-4 w-4" />
                   </Button>
                   <span className="mx-2 text-gray-300">|</span>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`w-8 h-8 p-0 ${fontStyle.align === 'left' ? 'bg-gray-200' : ''}`}
+                    onClick={() => applyFormatting('alignLeft')}
+                  >
                     <AlignLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`w-8 h-8 p-0 ${fontStyle.align === 'center' ? 'bg-gray-200' : ''}`}
+                    onClick={() => applyFormatting('alignCenter')}
+                  >
                     <AlignCenter className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`w-8 h-8 p-0 ${fontStyle.align === 'right' ? 'bg-gray-200' : ''}`}
+                    onClick={() => applyFormatting('alignRight')}
+                  >
                     <AlignRight className="h-4 w-4" />
                   </Button>
                   <span className="mx-2 text-gray-300">|</span>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-8 h-8 p-0"
+                    onClick={() => applyFormatting('list')}
+                  >
                     <List className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-8 h-8 p-0"
+                    onClick={() => applyFormatting('orderedList')}
+                  >
                     <ListOrdered className="h-4 w-4" />
                   </Button>
                   <span className="mx-2 text-gray-300">|</span>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-8 h-8 p-0"
+                    onClick={() => applyFormatting('link')}
+                  >
                     <LinkIcon className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
-                    <Image className="h-4 w-4" />
-                  </Button>
+                  <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-8 h-8 p-0"
+                      >
+                        <Image className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Inserir Imagem</DialogTitle>
+                        <DialogDescription>
+                          Selecione uma imagem para inserir no laudo
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="flex items-center gap-4">
+                          <Input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleImageUpload}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancelar</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
                 <Textarea 
                   id="editor" 
+                  ref={editorRef}
                   value={reportText}
                   onChange={(e) => setReportText(e.target.value)}
-                  className="min-h-[300px] rounded-none border-none focus-visible:ring-0 font-serif"
+                  className={`min-h-[300px] rounded-none border-none focus-visible:ring-0 font-serif text-${fontStyle.align}`}
+                  style={{
+                    fontWeight: fontStyle.bold ? 'bold' : 'normal',
+                    fontStyle: fontStyle.italic ? 'italic' : 'normal',
+                    textDecoration: fontStyle.underline ? 'underline' : 'none',
+                  }}
                 />
               </div>
             </div>
@@ -321,10 +541,17 @@ const LaudoTab = () => {
             </Button>
             
             <div className="flex space-x-2">
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={handleSaveReport}
+              >
                 Salvar
               </Button>
-              <Button variant="outline" className="bg-green-500 hover:bg-green-600 text-white">
+              <Button 
+                variant="outline" 
+                className="bg-green-500 hover:bg-green-600 text-white"
+                onClick={handleSaveReport}
+              >
                 Salvar e Fechar
               </Button>
               <Button variant="destructive">
