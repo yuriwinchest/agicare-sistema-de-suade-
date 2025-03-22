@@ -43,12 +43,21 @@ const DestinationModal = () => {
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
 
+  // Ensure we never have empty strings for SelectItem values
+  if (selectedLocation === "") {
+    setSelectedLocation("none-selected");
+  }
+  
+  if (selectedRoom === "") {
+    setSelectedRoom("none-selected");
+  }
+
   const handleConfirm = () => {
     // Update user settings with selected location and room
-    if (selectedLocation) {
+    if (selectedLocation && selectedLocation !== "none-selected") {
       updateUserSettings({
         unit: selectedLocation,
-        room: selectedRoom,
+        room: selectedRoom !== "none-selected" ? selectedRoom : "",
       });
     }
 
@@ -85,13 +94,14 @@ const DestinationModal = () => {
           <div className="space-y-2">
             <Label htmlFor="location">Recepção</Label>
             <Select 
-              defaultValue={selectedLocation} 
+              value={selectedLocation} 
               onValueChange={setSelectedLocation}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a recepção" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none-selected">Selecione uma opção</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location.value} value={location.value}>
                     {location.label}
@@ -103,13 +113,14 @@ const DestinationModal = () => {
           <div className="space-y-2">
             <Label htmlFor="room">Sala</Label>
             <Select 
-              defaultValue={selectedRoom} 
+              value={selectedRoom} 
               onValueChange={setSelectedRoom}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a sala" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none-selected">Selecione uma opção</SelectItem>
                 {rooms.map((room) => (
                   <SelectItem key={room.value} value={room.value}>
                     {room.label}
