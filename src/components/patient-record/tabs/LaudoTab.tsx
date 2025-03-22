@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Table,
@@ -16,21 +17,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   Search, 
   Plus, 
-  Bold, 
-  Italic, 
-  Underline, 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
-  List, 
-  ListOrdered,
   Link as LinkIcon,
   Image,
-  Type,
   FileText
 } from "lucide-react";
 import {
@@ -60,21 +51,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Editor } from '@tinymce/tinymce-react';
 
 // Sample data for laudo templates
 const templateData = [
@@ -88,20 +65,6 @@ const templateData = [
   { codigo: "13", nome: "TREINAMENTO FUNCIONAL - TESTE" },
   { codigo: "14", nome: "RADIOGRAFIA DA MÃO, PUNHO (ESQRD)" },
   { codigo: "15", nome: "RADIOGRAFIA PELO CORPO" }
-];
-
-// Font sizes in pixels for a more numeric representation
-const fontSizes = [
-  { value: '10', label: '10' },
-  { value: '11', label: '11' },
-  { value: '12', label: '12' },
-  { value: '14', label: '14' },
-  { value: '16', label: '16' },
-  { value: '18', label: '18' },
-  { value: '20', label: '20' },
-  { value: '24', label: '24' },
-  { value: '28', label: '28' },
-  { value: '32', label: '32' },
 ];
 
 // Acceptable file types for attachments
@@ -118,19 +81,10 @@ const LaudoTab = () => {
   const [reportText, setReportText] = useState("");
   const [currentTab, setCurrentTab] = useState("search"); // "search" or "edit"
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
-  const [fontSizeDialogOpen, setFontSizeDialogOpen] = useState(false);
-  const [currentFontSize, setCurrentFontSize] = useState("16");
   const [attachments, setAttachments] = useState<{type: string, url: string, name: string}[]>([]);
-  const [fontStyle, setFontStyle] = useState({
-    bold: false,
-    italic: false,
-    underline: false,
-    align: "left"
-  });
   
-  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
   
   const handleSelectTemplate = (template: {codigo: string, nome: string}) => {
     setSelectedTemplate(template);
@@ -143,7 +97,15 @@ const LaudoTab = () => {
     setShowEditor(true);
     
     // Initialize the editor with a template text
-    setReportText(`TESTE ELETROCARDIOGRAMA - Laudo\n\nECG de repouso, sugestivo distúrbio de condução do ramo direito.\n\nOs riscos tais dentro da normalidade. Como conclusão constam as seguintes informações:\n1. Paciente atingiu a frequência cardíaca submáxima e fisicamente bem estado.\n2. Não apresentou sinais compatível com isquemia durante todas as etapas realizado.\n3. Ausência de arritmias.\n4. Comportamento hemodinâmico dentro dos limites da normalidade.\n5. Excelente capacidade funcional para faixa etária.`);
+    setReportText(`TESTE ELETROCARDIOGRAMA - Laudo
+
+ECG de repouso, sugestivo distúrbio de condução do ramo direito.
+
+Os riscos tais dentro da normalidade. Como conclusão constam as seguintes informações:
+1. Paciente atingiu a frequência cardíaca submáxima e fisicamente bem estado.
+2. Não apresentou sinais compatível com isquemia durante todas as etapas realizado.
+3. Ausência de arritmias.
+4. Excelente capacidade funcional para faixa etária.`);
     
     toast({
       title: "Profissional selecionado",
@@ -152,142 +114,14 @@ const LaudoTab = () => {
   };
   
   const handleSaveReport = () => {
+    if (editorRef.current) {
+      console.log(editorRef.current.getContent());
+    }
+    
     toast({
       title: "Laudo salvo",
       description: "O laudo foi salvo com sucesso.",
     });
-  };
-
-  const getSelectedText = (): { text: string, start: number, end: number } => {
-    if (!editorRef.current) return { text: '', start: 0, end: 0 };
-    
-    const textarea = editorRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = reportText.substring(start, end);
-    
-    return { text: selectedText, start, end };
-  };
-
-  // Apply formatting only to selected text using Markdown-style syntax
-  const applyFormatting = (format: string) => {
-    if (!editorRef.current) return;
-    
-    const { text: selectedText, start, end } = getSelectedText();
-    if (start === end && !['list', 'orderedList'].includes(format)) {
-      toast({
-        title: "Nenhum texto selecionado",
-        description: "Selecione o texto para aplicar a formatação.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    let newText = reportText;
-    let newSelectionStart = start;
-    let newSelectionEnd = end;
-    
-    switch (format) {
-      case 'bold':
-        setFontStyle(prev => ({...prev, bold: !prev.bold}));
-        newText = `${reportText.substring(0, start)}**${selectedText}**${reportText.substring(end)}`;
-        newSelectionEnd = end + 4;
-        break;
-      case 'italic':
-        setFontStyle(prev => ({...prev, italic: !prev.italic}));
-        newText = `${reportText.substring(0, start)}_${selectedText}_${reportText.substring(end)}`;
-        newSelectionEnd = end + 2;
-        break;
-      case 'underline':
-        setFontStyle(prev => ({...prev, underline: !prev.underline}));
-        newText = `${reportText.substring(0, start)}__${selectedText}__${reportText.substring(end)}`;
-        newSelectionEnd = end + 4;
-        break;
-      case 'alignLeft':
-        setFontStyle(prev => ({...prev, align: "left"}));
-        // Don't use HTML tags for alignment
-        break;
-      case 'alignCenter':
-        setFontStyle(prev => ({...prev, align: "center"}));
-        // Don't use HTML tags for alignment
-        break;
-      case 'alignRight':
-        setFontStyle(prev => ({...prev, align: "right"}));
-        // Don't use HTML tags for alignment
-        break;
-      case 'list':
-        newText = `${reportText.substring(0, start)}\n- ${selectedText.split('\n').join('\n- ')}${reportText.substring(end)}`;
-        newSelectionEnd = end + 3 + selectedText.split('\n').length - 1;
-        break;
-      case 'orderedList':
-        const lines = selectedText.split('\n');
-        let numberedList = '';
-        lines.forEach((line, index) => {
-          numberedList += `${index + 1}. ${line}${index < lines.length - 1 ? '\n' : ''}`;
-        });
-        newText = `${reportText.substring(0, start)}\n${numberedList}${reportText.substring(end)}`;
-        newSelectionEnd = start + numberedList.length + 1;
-        break;
-      case 'link':
-        newText = `${reportText.substring(0, start)}[${selectedText}](url)${reportText.substring(end)}`;
-        newSelectionEnd = end + 7;
-        break;
-      case 'fontSize':
-        // Font size will be handled separately in the dialog
-        setFontSizeDialogOpen(true);
-        return;
-      default:
-        break;
-    }
-    
-    setReportText(newText);
-    
-    // Set cursor position after format is applied
-    setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.focus();
-        editorRef.current.setSelectionRange(newSelectionStart, newSelectionEnd);
-      }
-    }, 0);
-  };
-  
-  // Apply font size to selected text only - without using HTML spans
-  const applyFontSize = (size: string) => {
-    if (!editorRef.current) return;
-    
-    const { text: selectedText, start, end } = getSelectedText();
-    if (start === end) {
-      toast({
-        title: "Nenhum texto selecionado",
-        description: "Selecione o texto para aplicar o tamanho da fonte.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Instead of injecting HTML, we'll use a size indicator and store the font size metadata
-    // This approach simulates font-size without actually injecting HTML
-    setCurrentFontSize(size);
-    setFontSizeDialogOpen(false);
-    
-    // Apply font size formatting using special markers that won't render as HTML
-    // For real implementation, we would need to use a rich text editor instead of a textarea
-    // This is a simplified approach for the demo purpose
-    const newText = reportText; // For now, keep the text as is without injecting HTML tags
-    
-    // Close the font size dialog
-    toast({
-      title: "Tamanho de fonte aplicado",
-      description: `Tamanho ${size} aplicado ao texto selecionado.`,
-    });
-    
-    // Reset selection
-    setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.focus();
-        editorRef.current.setSelectionRange(start, end);
-      }
-    }, 0);
   };
 
   // Handle file uploads (images and PDFs)
@@ -313,8 +147,14 @@ const LaudoTab = () => {
           }
         ]);
         
-        // For the demo purpose, we'll just show the attachments in a separate panel
-        // In a real implementation, we would integrate with a rich text editor
+        // Insert image or link to PDF in editor
+        if (editorRef.current) {
+          if (file.type.startsWith('image/')) {
+            editorRef.current.execCommand('mceInsertContent', false, `<img src="${fileUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`);
+          } else if (isPdf) {
+            editorRef.current.execCommand('mceInsertContent', false, `<p><a href="${fileUrl}" target="_blank" class="pdf-attachment">${file.name} (PDF)</a></p>`);
+          }
+        }
         
         setImageDialogOpen(false);
         
@@ -501,206 +341,86 @@ const LaudoTab = () => {
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
-                {/* Editor toolbar */}
-                <div className="flex items-center p-2 bg-gray-50 border-b overflow-x-auto">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`w-8 h-8 p-0 ${fontStyle.bold ? 'bg-gray-200' : ''}`}
-                    onClick={() => applyFormatting('bold')}
-                    title="Negrito"
-                  >
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`w-8 h-8 p-0 ${fontStyle.italic ? 'bg-gray-200' : ''}`}
-                    onClick={() => applyFormatting('italic')}
-                    title="Itálico"
-                  >
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`w-8 h-8 p-0 ${fontStyle.underline ? 'bg-gray-200' : ''}`}
-                    onClick={() => applyFormatting('underline')}
-                    title="Sublinhado"
-                  >
-                    <Underline className="h-4 w-4" />
-                  </Button>
-                  
-                  {/* Font size dropdown with numeric values */}
-                  <Popover open={fontSizeDialogOpen} onOpenChange={setFontSizeDialogOpen}>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="w-auto h-8 px-2 flex items-center gap-1 ml-1"
-                        title="Tamanho da fonte"
-                      >
-                        <Type className="h-4 w-4" />
-                        <span className="text-xs">{currentFontSize}</span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-48 p-2">
-                      <div className="flex flex-col gap-1">
-                        {fontSizes.map((size) => (
-                          <Button 
-                            key={size.value}
-                            variant="ghost" 
-                            className={`justify-start h-8 px-2 ${currentFontSize === size.value ? 'bg-gray-100' : ''}`}
-                            onClick={() => applyFontSize(size.value)}
-                          >
-                            <span style={{ fontSize: `${size.value}px` }}>{size.label}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  
-                  <span className="mx-2 text-gray-300">|</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`w-8 h-8 p-0 ${fontStyle.align === 'left' ? 'bg-gray-200' : ''}`}
-                    onClick={() => applyFormatting('alignLeft')}
-                    title="Alinhar à esquerda"
-                  >
-                    <AlignLeft className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`w-8 h-8 p-0 ${fontStyle.align === 'center' ? 'bg-gray-200' : ''}`}
-                    onClick={() => applyFormatting('alignCenter')}
-                    title="Centralizar"
-                  >
-                    <AlignCenter className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`w-8 h-8 p-0 ${fontStyle.align === 'right' ? 'bg-gray-200' : ''}`}
-                    onClick={() => applyFormatting('alignRight')}
-                    title="Alinhar à direita"
-                  >
-                    <AlignRight className="h-4 w-4" />
-                  </Button>
-                  <span className="mx-2 text-gray-300">|</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-8 h-8 p-0"
-                    onClick={() => applyFormatting('list')}
-                    title="Lista com marcadores"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-8 h-8 p-0"
-                    onClick={() => applyFormatting('orderedList')}
-                    title="Lista numerada"
-                  >
-                    <ListOrdered className="h-4 w-4" />
-                  </Button>
-                  <span className="mx-2 text-gray-300">|</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-8 h-8 p-0"
-                    onClick={() => applyFormatting('link')}
-                    title="Inserir link"
-                  >
-                    <LinkIcon className="h-4 w-4" />
-                  </Button>
-                  
-                  {/* File upload button for images and PDFs */}
-                  <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="w-auto h-8 p-1 flex gap-1 items-center"
-                        title="Anexar arquivo"
-                      >
-                        <Image className="h-4 w-4 mr-1" />
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Anexar Arquivo</DialogTitle>
-                        <DialogDescription>
-                          Selecione uma imagem ou PDF para inserir no laudo
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Selecione um arquivo</label>
-                          <Input
-                            id="file-upload"
-                            type="file"
-                            accept={acceptableFileTypes}
-                            ref={fileInputRef}
-                            onChange={handleFileUpload}
-                            multiple
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Formatos aceitos: imagens (JPG, PNG, GIF) e PDF
-                          </p>
-                        </div>
-                      </div>
-                      <DialogFooter className="flex justify-between">
-                        <DialogClose asChild>
-                          <Button variant="outline">Cancelar</Button>
-                        </DialogClose>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                {/* Rich Text Editor */}
+                <Editor
+                  apiKey="your-tinymce-api-key" // Você pode obter uma chave gratuita em https://www.tiny.cloud/
+                  onInit={(evt, editor) => editorRef.current = editor}
+                  initialValue={reportText}
+                  init={{
+                    height: 400,
+                    menubar: false,
+                    plugins: [
+                      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                      'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                    ],
+                    toolbar: 'undo redo | ' +
+                      'bold italic underline strikethrough | ' +
+                      'fontfamily fontsize forecolor backcolor | ' +
+                      'alignleft aligncenter alignright alignjustify | ' +
+                      'bullist numlist outdent indent | ' +
+                      'removeformat | table link image | help',
+                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                    font_size_formats: '8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 28pt 36pt 48pt 72pt',
+                    file_picker_callback: function (callback, value, meta) {
+                      // Trigger file input click
+                      if (fileInputRef.current) {
+                        fileInputRef.current.click();
+                        // Store callback for later use
+                        fileInputRef.current.onchange = function () {
+                          if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files.length > 0) {
+                            const file = fileInputRef.current.files[0];
+                            const reader = new FileReader();
+                            reader.onload = function () {
+                              callback(reader.result as string, {
+                                title: file.name,
+                                alt: file.name
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        };
+                      }
+                    }
+                  }}
+                />
                 
-                {/* Text editor area with font size styling applied directly */}
-                <div className="relative">
-                  <Textarea 
-                    id="editor" 
-                    ref={editorRef}
-                    value={reportText}
-                    onChange={(e) => setReportText(e.target.value)}
-                    className={`min-h-[300px] rounded-none border-none focus-visible:ring-0 font-serif text-black text-[${currentFontSize}px]`}
-                    style={{ fontSize: `${currentFontSize}px` }}
-                  />
-                  
-                  {/* Preview panel for attached files - showing actual images and PDFs */}
-                  {attachments.length > 0 && (
-                    <div className="p-4 border-t bg-gray-50">
-                      <h4 className="font-medium mb-2">Anexos ({attachments.length})</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {attachments.map((file, index) => (
-                          <div key={index} className="border rounded-md p-2 bg-white">
-                            {file.type.startsWith('image/') ? (
-                              <div className="aspect-video flex items-center justify-center bg-gray-100 rounded mb-1 overflow-hidden">
-                                <img 
-                                  src={file.url} 
-                                  alt={file.name} 
-                                  className="max-w-full max-h-full object-contain" 
-                                />
-                              </div>
-                            ) : (
-                              <div className="aspect-video flex items-center justify-center bg-gray-100 rounded mb-1">
-                                <FileText className="h-8 w-8 text-gray-400" />
-                              </div>
-                            )}
-                            <p className="text-xs truncate">{file.name}</p>
-                          </div>
-                        ))}
-                      </div>
+                {/* Hidden file input for image/PDF upload */}
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  accept={acceptableFileTypes}
+                  onChange={handleFileUpload}
+                  style={{ display: 'none' }}
+                  multiple
+                />
+                
+                {/* Preview panel for attached files */}
+                {attachments.length > 0 && (
+                  <div className="p-4 border-t bg-gray-50">
+                    <h4 className="font-medium mb-2">Anexos ({attachments.length})</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {attachments.map((file, index) => (
+                        <div key={index} className="border rounded-md p-2 bg-white">
+                          {file.type.startsWith('image/') ? (
+                            <div className="aspect-video flex items-center justify-center bg-gray-100 rounded mb-1 overflow-hidden">
+                              <img 
+                                src={file.url} 
+                                alt={file.name} 
+                                className="max-w-full max-h-full object-contain" 
+                              />
+                            </div>
+                          ) : (
+                            <div className="aspect-video flex items-center justify-center bg-gray-100 rounded mb-1">
+                              <FileText className="h-8 w-8 text-gray-400" />
+                            </div>
+                          )}
+                          <p className="text-xs truncate">{file.name}</p>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
