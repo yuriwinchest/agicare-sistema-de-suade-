@@ -30,7 +30,8 @@ import {
   List, 
   ListOrdered,
   Link as LinkIcon,
-  Image
+  Image,
+  Type
 } from "lucide-react";
 import {
   Select,
@@ -91,6 +92,16 @@ const templateData = [
   { codigo: "15", nome: "RADIOGRAFIA PELO CORPO" }
 ];
 
+const fontSizes = [
+  { value: 'xs', label: 'Extra Small' },
+  { value: 'sm', label: 'Small' },
+  { value: 'base', label: 'Normal' },
+  { value: 'lg', label: 'Large' },
+  { value: 'xl', label: 'Extra Large' },
+  { value: '2xl', label: 'XX Large' },
+  { value: '3xl', label: 'XXX Large' },
+];
+
 const LaudoTab = () => {
   const { toast } = useToast();
   const [searchCode, setSearchCode] = useState("");
@@ -102,6 +113,8 @@ const LaudoTab = () => {
   const [reportText, setReportText] = useState("");
   const [currentTab, setCurrentTab] = useState("search"); // "search" or "edit"
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [fontSizeDialogOpen, setFontSizeDialogOpen] = useState(false);
+  const [currentFontSize, setCurrentFontSize] = useState("base");
   const [fontStyle, setFontStyle] = useState({
     bold: false,
     italic: false,
@@ -138,13 +151,30 @@ const LaudoTab = () => {
     });
   };
 
-  const applyFormatting = (format: string) => {
-    if (!editorRef.current) return;
+  const getSelectedText = (): { text: string, start: number, end: number } => {
+    if (!editorRef.current) return { text: '', start: 0, end: 0 };
     
     const textarea = editorRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = reportText.substring(start, end);
+    
+    return { text: selectedText, start, end };
+  };
+
+  const applyFormatting = (format: string) => {
+    if (!editorRef.current) return;
+    
+    const { text: selectedText, start, end } = getSelectedText();
+    if (start === end && format !== 'list' && format !== 'orderedList') {
+      toast({
+        title: "Nenhum texto selecionado",
+        description: "Selecione o texto para aplicar a formatação.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     let newText = reportText;
     let newSelectionStart = start;
     let newSelectionEnd = end;
@@ -191,6 +221,10 @@ const LaudoTab = () => {
         newText = `${reportText.substring(0, start)}[${selectedText}](url)${reportText.substring(end)}`;
         newSelectionEnd = end + 7;
         break;
+      case 'fontSize':
+        // Font size will be handled separately in the dialog
+        setFontSizeDialogOpen(true);
+        return;
       default:
         break;
     }
@@ -199,9 +233,39 @@ const LaudoTab = () => {
     
     // Set cursor position after format is applied
     setTimeout(() => {
-      if (textarea) {
-        textarea.focus();
-        textarea.setSelectionRange(newSelectionStart, newSelectionEnd);
+      if (editorRef.current) {
+        editorRef.current.focus();
+        editorRef.current.setSelectionRange(newSelectionStart, newSelectionEnd);
+      }
+    }, 0);
+  };
+  
+  const applyFontSize = (size: string) => {
+    if (!editorRef.current) return;
+    
+    const { text: selectedText, start, end } = getSelectedText();
+    if (start === end) {
+      toast({
+        title: "Nenhum texto selecionado",
+        description: "Selecione o texto para aplicar o tamanho da fonte.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Apply font size to selected text
+    const fontSizeTag = `<span class="text-${size}">${selectedText}</span>`;
+    const newText = `${reportText.substring(0, start)}${fontSizeTag}${reportText.substring(end)}`;
+    
+    setReportText(newText);
+    setCurrentFontSize(size);
+    setFontSizeDialogOpen(false);
+    
+    // Reset selection
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.focus();
+        editorRef.current.setSelectionRange(start, start + fontSizeTag.length);
       }
     }, 0);
   };
@@ -410,6 +474,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className={`w-8 h-8 p-0 ${fontStyle.bold ? 'bg-gray-200' : ''}`}
                     onClick={() => applyFormatting('bold')}
+                    title="Negrito"
                   >
                     <Bold className="h-4 w-4" />
                   </Button>
@@ -418,6 +483,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className={`w-8 h-8 p-0 ${fontStyle.italic ? 'bg-gray-200' : ''}`}
                     onClick={() => applyFormatting('italic')}
+                    title="Itálico"
                   >
                     <Italic className="h-4 w-4" />
                   </Button>
@@ -426,15 +492,47 @@ const LaudoTab = () => {
                     size="sm" 
                     className={`w-8 h-8 p-0 ${fontStyle.underline ? 'bg-gray-200' : ''}`}
                     onClick={() => applyFormatting('underline')}
+                    title="Sublinhado"
                   >
                     <Underline className="h-4 w-4" />
                   </Button>
+                  <Dialog open={fontSizeDialogOpen} onOpenChange={setFontSizeDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-auto h-8 px-2 flex items-center gap-1 ml-1"
+                        title="Tamanho da fonte"
+                      >
+                        <Type className="h-4 w-4" />
+                        <span className="text-xs">Tamanho</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[300px]">
+                      <DialogHeader>
+                        <DialogTitle>Selecione o tamanho da fonte</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-2 py-4">
+                        {fontSizes.map((size) => (
+                          <Button 
+                            key={size.value}
+                            variant="ghost" 
+                            className={`justify-start ${currentFontSize === size.value ? 'bg-gray-100' : ''}`}
+                            onClick={() => applyFontSize(size.value)}
+                          >
+                            <span className={`text-${size.value}`}>{size.label}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <span className="mx-2 text-gray-300">|</span>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     className={`w-8 h-8 p-0 ${fontStyle.align === 'left' ? 'bg-gray-200' : ''}`}
                     onClick={() => applyFormatting('alignLeft')}
+                    title="Alinhar à esquerda"
                   >
                     <AlignLeft className="h-4 w-4" />
                   </Button>
@@ -443,6 +541,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className={`w-8 h-8 p-0 ${fontStyle.align === 'center' ? 'bg-gray-200' : ''}`}
                     onClick={() => applyFormatting('alignCenter')}
+                    title="Centralizar"
                   >
                     <AlignCenter className="h-4 w-4" />
                   </Button>
@@ -451,6 +550,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className={`w-8 h-8 p-0 ${fontStyle.align === 'right' ? 'bg-gray-200' : ''}`}
                     onClick={() => applyFormatting('alignRight')}
+                    title="Alinhar à direita"
                   >
                     <AlignRight className="h-4 w-4" />
                   </Button>
@@ -460,6 +560,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className="w-8 h-8 p-0"
                     onClick={() => applyFormatting('list')}
+                    title="Lista com marcadores"
                   >
                     <List className="h-4 w-4" />
                   </Button>
@@ -468,6 +569,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className="w-8 h-8 p-0"
                     onClick={() => applyFormatting('orderedList')}
+                    title="Lista numerada"
                   >
                     <ListOrdered className="h-4 w-4" />
                   </Button>
@@ -477,6 +579,7 @@ const LaudoTab = () => {
                     size="sm" 
                     className="w-8 h-8 p-0"
                     onClick={() => applyFormatting('link')}
+                    title="Inserir link"
                   >
                     <LinkIcon className="h-4 w-4" />
                   </Button>
@@ -486,6 +589,7 @@ const LaudoTab = () => {
                         variant="ghost" 
                         size="sm" 
                         className="w-8 h-8 p-0"
+                        title="Inserir imagem"
                       >
                         <Image className="h-4 w-4" />
                       </Button>
