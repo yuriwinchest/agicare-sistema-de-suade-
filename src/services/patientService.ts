@@ -1,4 +1,3 @@
-
 // Mock database/storage for patients
 let patients: any[] = [
   { id: "001", name: "Carlos Ferreira", cpf: "123.456.789-01", phone: "(11) 98765-4321", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "14:30", status: "Agendado" },
@@ -42,7 +41,20 @@ export const getPatients = () => {
 export const getPatientById = (id: string) => {
   // Always refresh from localStorage first
   initFromLocalStorage();
-  return patients.find(patient => patient.id === id);
+  
+  // Find patient by ID
+  const patient = patients.find(patient => patient.id === id);
+  
+  if (patient) {
+    // Ensure patient has all necessary fields for PatientInfoHeader
+    return {
+      ...patient,
+      // If allergies doesn't exist, provide an empty array
+      allergies: patient.allergies || []
+    };
+  }
+  
+  return patient;
 };
 
 // Generate a unique ID

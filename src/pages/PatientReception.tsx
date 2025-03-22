@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { patientInfo } from "@/components/patient-record/PatientRecordData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,7 +72,13 @@ const PatientReception = () => {
     if (id) {
       const patientData = getPatientById(id);
       if (patientData) {
-        setPatient(patientData);
+        // Make sure patient data has the expected structure for PatientInfoHeader
+        const formattedPatient = {
+          ...patientData,
+          // Set default values for patientInfo if they don't exist
+          allergies: patientData.allergies || []
+        };
+        setPatient(formattedPatient);
       } else {
         toast({
           title: "Paciente não encontrado",
