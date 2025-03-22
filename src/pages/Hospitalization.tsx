@@ -98,14 +98,14 @@ const Hospitalization = () => {
             <Input
               type="search"
               placeholder="Buscar por nome, registro ou diagnóstico..."
-              className="pl-8"
+              className="pl-8 border-teal-500/20 focus-visible:ring-teal-500/30"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           
           <Select value={unitFilter} onValueChange={setUnitFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] border-teal-500/20 focus:ring-teal-500/30">
               <SelectValue placeholder="Filtrar por unidade" />
             </SelectTrigger>
             <SelectContent>
@@ -116,10 +116,10 @@ const Hospitalization = () => {
           </Select>
         </div>
         
-        <Card className="section-fade" style={{ animationDelay: "0.1s" }}>
+        <Card className="section-fade system-card" style={{ animationDelay: "0.1s" }}>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <MapPin className="h-5 w-5 mr-2" />
+              <MapPin className="h-5 w-5 mr-2 text-teal-500" />
               Pacientes Internados ({filteredPatients.length})
             </CardTitle>
           </CardHeader>
@@ -129,7 +129,7 @@ const Hospitalization = () => {
                 filteredPatients.map((patient) => (
                   <div
                     key={patient.id}
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                       <div className="flex items-start md:items-center">
@@ -175,6 +175,7 @@ const Hospitalization = () => {
                     <div className="flex items-center justify-end">
                       <Button
                         size="sm"
+                        className="bg-teal-500 text-white hover:bg-teal-600"
                         onClick={() => handleViewPatient(patient)}
                       >
                         <Stethoscope className="h-4 w-4 mr-1" />

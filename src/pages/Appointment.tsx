@@ -74,7 +74,7 @@ const Appointment = () => {
             <Input
               type="search"
               placeholder="Buscar por nome, registro ou especialidade..."
-              className="pl-8"
+              className="pl-8 border-teal-500/20 focus-visible:ring-teal-500/30"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -83,13 +83,13 @@ const Appointment = () => {
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                variant={"outline"}
+                variant="outline"
                 className={cn(
-                  "justify-start text-left font-normal",
+                  "justify-start text-left font-normal border-teal-500/20 hover:border-teal-500/30 hover:bg-teal-50",
                   !date && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4 text-teal-500" />
                 {date ? format(date, "PPP") : <span>Selecionar data</span>}
               </Button>
             </PopoverTrigger>
@@ -105,10 +105,10 @@ const Appointment = () => {
           </Popover>
         </div>
         
-        <Card className="section-fade" style={{ animationDelay: "0.1s" }}>
+        <Card className="section-fade system-card" style={{ animationDelay: "0.1s" }}>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <CalendarCheck className="h-5 w-5 mr-2" />
+              <CalendarCheck className="h-5 w-5 mr-2 text-teal-500" />
               Consultas Agendadas - {format(date, "dd/MM/yyyy")}
             </CardTitle>
           </CardHeader>
@@ -118,7 +118,7 @@ const Appointment = () => {
                 filteredPatients.map((patient) => (
                   <div
                     key={patient.id}
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
                       <div className="flex items-start md:items-center">
@@ -151,6 +151,7 @@ const Appointment = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
                         onClick={() => handleCallPatient(patient)}
                       >
                         Chamar
@@ -166,6 +167,7 @@ const Appointment = () => {
                       </Button>
                       <Button
                         size="sm"
+                        className="bg-teal-500 text-white hover:bg-teal-600"
                         onClick={() => handleStartConsult(patient)}
                       >
                         <Stethoscope className="h-4 w-4 mr-1" />

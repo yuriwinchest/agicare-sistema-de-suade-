@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -132,6 +133,30 @@
 
   .app-gradient {
     @apply bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600;
+  }
+  
+  .teal-button {
+    @apply bg-teal-500 hover:bg-teal-600 text-white transition-colors;
+  }
+  
+  .teal-card {
+    @apply border-teal-500/20 hover:border-teal-500/40 bg-white hover:bg-teal-50/30;
+  }
+  
+  .teal-hover {
+    @apply hover:text-teal-600 hover:bg-teal-50/50;
+  }
+  
+  .card-with-hover {
+    @apply bg-white shadow-sm hover:shadow-md transition-all duration-200 rounded-lg border border-teal-500/10 hover:border-teal-500/30;
+  }
+  
+  .system-header {
+    @apply bg-gradient-to-r from-teal-500/10 to-blue-500/10 backdrop-blur-sm;
+  }
+  
+  .system-card {
+    @apply border border-teal-500/10 bg-white hover:border-teal-500/20 transition-all duration-200 rounded-lg shadow-sm hover:shadow-md;
   }
 }
 

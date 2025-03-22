@@ -28,7 +28,7 @@ const ModuleCard = ({ icon: Icon, title, path, color = "bg-teal-400/10" }: Modul
   return (
     <button
       onClick={() => navigate(path)}
-      className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-center h-full border border-teal-500/10 hover:border-teal-500/20"
+      className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-center h-full border border-teal-500/20 hover:border-teal-500/40 hover:bg-teal-50/30"
     >
       <div className={`p-4 mb-3 rounded-md ${color}`}>
         <Icon className="h-8 w-8 text-teal-500" />

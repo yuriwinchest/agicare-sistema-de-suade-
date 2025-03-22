@@ -56,13 +56,17 @@ export default {
 				// Theme colors from the login screen
 				emerald: {
 					600: '#059669',
+					700: '#047857',
 				},
 				teal: {
 					400: '#2DD4BF',
 					500: '#14B8A6',
+					600: '#0D9488',
+					700: '#0F766E',
 				},
 				blue: {
 					600: '#2563EB',
+					700: '#1D4ED8',
 				},
 				medblue: {
 					DEFAULT: 'hsl(210, 100%, 50%)',
@@ -70,6 +74,7 @@ export default {
 					dark: 'hsl(210, 100%, 40%)',
 				},
 				medgray: {
+					50: 'hsl(210, 20%, 99%)',
 					100: 'hsl(210, 20%, 98%)',
 					200: 'hsl(210, 20%, 95%)',
 					300: 'hsl(210, 20%, 90%)',

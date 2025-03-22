@@ -19,7 +19,6 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Clock, CheckCircle, AlertCircle, User, Stethoscope, X } from "lucide-react";
 
-// Mock patient data
 const patientData = {
   waiting: [
     { id: "001", name: "Carlos Ferreira", priority: "Urgente", time: "09:15", triage: { temp: "38.5°C", pressure: "130/85", symptoms: "Febre, dor abdominal" } },
@@ -117,30 +116,30 @@ const Ambulatory = () => {
             <Input
               type="search"
               placeholder="Buscar por nome ou registro..."
-              className="pl-8"
+              className="pl-8 border-teal-500/20 focus-visible:ring-teal-500/30"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
         
-        <Card className="section-fade" style={{ animationDelay: "0.1s" }}>
+        <Card className="section-fade system-card" style={{ animationDelay: "0.1s" }}>
           <CardHeader className="px-6 pt-6 pb-0">
             <CardTitle>Pacientes</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="waiting" onValueChange={setActiveTab}>
               <TabsList className="w-full bg-medgray-200 grid grid-cols-4 h-auto">
-                <TabsTrigger value="waiting" className="data-[state=active]:bg-white py-3">
+                <TabsTrigger value="waiting" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 py-3">
                   Aguardando
                 </TabsTrigger>
-                <TabsTrigger value="today" className="data-[state=active]:bg-white py-3">
+                <TabsTrigger value="today" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 py-3">
                   Hoje
                 </TabsTrigger>
-                <TabsTrigger value="return" className="data-[state=active]:bg-white py-3">
+                <TabsTrigger value="return" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 py-3">
                   Retorno
                 </TabsTrigger>
-                <TabsTrigger value="observation" className="data-[state=active]:bg-white py-3">
+                <TabsTrigger value="observation" className="data-[state=active]:bg-white data-[state=active]:text-teal-600 py-3">
                   Observação
                 </TabsTrigger>
               </TabsList>
@@ -149,7 +148,7 @@ const Ambulatory = () => {
                 {getFilteredPatients().map((patient: any) => (
                   <div 
                     key={patient.id} 
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
@@ -197,6 +196,7 @@ const Ambulatory = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
                         onClick={() => handleCallPatient(patient)}
                       >
                         Chamar
@@ -212,6 +212,7 @@ const Ambulatory = () => {
                       </Button>
                       <Button
                         size="sm"
+                        className="bg-teal-500 text-white hover:bg-teal-600"
                         onClick={() => handleStartConsult(patient)}
                       >
                         <Stethoscope className="h-4 w-4 mr-1" />
@@ -226,7 +227,7 @@ const Ambulatory = () => {
                 {getFilteredPatients().map((patient: any) => (
                   <div 
                     key={patient.id} 
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
@@ -266,7 +267,7 @@ const Ambulatory = () => {
                 {getFilteredPatients().map((patient: any) => (
                   <div 
                     key={patient.id} 
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
@@ -311,7 +312,7 @@ const Ambulatory = () => {
                 {getFilteredPatients().map((patient: any) => (
                   <div 
                     key={patient.id} 
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow"
+                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">

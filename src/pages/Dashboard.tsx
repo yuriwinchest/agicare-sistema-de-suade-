@@ -105,17 +105,17 @@ const Dashboard = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 section-fade" style={{ animationDelay: "0.1s" }}>
           {modules.map((module, index) => (
-            <Card key={module.name} className="hover:shadow-md transition-shadow">
+            <Card key={module.name} className="system-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-lg font-medium">{module.name}</CardTitle>
-                <module.icon className="h-5 w-5 text-muted-foreground" />
+                <module.icon className="h-5 w-5 text-teal-500" />
               </CardHeader>
               <CardContent>
                 <CardDescription>{module.description}</CardDescription>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="mt-4 w-full"
+                  className="mt-4 w-full border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-500/30"
                   onClick={() => navigate(module.path)}
                 >
                   Acessar
@@ -127,7 +127,7 @@ const Dashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <Card className="lg:col-span-2 section-fade" style={{ animationDelay: "0.2s" }}>
+          <Card className="lg:col-span-2 section-fade system-card" style={{ animationDelay: "0.2s" }}>
             <CardHeader>
               <CardTitle>Atendimentos na Semana</CardTitle>
             </CardHeader>
@@ -152,7 +152,7 @@ const Dashboard = () => {
                     <Bar 
                       dataKey="atendimentos" 
                       name="Atendimentos" 
-                      fill="hsl(var(--primary))" 
+                      fill="#14b8a6" 
                       radius={[4, 4, 0, 0]} 
                     />
                   </BarChart>
@@ -162,7 +162,7 @@ const Dashboard = () => {
           </Card>
           
           <div className="space-y-6">
-            <Card className="section-fade" style={{ animationDelay: "0.3s" }}>
+            <Card className="section-fade system-card" style={{ animationDelay: "0.3s" }}>
               <CardHeader>
                 <CardTitle>Distribuição de Pacientes</CardTitle>
               </CardHeader>
@@ -197,7 +197,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
             
-            <Card className="section-fade" style={{ animationDelay: "0.4s" }}>
+            <Card className="section-fade system-card" style={{ animationDelay: "0.4s" }}>
               <CardHeader>
                 <CardTitle>Ações Rápidas</CardTitle>
               </CardHeader>
@@ -207,9 +207,9 @@ const Dashboard = () => {
                     <Button
                       key={action.name}
                       variant="outline"
-                      className="flex flex-col h-auto py-4"
+                      className="flex flex-col h-auto py-4 border-teal-500/20 hover:bg-teal-50 hover:border-teal-500/30"
                     >
-                      <action.icon className="h-5 w-5 mb-1" />
+                      <action.icon className="h-5 w-5 mb-1 text-teal-500" />
                       <span className="text-xs">{action.name}</span>
                     </Button>
                   ))}
@@ -220,24 +220,24 @@ const Dashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 section-fade" style={{ animationDelay: "0.5s" }}>
-          <Card>
+          <Card className="system-card">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Clock className="h-5 w-5 mr-2" />
+                <Clock className="h-5 w-5 mr-2 text-teal-500" />
                 Pendências
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
                 {pendingTasks.map((task, index) => (
-                  <li key={index} className="flex items-center justify-between p-3 rounded-md bg-medgray-100">
+                  <li key={index} className="flex items-center justify-between p-3 rounded-md bg-medgray-100 hover:bg-teal-50/50 transition-colors">
                     <div>
                       <h3 className="font-medium">{task.patient}</h3>
                       <p className="text-sm text-muted-foreground">{task.type}</p>
                     </div>
                     <div className="flex items-center">
                       <span className="text-sm text-muted-foreground mr-3">{task.time}</span>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="text-teal-500 hover:text-teal-600 hover:bg-teal-50">
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
@@ -247,7 +247,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-br from-primary to-medblue-light text-white">
+          <Card className="app-gradient text-white">
             <CardHeader>
               <CardTitle>Resumo do Dia</CardTitle>
             </CardHeader>
