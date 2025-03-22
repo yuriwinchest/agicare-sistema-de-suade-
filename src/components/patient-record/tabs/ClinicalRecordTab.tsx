@@ -59,7 +59,7 @@ const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({
   const [searchClinicalRecord, setSearchClinicalRecord] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [selectedSpeciality, setSelectedSpeciality] = useState("");
+  const [selectedSpeciality, setSelectedSpeciality] = useState("all"); // Changed default value to "all"
   const [isNewRecordOpen, setIsNewRecordOpen] = useState(false);
   const [selectedFormType, setSelectedFormType] = useState("");
   
@@ -331,7 +331,7 @@ const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="all">Todas</SelectItem> {/* Changed from empty string to "all" */}
                     {specialities.map((spec) => (
                       <SelectItem key={spec.id} value={spec.name}>
                         {spec.name}
@@ -365,7 +365,7 @@ const ClinicalRecordTab: React.FC<ClinicalRecordTabProps> = ({
                       (searchClinicalRecord ? 
                         record.number.includes(searchClinicalRecord) || 
                         record.type.toLowerCase().includes(searchClinicalRecord.toLowerCase()) : true) &&
-                      (selectedSpeciality ? record.speciality === selectedSpeciality : true)
+                      (selectedSpeciality !== "all" ? record.speciality === selectedSpeciality : true) // Changed to check for "all" instead of empty string
                     )
                     .map((record, index) => (
                       <tr key={record.id} className={index % 2 === 0 ? "bg-white" : "bg-muted/20"}>
