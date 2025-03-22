@@ -53,6 +53,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Theme colors from the login screen
+				emerald: {
+					600: '#059669',
+				},
+				teal: {
+					400: '#2DD4BF',
+					500: '#14B8A6',
+				},
+				blue: {
+					600: '#2563EB',
+				},
 				medblue: {
 					DEFAULT: 'hsl(210, 100%, 50%)',
 					light: 'hsl(210, 100%, 60%)',

@@ -22,16 +22,16 @@ interface ModuleCardProps {
   color?: string;
 }
 
-const ModuleCard = ({ icon: Icon, title, path, color = "bg-primary/10" }: ModuleCardProps) => {
+const ModuleCard = ({ icon: Icon, title, path, color = "bg-teal-400/10" }: ModuleCardProps) => {
   const navigate = useNavigate();
   
   return (
     <button
       onClick={() => navigate(path)}
-      className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-center h-full"
+      className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-center h-full border border-teal-500/10 hover:border-teal-500/20"
     >
       <div className={`p-4 mb-3 rounded-md ${color}`}>
-        <Icon className="h-8 w-8 text-primary" />
+        <Icon className="h-8 w-8 text-teal-500" />
       </div>
       <span className="text-sm font-medium text-gray-700">{title}</span>
     </button>
@@ -61,7 +61,7 @@ const MainMenu = () => {
             <Input 
               type="search" 
               placeholder="Buscar módulo específico..." 
-              className="pl-10 py-6 text-lg" 
+              className="pl-10 py-6 text-lg border-teal-500/20 focus-visible:ring-teal-500/30" 
             />
           </div>
         </div>

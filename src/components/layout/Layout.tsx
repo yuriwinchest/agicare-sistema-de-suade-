@@ -82,22 +82,23 @@ const Sidebar = () => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed lg:sticky top-0 z-50 lg:z-0 h-full bg-white border-r border-border shadow-sm transition-all duration-300 ease-in-out",
-          isOpen ? "w-64 left-0" : "w-0 lg:w-20 -left-20 lg:left-0"
+          "fixed lg:sticky top-0 z-50 lg:z-0 h-full border-r border-border shadow-sm transition-all duration-300 ease-in-out",
+          isOpen ? "w-64 left-0" : "w-0 lg:w-20 -left-20 lg:left-0",
+          "bg-gradient-to-b from-teal-500/95 to-blue-600/95 text-white"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-4 border-b border-border flex items-center justify-between h-16">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between h-16">
             <Link to="/dashboard" className="flex items-center">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <span className="text-white font-bold">S</span>
+              <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
+                <span className="text-teal-500 font-bold">S</span>
               </div>
-              {isOpen && <span className="ml-2 font-semibold text-lg">Salutem</span>}
+              {isOpen && <span className="ml-2 font-semibold text-lg text-white">Salutem</span>}
             </Link>
             <button 
               onClick={toggle}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-white/70 hover:text-white"
             >
               <X size={20} />
             </button>
@@ -116,8 +117,8 @@ const Sidebar = () => {
                           className={cn(
                             "flex items-center p-3 rounded-md transition-all",
                             location.pathname === item.path
-                              ? "bg-primary text-white"
-                              : "text-gray-600 hover:bg-gray-100",
+                              ? "bg-white/20 text-white"
+                              : "text-white/70 hover:bg-white/10 hover:text-white",
                             !isOpen && "justify-center"
                           )}
                         >
@@ -138,16 +139,16 @@ const Sidebar = () => {
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-border">
+          <div className="p-4 border-t border-white/10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className={cn(
-                  "flex items-center w-full p-2 rounded-md hover:bg-gray-100 transition-all",
+                  "flex items-center w-full p-2 rounded-md hover:bg-white/10 transition-all",
                   !isOpen && "justify-center"
                 )}>
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="" />
-                    <AvatarFallback className="bg-primary text-white">
+                    <AvatarFallback className="bg-white text-teal-500">
                       {user?.name?.slice(0, 2).toUpperCase() || 'US'}
                     </AvatarFallback>
                   </Avatar>
@@ -155,10 +156,10 @@ const Sidebar = () => {
                   {isOpen && (
                     <>
                       <div className="ml-3 text-left flex-1 overflow-hidden">
-                        <p className="text-sm font-medium truncate">{user?.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user?.role}</p>
+                        <p className="text-sm font-medium truncate text-white">{user?.name}</p>
+                        <p className="text-xs text-white/70 truncate">{user?.role}</p>
                       </div>
-                      <ChevronDown size={16} className="text-gray-500" />
+                      <ChevronDown size={16} className="text-white/70" />
                     </>
                   )}
                 </button>
@@ -203,7 +204,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
           
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="border-teal-500/30 text-teal-600">
                 {user?.unit ? `${user.unit} - Sala ${user.room}` : 'Selecionar Local'}
               </Button>
             </DialogTrigger>
@@ -248,7 +249,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={() => setIsSettingsOpen(false)}>Salvar</Button>
+                <Button onClick={() => setIsSettingsOpen(false)} className="bg-teal-500 hover:bg-teal-600">Salvar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

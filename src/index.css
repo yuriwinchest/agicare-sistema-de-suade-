@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 100% 50%;
+    --primary: 175 68% 41%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -45,7 +45,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 100% 50%;
+    --primary: 175 68% 41%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -123,11 +123,15 @@
   }
 
   .teal-login-button {
-    @apply bg-teal-400 hover:bg-teal-500 transition-colors text-white font-medium;
+    @apply bg-primary hover:bg-primary/90 transition-colors text-white font-medium;
   }
   
   .login-input {
     @apply bg-white/20 border-white/30 text-white placeholder:text-white/50;
+  }
+
+  .app-gradient {
+    @apply bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600;
   }
 }
 
