@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -72,6 +71,11 @@ const Reception = () => {
   // Função para lidar com check-in de paciente
   const handleCheckIn = (patient: any) => {
     // Navega para a página de complemento de atendimento do paciente
+    navigate(`/patient-reception/${patient.id}`);
+  };
+
+  const handlePatientClick = (patient: any) => {
+    // Navega para a página de confirmação de dados do paciente
     navigate(`/patient-reception/${patient.id}`);
   };
 
@@ -162,7 +166,11 @@ const Reception = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredPatients.map((patient) => (
-                      <TableRow key={patient.id}>
+                      <TableRow 
+                        key={patient.id} 
+                        className="cursor-pointer hover:bg-teal-50/50"
+                        onClick={() => handlePatientClick(patient)}
+                      >
                         <TableCell className="font-medium">{patient.id}</TableCell>
                         <TableCell>
                           <div className="flex flex-col">
@@ -191,12 +199,15 @@ const Reception = () => {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
+                          <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
                             <Button 
                               size="sm" 
                               variant="ghost" 
                               className="teal-hover"
-                              onClick={() => navigate(`/patient/${patient.id}`)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/patient/${patient.id}`);
+                              }}
                             >
                               <User className="h-4 w-4" />
                               <span className="sr-only">Ver paciente</span>
@@ -205,7 +216,10 @@ const Reception = () => {
                               size="sm" 
                               variant="ghost"
                               className="teal-hover"
-                              onClick={() => handleCheckIn(patient)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCheckIn(patient);
+                              }}
                             >
                               <CheckCircle2 className="h-4 w-4" />
                               <span className="sr-only">Check-in</span>

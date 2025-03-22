@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +74,7 @@ const Ambulatory = () => {
   };
   
   const handleStartConsult = (patient: any) => {
+    // Navega para a página de registro do paciente (prontuário)
     navigate(`/patient/${patient.id}`);
   };
   

@@ -1,331 +1,315 @@
 
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { patientInfo } from "@/components/patient-record/PatientRecordData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Save } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, ArrowRight, ClipboardList, Stethoscope, CalendarCheck } from "lucide-react";
+import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
 
-// Mock de dados do paciente
-const mockPatientData = {
-  id: "1",
-  name: "PACIENTE TESTE",
-  birthDate: "01/01/1990",
-  cpf: "123.456.789-01",
-  phoneNumber: "11 99999-9999",
-  reception: "01 - RECEPÇÃO CENTRAL"
-};
-
-// Mock de dados para os selects
-const unitOptions = [
-  { value: "01", label: "01 - MATRIZ GERAL" },
-  { value: "02", label: "02 - FILIAL SUL" },
+// Mock data for the form
+const mockPatients = [
+  { id: "1", name: "Paciente Teste", cpf: "123.456.789-01", phone: "(11) 98765-4321", status: "Agendado" },
+  { id: "2", name: "Maria Silva", cpf: "987.654.321-09", phone: "(11) 91234-5678", status: "Confirmado" },
+  { id: "3", name: "João Santos", cpf: "456.789.123-45", phone: "(11) 97890-1234", status: "Aguardando" },
+  { id: "4", name: "Ana Oliveira", cpf: "789.123.456-78", phone: "(11) 94567-8901", status: "Confirmado" },
 ];
 
-const receptionOptions = [
-  { value: "01", label: "01 - RECEPÇÃO CENTRAL" },
-  { value: "02", label: "02 - RECEPÇÃO PEDIATRIA" },
-  { value: "03", label: "03 - RECEPÇÃO ORTOPEDIA" },
+const specialties = [
+  { id: "1", name: "Clínica Médica" },
+  { id: "2", name: "Cardiologia" },
+  { id: "3", name: "Ortopedia" },
+  { id: "4", name: "Pediatria" },
+  { id: "5", name: "Ginecologia" },
+  { id: "6", name: "Dermatologia" },
 ];
 
-const professionalOptions = [
-  { value: "01", label: "01 - ASSISTENTE SOCIAL" },
-  { value: "02", label: "02 - CARDIOLOGISTA" },
-  { value: "03", label: "03 - CLÍNICO GERAL" },
+const professionals = [
+  { id: "1", name: "Dr. Ricardo Mendes", specialty: "Cardiologia" },
+  { id: "2", name: "Dra. Isabela Rocha", specialty: "Dermatologia" },
+  { id: "3", name: "Dr. Fernando Costa", specialty: "Ortopedia" },
+  { id: "4", name: "Dra. Camila Santos", specialty: "Pediatria" },
+  { id: "5", name: "Dr. Henrique Lima", specialty: "Neurologia" },
+  { id: "6", name: "Dra. Laura Almeida", specialty: "Ginecologia" },
 ];
 
-const attendanceTypeOptions = [
-  { value: "01", label: "01 - PRIMEIRA CONSULTA" },
-  { value: "02", label: "02 - RETORNO" },
-  { value: "03", label: "03 - URGÊNCIA" },
+const healthPlans = [
+  { id: "1", name: "UNIMED" },
+  { id: "2", name: "AMIL" },
+  { id: "3", name: "BRADESCO SAÚDE" },
+  { id: "4", name: "SUL AMÉRICA" },
+  { id: "5", name: "HAPVIDA" },
+  { id: "6", name: "NOTREDAME" },
 ];
 
-const agreementOptions = [
-  { value: "01", label: "01 - SUS" },
-  { value: "02", label: "02 - PARTICULAR" },
-  { value: "03", label: "03 - CONVÊNIO" },
-];
-
-const specialtyOptions = [
-  { value: "01", label: "01 - CARDIOLOGIA" },
-  { value: "02", label: "02 - CLÍNICA MÉDICA" },
-  { value: "03", label: "03 - PEDIATRIA" },
-];
-
-const PaymentStatus = [
-  { value: "01", label: "01 - PENDENTE" },
-  { value: "02", label: "02 - PAGO" },
+const attendanceTypes = [
+  { id: "1", name: "Consulta" },
+  { id: "2", name: "Retorno" },
+  { id: "3", name: "Procedimento" },
+  { id: "4", name: "Exame" },
 ];
 
 const PatientReception = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams();
   const { toast } = useToast();
   
-  // Estados para os campos do formulário
-  const [patient, setPatient] = useState(mockPatientData);
-  const [unit, setUnit] = useState("");
-  const [reception, setReception] = useState(patient.reception.split(" - ")[0] || "");
-  const [attendanceType, setAttendanceType] = useState("");
-  const [professional, setProfessional] = useState("");
-  const [agreement, setAgreement] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState("");
-  const [reason, setReason] = useState("");
-  const [observations, setObservations] = useState("");
+  // Getting patient data based on the ID
+  const patient = id === "001" ? patientInfo : mockPatients.find(p => p.id === id);
   
-  useEffect(() => {
-    // Aqui você poderia buscar os dados do paciente baseado no ID
-    console.log("Buscando dados do paciente com ID:", id);
-    // Por enquanto estamos usando dados fictícios
-  }, [id]);
+  // Form state
+  const [formData, setFormData] = useState({
+    attendanceType: "",
+    specialty: "",
+    professional: "",
+    healthPlan: "",
+    healthCardNumber: "",
+    observations: "",
+  });
+  
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Aqui você enviaria os dados para a API
-    console.log("Dados do atendimento:", {
-      patientId: id,
-      unit,
-      reception,
-      attendanceType,
-      professional,
-      agreement,
-      specialty,
-      paymentStatus,
-      reason,
-      observations
-    });
+    // Check if all required fields are filled
+    if (!formData.attendanceType || !formData.specialty || !formData.professional) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // Exibe mensagem de sucesso
+    // Success notification
     toast({
       title: "Atendimento registrado",
-      description: "O paciente foi encaminhado para o atendimento ambulatorial",
+      description: "O paciente foi encaminhado para atendimento ambulatorial.",
     });
     
-    // Redireciona para a página de recepção
+    // Navigate to the ambulatory page
     navigate("/ambulatory");
+  };
+  
+  const goBack = () => {
+    navigate("/reception");
   };
   
   return (
     <Layout>
       <div className="page-container">
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/reception")}>
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Voltar
-          </Button>
-          <h1 className="text-2xl font-semibold ml-2">Complemento de Atendimento</h1>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <Card className="col-span-full">
-            <CardHeader className="bg-teal-50 pb-2">
-              <div className="flex items-center space-x-4">
-                <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-2xl text-gray-500">P</span>
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Paciente: {patient.id} - {patient.name}</CardTitle>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-1 mt-2">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Data de Nascimento:</span> {patient.birthDate}
+        {patient && 'name' in patient ? (
+          <>
+            <PatientInfoHeader patientInfo={patientInfo} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <Card className="col-span-full md:col-span-2 section-fade system-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <ClipboardList className="h-5 w-5 mr-2 text-teal-500" />
+                    Dados do Atendimento
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="attendanceType" className="text-muted-foreground">
+                          Tipo de Atendimento <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.attendanceType}
+                          onValueChange={(value) => handleChange("attendanceType", value)}
+                        >
+                          <SelectTrigger id="attendanceType" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                            <SelectValue placeholder="Selecione o tipo de atendimento" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {attendanceTypes.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="specialty" className="text-muted-foreground">
+                          Especialidade <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.specialty}
+                          onValueChange={(value) => handleChange("specialty", value)}
+                        >
+                          <SelectTrigger id="specialty" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                            <SelectValue placeholder="Selecione a especialidade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {specialties.map((specialty) => (
+                              <SelectItem key={specialty.id} value={specialty.id}>
+                                {specialty.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">CPF:</span> {patient.cpf}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="professional" className="text-muted-foreground">
+                          Profissional <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                          value={formData.professional}
+                          onValueChange={(value) => handleChange("professional", value)}
+                        >
+                          <SelectTrigger id="professional" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                            <SelectValue placeholder="Selecione o profissional" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {professionals.map((professional) => (
+                              <SelectItem key={professional.id} value={professional.id}>
+                                {professional.name} - {professional.specialty}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="healthPlan" className="text-muted-foreground">
+                          Convênio
+                        </Label>
+                        <Select
+                          value={formData.healthPlan}
+                          onValueChange={(value) => handleChange("healthPlan", value)}
+                        >
+                          <SelectTrigger id="healthPlan" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                            <SelectValue placeholder="Selecione o convênio" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {healthPlans.map((plan) => (
+                              <SelectItem key={plan.id} value={plan.id}>
+                                {plan.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Recepção:</span> {patient.reception}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="healthCardNumber" className="text-muted-foreground">
+                          Número da Carteirinha
+                        </Label>
+                        <Input
+                          id="healthCardNumber"
+                          value={formData.healthCardNumber}
+                          onChange={(e) => handleChange("healthCardNumber", e.target.value)}
+                          className="border-teal-500/20 focus-visible:ring-teal-500/30"
+                        />
+                      </div>
                     </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="observations" className="text-muted-foreground">
+                        Observações
+                      </Label>
+                      <Textarea
+                        id="observations"
+                        value={formData.observations}
+                        onChange={(e) => handleChange("observations", e.target.value)}
+                        className="min-h-32 border-teal-500/20 focus-visible:ring-teal-500/30"
+                        placeholder="Insira informações adicionais sobre o atendimento, se necessário."
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={goBack}
+                        className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
+                      >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Voltar
+                      </Button>
+                      
+                      <Button 
+                        type="submit"
+                        className="bg-teal-500 text-white hover:bg-teal-600"
+                      >
+                        Confirmar Atendimento
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+              
+              <Card className="col-span-full md:col-span-1 section-fade system-card h-fit" style={{ animationDelay: "0.1s" }}>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Stethoscope className="h-5 w-5 mr-2 text-teal-500" />
+                    Informações do Atendimento
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-teal-50 border border-teal-100 rounded-md p-4">
+                    <h3 className="font-medium text-teal-700 mb-2 flex items-center">
+                      <CalendarCheck className="mr-2 h-4 w-4" /> 
+                      Próximos passos
+                    </h3>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start">
+                        <span className="bg-teal-200 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5">1</span>
+                        <span>Preencha os dados do atendimento</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="bg-teal-200 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5">2</span>
+                        <span>Confirme as informações</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="bg-teal-200 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5">3</span>
+                        <span>O paciente aparecerá na lista de atendimento ambulatorial</span>
+                      </li>
+                    </ul>
                   </div>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-        </div>
-        
-        <form onSubmit={handleSubmit}>
-          <Card className="mb-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-md">Dados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="unit">Unidade Atendimento</Label>
-                  <Select value={unit} onValueChange={setUnit} required>
-                    <SelectTrigger id="unit">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {unitOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="reception">Local Atendimento</Label>
-                  <Select value={reception} onValueChange={setReception} required>
-                    <SelectTrigger id="reception">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {receptionOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="attendance-type">Tipo de Atendimento</Label>
-                  <Select value={attendanceType} onValueChange={setAttendanceType} required>
-                    <SelectTrigger id="attendance-type">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {attendanceTypeOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="professional">Profissional</Label>
-                  <Select value={professional} onValueChange={setProfessional} required>
-                    <SelectTrigger id="professional">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {professionalOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="specialty">Especialidade</Label>
-                  <Select value={specialty} onValueChange={setSpecialty} required>
-                    <SelectTrigger id="specialty">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {specialtyOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="agreement">Convênio</Label>
-                  <Select value={agreement} onValueChange={setAgreement} required>
-                    <SelectTrigger id="agreement">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {agreementOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="payment">Status Pagamento</Label>
-                  <Select value={paymentStatus} onValueChange={setPaymentStatus} required>
-                    <SelectTrigger id="payment">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PaymentStatus.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="mb-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-md">Responsável</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="reason">Motivo</Label>
-                  <Input 
-                    id="reason" 
-                    value={reason} 
-                    onChange={(e) => setReason(e.target.value)} 
-                    placeholder="Informe o motivo do atendimento"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="responsibleName">Responsável</Label>
-                  <Input 
-                    id="responsibleName" 
-                    placeholder="Nome do responsável (se aplicável)" 
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="mb-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-md">Observações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea 
-                value={observations} 
-                onChange={(e) => setObservations(e.target.value)} 
-                placeholder="Informações adicionais sobre o atendimento"
-                className="min-h-[100px]"
-              />
-            </CardContent>
-            <CardFooter className="flex justify-between pt-2">
-              <Button type="button" variant="outline" onClick={() => navigate("/reception")}>
-                Cancelar
-              </Button>
-              <Button type="submit" className="bg-teal-500 hover:bg-teal-600">
-                <Save className="mr-2 h-4 w-4" />
-                Salvar e Encaminhar
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
+                  
+                  <div className="p-4 border border-amber-200 bg-amber-50 rounded-md">
+                    <p className="text-sm text-amber-800">
+                      Os campos marcados com <span className="text-red-500">*</span> são obrigatórios para continuar o atendimento.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-96">
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Paciente não encontrado</h2>
+            <p className="text-muted-foreground mb-4">Não foi possível encontrar os dados do paciente.</p>
+            <Button onClick={goBack}>Voltar para Recepção</Button>
+          </div>
+        )}
       </div>
     </Layout>
   );
