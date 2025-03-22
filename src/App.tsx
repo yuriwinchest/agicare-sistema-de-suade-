@@ -9,6 +9,7 @@ import { SidebarProvider } from "@/components/layout/SidebarContext";
 // Pages
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import MainMenu from "./pages/MainMenu";
 import Ambulatory from "./pages/Ambulatory";
 import Appointment from "./pages/Appointment";
 import Hospitalization from "./pages/Hospitalization";
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             
             <Route element={<RequireAuth />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/menu" replace />} />
+              <Route path="/menu" element={<MainMenu />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/ambulatory" element={<Ambulatory />} />
               <Route path="/appointment" element={<Appointment />} />

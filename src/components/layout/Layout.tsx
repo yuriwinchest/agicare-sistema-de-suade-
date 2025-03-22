@@ -13,7 +13,8 @@ import {
   LogOut, 
   Settings,
   Bell,
-  ChevronDown
+  ChevronDown,
+  LayoutGrid
 } from "lucide-react";
 import { 
   DropdownMenu,
@@ -45,6 +46,7 @@ interface LayoutProps {
 
 // Define the navigation items
 const navItems = [
+  { path: '/menu', icon: LayoutGrid, label: 'Menu Principal' },
   { path: '/dashboard', icon: Home, label: 'Dashboard' },
   { path: '/ambulatory', icon: Users, label: 'Ambulatorial' },
   { path: '/appointment', icon: Calendar, label: 'Agendamento' },
