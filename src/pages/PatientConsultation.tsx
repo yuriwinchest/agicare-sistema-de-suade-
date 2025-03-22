@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ const mockPatients: Patient[] = [
 ];
 
 const PatientConsultation = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>(mockPatients);
   
@@ -46,12 +48,25 @@ const PatientConsultation = () => {
     setFilteredPatients(filtered);
   };
 
+  const handlePatientClick = (patientId: number) => {
+    navigate(`/patient-registration/${patientId}`);
+  };
+  
+  const handleNewPatient = () => {
+    navigate('/patient-registration');
+  };
+
   return (
     <Layout>
       <div className="page-container">
         <Card className="system-modal mb-6">
           <CardContent className="p-6">
-            <h1 className="text-xl font-semibold mb-4 text-teal-700">Consulta de Paciente</h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-semibold text-teal-700">Consulta de Paciente</h1>
+              <Button onClick={handleNewPatient} className="bg-teal-500 hover:bg-teal-600">
+                Novo Paciente
+              </Button>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
@@ -155,7 +170,8 @@ const PatientConsultation = () => {
                   {filteredPatients.map((patient) => (
                     <TableRow 
                       key={patient.id}
-                      className={patient.id % 2 === 0 ? "bg-teal-50/50" : ""}
+                      className={`${patient.id % 2 === 0 ? "bg-teal-50/50" : ""} hover:bg-teal-100/50 cursor-pointer`}
+                      onClick={() => handlePatientClick(patient.id)}
                     >
                       <TableCell className="text-center">{patient.id}</TableCell>
                       <TableCell>{patient.prontuario}</TableCell>
