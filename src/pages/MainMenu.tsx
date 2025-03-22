@@ -10,7 +10,8 @@ import {
   Stethoscope,
   FileClock,
   ClipboardList,
-  ImagePlus
+  ImagePlus,
+  UserSearch
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -50,6 +51,7 @@ const MainMenu = () => {
     { icon: ClipboardList, title: "Controle de Leito", path: "/beds" },
     { icon: FileText, title: "Prontuário Eletrônico Internação", path: "/hospitalization" },
     { icon: ImagePlus, title: "Faturação Atendimento", path: "/billing" },
+    { icon: UserSearch, title: "Consulta de Paciente", path: "/patient-consultation" },
   ];
 
   return (
