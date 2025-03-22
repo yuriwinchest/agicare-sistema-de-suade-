@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Table,
@@ -51,9 +50,8 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Editor } from '@tinymce/tinymce-react';
+import { Editor } from '@tinymce/tinymce-react";
 
-// Sample data for laudo templates
 const templateData = [
   { codigo: "1", nome: "RAIO-X TÓRAX" },
   { codigo: "2", nome: "ULTRASONOGRAFIA DO ABDOME TOTAL" },
@@ -67,7 +65,6 @@ const templateData = [
   { codigo: "15", nome: "RADIOGRAFIA PELO CORPO" }
 ];
 
-// Acceptable file types for attachments
 const acceptableFileTypes = "image/*,.pdf";
 
 const LaudoTab = () => {
@@ -79,7 +76,7 @@ const LaudoTab = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<{codigo: string, nome: string} | null>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<{id: string, name: string} | null>(null);
   const [reportText, setReportText] = useState("");
-  const [currentTab, setCurrentTab] = useState("search"); // "search" or "edit"
+  const [currentTab, setCurrentTab] = useState("search");
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [attachments, setAttachments] = useState<{type: string, url: string, name: string}[]>([]);
   
@@ -96,7 +93,6 @@ const LaudoTab = () => {
     setCurrentTab("edit");
     setShowEditor(true);
     
-    // Initialize the editor with a template text
     setReportText(`TESTE ELETROCARDIOGRAMA - Laudo
 
 ECG de repouso, sugestivo distúrbio de condução do ramo direito.
@@ -124,12 +120,10 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
     });
   };
 
-  // Handle file uploads (images and PDFs)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     
-    // Process each file
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       const isPdf = file.type === 'application/pdf';
@@ -137,7 +131,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
       reader.onloadend = () => {
         const fileUrl = reader.result as string;
         
-        // Add to attachments array
         setAttachments(prev => [
           ...prev, 
           { 
@@ -147,7 +140,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
           }
         ]);
         
-        // Insert image or link to PDF in editor
         if (editorRef.current) {
           if (file.type.startsWith('image/')) {
             editorRef.current.execCommand('mceInsertContent', false, `<img src="${fileUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`);
@@ -167,7 +159,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
       reader.readAsDataURL(file);
     });
     
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -262,7 +253,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
           </CardContent>
         </Card>
       ) : (
-        // Edit tab content
         <Card>
           <CardHeader className="bg-teal-600 text-white rounded-t-lg">
             <CardTitle className="text-xl">Cadastro do Template do Laudo</CardTitle>
@@ -341,7 +331,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
-                {/* Rich Text Editor with corrected API key */}
                 <Editor
                   apiKey="rsh41jbv58da92e62s3kr4soxukqv8qbf8q7n4gxc897n3ar"
                   onInit={(evt, editor) => editorRef.current = editor}
@@ -351,10 +340,11 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
                     menubar: true,
                     plugins: [
                       'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 
-                      'searchreplace', 'table', 'visualblocks', 'wordcount', 'checklist', 'mediaembed', 'casechange', 
-                      'export', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 
-                      'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'mentions', 'tableofcontents', 
-                      'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown'
+                      'searchreplace', 'table', 'visualblocks', 'wordcount',
+                      'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'a11ychecker', 
+                      'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 
+                      'advtemplate', 'mentions', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 
+                      'typography', 'inlinecss', 'markdown'
                     ],
                     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | ' +
                       'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
@@ -363,10 +353,8 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                     font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
                     file_picker_callback: function (callback, value, meta) {
-                      // Trigger file input click
                       if (fileInputRef.current) {
                         fileInputRef.current.click();
-                        // Store callback for later use
                         fileInputRef.current.onchange = function () {
                           if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files.length > 0) {
                             const file = fileInputRef.current.files[0];
@@ -397,7 +385,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
                   }}
                 />
                 
-                {/* Hidden file input for image/PDF upload */}
                 <input 
                   type="file" 
                   ref={fileInputRef}
@@ -407,7 +394,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
                   multiple
                 />
                 
-                {/* Preview panel for attached files */}
                 {attachments.length > 0 && (
                   <div className="p-4 border-t bg-gray-50">
                     <h4 className="font-medium mb-2">Anexos ({attachments.length})</h4>
@@ -467,7 +453,6 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
         </Card>
       )}
       
-      {/* Professional search dialog */}
       <ProfessionalSearchDialog 
         open={professionalDialogOpen} 
         onOpenChange={setProfessionalDialogOpen} 
