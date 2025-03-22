@@ -13,7 +13,8 @@ import {
   FileClock,
   ClipboardList,
   ImagePlus,
-  UserSearch
+  UserSearch,
+  ClipboardCheck
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -54,6 +55,7 @@ const MainMenu = () => {
     { icon: Bed, title: "Internação", path: "/hospitalization" },
     { icon: Users, title: "Atendimento Ambulatorial", path: "/ambulatory" },
     { icon: Calendar, title: "Agendamento", path: "/appointment" },
+    { icon: ClipboardCheck, title: "Recepção", path: "/reception" },
     { icon: FileText, title: "Prontuário Eletrônico", path: "/patient/new" },
     { icon: Stethoscope, title: "Enfermagem", path: "/patient/nursing" },
     { icon: FileClock, title: "Prontuário Eletrônico Agenda", path: "/appointment" },
