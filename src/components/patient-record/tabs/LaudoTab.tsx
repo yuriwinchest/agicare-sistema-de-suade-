@@ -50,7 +50,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Editor } from '@tinymce/tinymce-react";
+import { Editor } from "@tinymce/tinymce-react";
 
 const templateData = [
   { codigo: "1", nome: "RAIO-X TÓRAX" },
