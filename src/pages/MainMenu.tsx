@@ -42,6 +42,13 @@ const ModuleCard = ({ icon: Icon, title, path, color = "bg-teal-400/10" }: Modul
 };
 
 const MainMenu = () => {
+  const { open } = useSidebar();
+  
+  // Ensure sidebar is open when on the menu page
+  useEffect(() => {
+    open();
+  }, [open]);
+  
   const modules = [
     { icon: LayoutDashboard, title: "Dashboard", path: "/dashboard" },
     { icon: Bed, title: "Internação", path: "/hospitalization" },

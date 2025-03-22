@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -20,7 +21,8 @@ import {
   ClipboardList, 
   UserCheck, 
   Bed,
-  ClipboardList as ClipboardIcon,
+  ClipboardIcon,
+  FileSpreadsheet
 } from "lucide-react";
 
 import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
@@ -28,6 +30,7 @@ import SummaryTab from "@/components/patient-record/tabs/SummaryTab";
 import AnamnesisTab from "@/components/patient-record/tabs/AnamnesisTab";
 import NursingTab from "@/components/patient-record/tabs/NursingTab";
 import ClinicalRecordTab from "@/components/patient-record/tabs/ClinicalRecordTab";
+import LaudoTab from "@/components/patient-record/tabs/LaudoTab";
 
 import { 
   patientInfo, 
@@ -115,6 +118,10 @@ const PatientRecord = () => {
                   <ClipboardIcon className="h-4 w-4 mr-1" />
                   Ficha Clínica
                 </TabsTrigger>
+                <TabsTrigger value="laudo" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                  <FileSpreadsheet className="h-4 w-4 mr-1" />
+                  Laudo
+                </TabsTrigger>
                 <TabsTrigger value="discharge" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <UserCheck className="h-4 w-4 mr-1" />
                   Alta/Atestado
@@ -150,6 +157,10 @@ const PatientRecord = () => {
                   clinicalRecords={clinicalRecords}
                   specialities={specialities}
                 />
+              </TabsContent>
+              
+              <TabsContent value="laudo" className="p-6">
+                <LaudoTab />
               </TabsContent>
               
               <TabsContent value="prescription" className="p-6">

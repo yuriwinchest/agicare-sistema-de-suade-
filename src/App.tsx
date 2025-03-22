@@ -20,36 +20,39 @@ import NotFound from "./pages/NotFound";
 // Auth Provider
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
 import DestinationModal from "./components/auth/DestinationModal";
+import { SidebarProvider } from "./components/layout/SidebarContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <DestinationModal />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            
-            <Route element={<RequireAuth />}>
-              <Route path="/" element={<Navigate to="/menu" replace />} />
-              <Route path="/menu" element={<MainMenu />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/ambulatory" element={<Ambulatory />} />
-              <Route path="/appointment" element={<Appointment />} />
-              <Route path="/hospitalization" element={<Hospitalization />} />
-              <Route path="/patient/:id" element={<PatientRecord />} />
-              <Route path="/patient-consultation" element={<PatientConsultation />} />
-              <Route path="/patient-registration/:id?" element={<PatientRegistration />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <SidebarProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <DestinationModal />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              
+              <Route element={<RequireAuth />}>
+                <Route path="/" element={<Navigate to="/menu" replace />} />
+                <Route path="/menu" element={<MainMenu />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/ambulatory" element={<Ambulatory />} />
+                <Route path="/appointment" element={<Appointment />} />
+                <Route path="/hospitalization" element={<Hospitalization />} />
+                <Route path="/patient/:id" element={<PatientRecord />} />
+                <Route path="/patient-consultation" element={<PatientConsultation />} />
+                <Route path="/patient-registration/:id?" element={<PatientRegistration />} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SidebarProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
