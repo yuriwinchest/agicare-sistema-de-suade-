@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -11,21 +10,75 @@ import { ChevronLeft, Save, Printer, FileText, Upload } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { savePatient } from "@/services/patientService";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
   
+  const [patientData, setPatientData] = useState({
+    id: Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+    name: "",
+    cpf: "",
+    phone: "",
+    birthDate: "",
+    gender: "",
+    active: true,
+    address: {
+      street: "",
+      number: "",
+      complement: "",
+      neighborhood: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
+    healthPlan: "",
+    healthCardNumber: "",
+    status: "Agendado"
+  });
+  
+  const handleChange = (field: string, value: any) => {
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      setPatientData({
+        ...patientData,
+        [parent]: {
+          ...patientData[parent as keyof typeof patientData] as object,
+          [child]: value
+        }
+      });
+    } else {
+      setPatientData({
+        ...patientData,
+        [field]: value
+      });
+    }
+  };
+  
   const handleGoBack = () => {
     navigate(-1);
   };
   
   const handleSave = () => {
+    if (!patientData.name) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Nome do paciente é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    savePatient(patientData);
+    
     toast({
       title: "Cadastro Salvo",
       description: "Os dados do paciente foram salvos com sucesso."
     });
+    
+    navigate("/reception");
   };
 
   return (
@@ -74,12 +127,15 @@ const PatientRegistration = () => {
                 </TabsTrigger>
               </TabsList>
               
-              {/* Dados Pessoais Tab */}
               <TabsContent value="dados-pessoais" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Prontuário</label>
-                    <Input placeholder="Digite o prontuário" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      value={patientData.id}
+                      readOnly
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Pessoa</label>
@@ -98,7 +154,12 @@ const PatientRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                    <Input placeholder="Digite o nome completo" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="Digite o nome completo" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.name}
+                      onChange={(e) => handleChange("name", e.target.value)}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">CNS</label>
@@ -109,7 +170,12 @@ const PatientRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                    <Input type="date" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      type="date" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.birthDate}
+                      onChange={(e) => handleChange("birthDate", e.target.value)}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
@@ -128,13 +194,16 @@ const PatientRegistration = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Sexo Biológico</label>
-                    <Select>
+                    <Select 
+                      value={patientData.gender} 
+                      onValueChange={(value) => handleChange("gender", value)}
+                    >
                       <SelectTrigger className="border-teal-500/30">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="masculino">MASCULINO</SelectItem>
-                        <SelectItem value="feminino">FEMININO</SelectItem>
+                        <SelectItem value="Masculino">MASCULINO</SelectItem>
+                        <SelectItem value="Feminino">FEMININO</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -152,47 +221,83 @@ const PatientRegistration = () => {
                 </div>
                 
                 <div className="flex items-center space-x-2 mt-4">
-                  <Switch id="paciente-ativo" />
+                  <Switch 
+                    id="paciente-ativo" 
+                    checked={patientData.active}
+                    onCheckedChange={(checked) => handleChange("active", checked)}
+                  />
                   <Label htmlFor="paciente-ativo">Paciente Ativo?</Label>
                 </div>
               </TabsContent>
               
-              {/* Contato Tab */}
               <TabsContent value="contato" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                    <Input placeholder="00000-000" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="00000-000" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.address.zipCode}
+                      onChange={(e) => handleChange("address.zipCode", e.target.value)}
+                    />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
-                    <Input placeholder="Digite o endereço" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="Digite o endereço" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.address.street}
+                      onChange={(e) => handleChange("address.street", e.target.value)}
+                    />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
-                    <Input placeholder="Número" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="Número" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.address.number}
+                      onChange={(e) => handleChange("address.number", e.target.value)}
+                    />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
-                    <Input placeholder="Complemento" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="Complemento" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.address.complement}
+                      onChange={(e) => handleChange("address.complement", e.target.value)}
+                    />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
-                    <Input placeholder="Bairro" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="Bairro" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.address.neighborhood}
+                      onChange={(e) => handleChange("address.neighborhood", e.target.value)}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-                    <Input placeholder="Cidade" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="Cidade" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.address.city}
+                      onChange={(e) => handleChange("address.city", e.target.value)}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Estado/UF</label>
-                    <Select>
+                    <Select 
+                      value={patientData.address.state}
+                      onValueChange={(value) => handleChange("address.state", value)}
+                    >
                       <SelectTrigger className="border-teal-500/30">
                         <SelectValue placeholder="UF" />
                       </SelectTrigger>
@@ -232,7 +337,12 @@ const PatientRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Telefone Principal</label>
-                    <Input placeholder="(00) 00000-0000" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      placeholder="(00) 00000-0000" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.phone}
+                      onChange={(e) => handleChange("phone", e.target.value)}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Telefone Alternativo</label>
@@ -245,7 +355,28 @@ const PatientRegistration = () => {
                 </div>
               </TabsContent>
               
-              {/* Dados Complementares Tab */}
+              <TabsContent value="documentos" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                    <Input 
+                      placeholder="000.000.000-00" 
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                      value={patientData.cpf}
+                      onChange={(e) => handleChange("cpf", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">RG</label>
+                    <Input placeholder="0000000000" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Órgão Emissor</label>
+                    <Input placeholder="SSP/UF" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                  </div>
+                </div>
+              </TabsContent>
+              
               <TabsContent value="dados-complementares" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
@@ -370,25 +501,6 @@ const PatientRegistration = () => {
                 </div>
               </TabsContent>
               
-              {/* Documentos Tab */}
-              <TabsContent value="documentos" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                    <Input placeholder="000.000.000-00" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">RG</label>
-                    <Input placeholder="0000000000" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Órgão Emissor</label>
-                    <Input placeholder="SSP/UF" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              {/* Alergias Tab */}
               <TabsContent value="alergias" className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div>
@@ -423,7 +535,6 @@ const PatientRegistration = () => {
                 </div>
               </TabsContent>
               
-              {/* Outros Tab */}
               <TabsContent value="outros" className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div>
@@ -436,7 +547,6 @@ const PatientRegistration = () => {
                 </div>
               </TabsContent>
               
-              {/* Log Tab */}
               <TabsContent value="log" className="space-y-4">
                 <div className="border border-gray-200 rounded-md p-4">
                   <h3 className="font-medium mb-2">Histórico de Alterações</h3>

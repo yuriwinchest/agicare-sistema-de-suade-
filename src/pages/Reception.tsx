@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Search, 
@@ -25,14 +26,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock data for patients
-const mockPatients = [
-  { id: 1, name: "Paciente Teste", cpf: "123.456.789-01", phone: "(11) 98765-4321", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "14:30", status: "Agendado" },
-  { id: 2, name: "Maria Silva", cpf: "987.654.321-09", phone: "(11) 91234-5678", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "15:00", status: "Confirmado" },
-  { id: 3, name: "João Santos", cpf: "456.789.123-45", phone: "(11) 97890-1234", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "15:30", status: "Aguardando" },
-  { id: 4, name: "Ana Oliveira", cpf: "789.123.456-78", phone: "(11) 94567-8901", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "16:00", status: "Confirmado" },
-];
+import { getPatients } from "@/services/patientService";
 
 const Reception = () => {
   const navigate = useNavigate();
@@ -40,12 +34,18 @@ const Reception = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [receptionFilter, setReceptionFilter] = useState("");
+  const [patients, setPatients] = useState<any[]>([]);
+  
+  // Load patients when component mounts
+  useEffect(() => {
+    setPatients(getPatients());
+  }, []);
   
   // Filter patients based on search term and filters
-  const filteredPatients = mockPatients.filter((patient) => {
+  const filteredPatients = patients.filter((patient) => {
     const matchesSearch = 
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.cpf.includes(searchTerm);
+      patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.cpf?.includes(searchTerm);
     
     const matchesStatus = statusFilter ? patient.status === statusFilter : true;
     const matchesReception = receptionFilter ? patient.reception === receptionFilter : true;

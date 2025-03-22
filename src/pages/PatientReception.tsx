@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { patientInfo } from "@/components/patient-record/PatientRecordData";
@@ -18,15 +18,9 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, ClipboardList, Stethoscope, CalendarCheck } from "lucide-react";
 import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
+import { getPatientById, confirmPatientAppointment } from "@/services/patientService";
 
-// Mock data for the form
-const mockPatients = [
-  { id: "1", name: "Paciente Teste", cpf: "123.456.789-01", phone: "(11) 98765-4321", status: "Agendado" },
-  { id: "2", name: "Maria Silva", cpf: "987.654.321-09", phone: "(11) 91234-5678", status: "Confirmado" },
-  { id: "3", name: "João Santos", cpf: "456.789.123-45", phone: "(11) 97890-1234", status: "Aguardando" },
-  { id: "4", name: "Ana Oliveira", cpf: "789.123.456-78", phone: "(11) 94567-8901", status: "Confirmado" },
-];
-
+// Static data for selections
 const specialties = [
   { id: "1", name: "Clínica Médica" },
   { id: "2", name: "Cardiologia" },
@@ -63,11 +57,9 @@ const attendanceTypes = [
 
 const PatientReception = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
-  
-  // Getting patient data based on the ID
-  const patient = id === "001" ? patientInfo : mockPatients.find(p => p.id === id);
+  const [patient, setPatient] = useState<any>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -78,6 +70,19 @@ const PatientReception = () => {
     healthCardNumber: "",
     observations: "",
   });
+  
+  // Fetch patient data when component mounts
+  useEffect(() => {
+    if (id) {
+      const patientData = getPatientById(id);
+      if (patientData) {
+        setPatient(patientData);
+      } else if (id === "001") {
+        // Fallback for the hard-coded patient
+        setPatient(patientInfo);
+      }
+    }
+  }, [id]);
   
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -96,14 +101,35 @@ const PatientReception = () => {
       return;
     }
     
-    // Success notification
-    toast({
-      title: "Atendimento registrado",
-      description: "O paciente foi encaminhado para atendimento ambulatorial.",
-    });
-    
-    // Navigate to the ambulatory page
-    navigate("/ambulatory");
+    if (id) {
+      // Get the professional name based on ID
+      const professionalObj = professionals.find(p => p.id === formData.professional);
+      const specialtyObj = specialties.find(s => s.id === formData.specialty);
+      const attendanceTypeObj = attendanceTypes.find(a => a.id === formData.attendanceType);
+      
+      // Prepare appointment data
+      const appointmentData = {
+        ...formData,
+        // Map IDs to actual names
+        professional: professionalObj?.name || "",
+        specialty: specialtyObj?.name || "",
+        attendanceType: attendanceTypeObj?.name || "",
+        // Set to waiting status for ambulatory
+        status: "Aguardando"
+      };
+      
+      // Update patient with appointment data
+      confirmPatientAppointment(id, appointmentData);
+      
+      // Success notification
+      toast({
+        title: "Atendimento registrado",
+        description: "O paciente foi encaminhado para atendimento ambulatorial.",
+      });
+      
+      // Navigate to the ambulatory page
+      navigate("/ambulatory");
+    }
   };
   
   const goBack = () => {
@@ -113,9 +139,9 @@ const PatientReception = () => {
   return (
     <Layout>
       <div className="page-container">
-        {patient && 'name' in patient ? (
+        {patient ? (
           <>
-            <PatientInfoHeader patientInfo={patientInfo} />
+            <PatientInfoHeader patientInfo={patient} />
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
               <Card className="col-span-full md:col-span-2 section-fade system-card">
