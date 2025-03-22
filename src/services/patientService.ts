@@ -33,11 +33,15 @@ initFromLocalStorage();
 
 // Get all patients
 export const getPatients = () => {
+  // Always refresh from localStorage first to ensure we have the latest data
+  initFromLocalStorage();
   return patients;
 };
 
 // Get patient by ID
 export const getPatientById = (id: string) => {
+  // Always refresh from localStorage first
+  initFromLocalStorage();
   return patients.find(patient => patient.id === id);
 };
 
@@ -55,6 +59,9 @@ const generateUniqueId = () => {
 
 // Save new patient or update existing one
 export const savePatient = (patient: any) => {
+  // Always refresh from localStorage first
+  initFromLocalStorage();
+  
   const existingPatientIndex = patients.findIndex(p => p.id === patient.id);
   
   if (existingPatientIndex >= 0) {
@@ -130,6 +137,9 @@ export const clearDraftPatient = () => {
 
 // Update patient status and send to ambulatory
 export const confirmPatientAppointment = (patientId: string, appointmentData: any) => {
+  // Always refresh from localStorage first
+  initFromLocalStorage();
+  
   const patientIndex = patients.findIndex(p => p.id === patientId);
   
   if (patientIndex >= 0) {
@@ -183,11 +193,16 @@ initAmbulatoryFromLocalStorage();
 
 // Get all ambulatory patients
 export const getAmbulatoryPatients = () => {
+  // Always refresh from localStorage
+  initAmbulatoryFromLocalStorage();
   return ambulatoryPatients;
 };
 
 // Update or add patient to ambulatory
 export const updateAmbulatoryPatient = (patient: any) => {
+  // Always refresh from localStorage
+  initAmbulatoryFromLocalStorage();
+  
   const existingIndex = ambulatoryPatients.findIndex(p => p.id === patient.id);
   
   if (existingIndex >= 0) {

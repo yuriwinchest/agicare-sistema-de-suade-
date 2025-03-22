@@ -80,15 +80,13 @@ const Reception = () => {
     }
   };
 
-  // Função para lidar com check-in de paciente
-  const handleCheckIn = (patient: any) => {
-    // Navega para a página de complemento de atendimento do paciente
+  // Navigate to patient reception confirmation page when clicking on a patient
+  const handlePatientClick = (patient: any) => {
     navigate(`/patient-reception/${patient.id}`);
   };
 
-  // Handle clicking on a patient to navigate to confirmation page
-  const handlePatientClick = (patient: any) => {
-    // Navigate to the patient reception confirmation page
+  // Handle patient check-in button click
+  const handleCheckIn = (patient: any) => {
     navigate(`/patient-reception/${patient.id}`);
   };
 
