@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -41,6 +40,7 @@ import {
   Calendar,
   Check,
   X,
+  ClipboardList as ClipboardIcon,
 } from "lucide-react";
 
 // Mock patient data
@@ -196,6 +196,36 @@ const PatientRecord = () => {
   const [currentInstruction, setCurrentInstruction] = useState("");
   const [currentInstructionFreq, setCurrentInstructionFreq] = useState("");
   
+  // New state for clinical record
+  const [searchClinicalRecord, setSearchClinicalRecord] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedSpeciality, setSelectedSpeciality] = useState("");
+  
+  // Mock clinical records
+  const clinicalRecords = [
+    { id: "10001", number: "12345", date: "02/05/2023 14:39", speciality: "CARDIOLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA DE ATENDIMENTO", status: "FINALIZADA" },
+    { id: "10002", number: "21576", date: "05/04/2023 10:15", speciality: "ANESTESIOLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA DE ATENDIMENTO", status: "PENDENTE" },
+    { id: "10003", number: "31255", date: "20/03/2023 08:54", speciality: "CARDIOLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA DE EVOLUÇÃO", status: "FINALIZADA" },
+    { id: "10004", number: "41236", date: "15/02/2023 16:30", speciality: "CLÍNICA MÉDICA", professional: "MÉDICO PADRÃO", type: "FICHA DE ATENDIMENTO", status: "FINALIZADA" },
+    { id: "10005", number: "51377", date: "10/01/2023 09:20", speciality: "NEUROLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA DE AVALIAÇÃO", status: "FINALIZADA" },
+    { id: "10006", number: "61238", date: "05/12/2022 11:45", speciality: "CARDIOLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA DE ATENDIMENTO", status: "FINALIZADA" },
+    { id: "10007", number: "71288", date: "20/11/2022 13:10", speciality: "CLÍNICA MÉDICA", professional: "MÉDICO PADRÃO", type: "FICHA DE EVOLUÇÃO", status: "FINALIZADA" },
+    { id: "10008", number: "81356", date: "15/10/2022 15:25", speciality: "ANESTESIOLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA DE AVALIAÇÃO", status: "FINALIZADA" },
+    { id: "10009", number: "90408", date: "28/09/2022 10:50", speciality: "MÉDICO PEDIATRA NEONATOLOGISTA JÚNIOR", professional: "MÉDICO PADRÃO", type: "FICHA TÉCNICA", status: "FINALIZADA" },
+    { id: "10010", number: "12405", date: "08/08/2022 14:30", speciality: "ORTOPEDIA / TRAUMATOLOGIA", professional: "MÉDICO PADRÃO", type: "FICHA CLÍNICA", status: "FINALIZADA" },
+  ];
+  
+  // Available specialities for filtering
+  const specialities = [
+    { id: "spec1", name: "CARDIOLOGIA" },
+    { id: "spec2", name: "ANESTESIOLOGIA" },
+    { id: "spec3", name: "CLÍNICA MÉDICA" },
+    { id: "spec4", name: "NEUROLOGIA" },
+    { id: "spec5", name: "ORTOPEDIA / TRAUMATOLOGIA" },
+    { id: "spec6", name: "PEDIATRIA" },
+  ];
+  
   const handleGoBack = () => {
     navigate(-1);
   };
@@ -345,6 +375,13 @@ const PatientRecord = () => {
     });
   };
   
+  const handleAddClinicalRecord = () => {
+    toast({
+      title: "Nova Ficha Clínica",
+      description: "Funcionalidade em desenvolvimento",
+    });
+  };
+  
   return (
     <Layout>
       <div className="page-container">
@@ -441,6 +478,10 @@ const PatientRecord = () => {
                 <TabsTrigger value="labresults" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <ClipboardList className="h-4 w-4 mr-1" />
                   Resultados
+                </TabsTrigger>
+                <TabsTrigger value="clinical" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                  <ClipboardIcon className="h-4 w-4 mr-1" />
+                  Ficha Clínica
                 </TabsTrigger>
                 <TabsTrigger value="discharge" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <UserCheck className="h-4 w-4 mr-1" />
@@ -662,628 +703,3 @@ const PatientRecord = () => {
                 
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-md font-medium mb-4">Sinais Vitais</h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="bg-medgray-100">
-                            <th className="p-2 text-left text-sm font-medium">Data/Hora</th>
-                            <th className="p-2 text-left text-sm font-medium">Temperatura</th>
-                            <th className="p-2 text-left text-sm font-medium">Pressão Arterial</th>
-                            <th className="p-2 text-left text-sm font-medium">Pulso</th>
-                            <th className="p-2 text-left text-sm font-medium">Resp.</th>
-                            <th className="p-2 text-left text-sm font-medium">Sat. O2</th>
-                            <th className="p-2 text-left text-sm font-medium">Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {patientInfo.vitalSigns.map((vs, index) => (
-                            <tr key={index} className="border-b">
-                              <td className="p-2 text-sm">{vs.date}</td>
-                              <td className="p-2 text-sm">{vs.temperature}</td>
-                              <td className="p-2 text-sm">{vs.pressure}</td>
-                              <td className="p-2 text-sm">{vs.pulse}</td>
-                              <td className="p-2 text-sm">{vs.respiratory}</td>
-                              <td className="p-2 text-sm">{vs.oxygen}</td>
-                              <td className="p-2 text-sm">
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <FileText className="h-4 w-4" />
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              {/* Prescription Tab */}
-              <TabsContent value="prescription" className="p-6">
-                <div className="flex justify-between mb-6">
-                  <h2 className="text-lg font-semibold">Prescrição</h2>
-                  
-                  <Dialog open={showPrescriptionDialog} onOpenChange={setShowPrescriptionDialog}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Nova Prescrição
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
-                      <DialogHeader>
-                        <DialogTitle>Nova Prescrição</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-6 py-4">
-                        <div>
-                          <h3 className="text-md font-medium mb-3">Medicação</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
-                            <div className="md:col-span-2">
-                              <Label htmlFor="medication">Medicamento</Label>
-                              <Select value={currentMedication} onValueChange={setCurrentMedication}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {availableMedications.map((med) => (
-                                    <SelectItem key={med.id} value={med.name}>
-                                      {med.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label htmlFor="dose">Dose</Label>
-                              <Input 
-                                id="dose"
-                                value={currentDose}
-                                onChange={(e) => setCurrentDose(e.target.value)}
-                                placeholder="Ex: 1g"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="frequency">Frequência</Label>
-                              <Input 
-                                id="frequency"
-                                value={currentFrequency}
-                                onChange={(e) => setCurrentFrequency(e.target.value)}
-                                placeholder="Ex: 8/8h"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="route">Via</Label>
-                              <Select value={currentRoute} onValueChange={setCurrentRoute}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="VO">Via Oral</SelectItem>
-                                  <SelectItem value="EV">Endovenoso</SelectItem>
-                                  <SelectItem value="IM">Intramuscular</SelectItem>
-                                  <SelectItem value="SC">Subcutâneo</SelectItem>
-                                  <SelectItem value="SL">Sublingual</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <Button onClick={handleAddMedication} variant="outline" size="sm">
-                            <Plus className="h-4 w-4 mr-1" />
-                            Adicionar Medicação
-                          </Button>
-                          
-                          {prescriptionItems.length > 0 && (
-                            <div className="mt-3">
-                              <h4 className="text-sm font-medium mb-2">Medicações Adicionadas</h4>
-                              <ul className="space-y-2">
-                                {prescriptionItems.map((item, index) => (
-                                  <li 
-                                    key={index} 
-                                    className="flex items-center justify-between p-2 bg-medgray-100 rounded-md"
-                                  >
-                                    <span className="text-sm">
-                                      {item.medication} {item.dose}, {item.frequency}, {item.route}
-                                    </span>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon"
-                                      onClick={() => handleRemoveMedication(index)}
-                                      className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Separator />
-                        
-                        <div>
-                          <h3 className="text-md font-medium mb-3">Orientação Enfermagem</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                            <div>
-                              <Label htmlFor="instruction">Orientação</Label>
-                              <Select value={currentInstruction} onValueChange={setCurrentInstruction}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {availableNursingInstructions.map((instr) => (
-                                    <SelectItem key={instr.id} value={instr.name}>
-                                      {instr.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label htmlFor="instructionFreq">Frequência</Label>
-                              <Input 
-                                id="instructionFreq"
-                                value={currentInstructionFreq}
-                                onChange={(e) => setCurrentInstructionFreq(e.target.value)}
-                                placeholder="Ex: 4/4h"
-                              />
-                            </div>
-                          </div>
-                          <Button onClick={handleAddInstruction} variant="outline" size="sm">
-                            <Plus className="h-4 w-4 mr-1" />
-                            Adicionar Orientação
-                          </Button>
-                          
-                          {nursingInstructions.length > 0 && (
-                            <div className="mt-3">
-                              <h4 className="text-sm font-medium mb-2">Orientações Adicionadas</h4>
-                              <ul className="space-y-2">
-                                {nursingInstructions.map((item, index) => (
-                                  <li 
-                                    key={index} 
-                                    className="flex items-center justify-between p-2 bg-medgray-100 rounded-md"
-                                  >
-                                    <span className="text-sm">
-                                      {item.instruction}, {item.frequency}
-                                    </span>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon"
-                                      onClick={() => handleRemoveInstruction(index)}
-                                      className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Separator />
-                        
-                        <div>
-                          <h3 className="text-md font-medium mb-3">Dieta</h3>
-                          <Select value={selectedDiet} onValueChange={setSelectedDiet}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a dieta" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableDiets.map((diet) => (
-                                <SelectItem key={diet.id} value={diet.name}>
-                                  {diet.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setShowPrescriptionDialog(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleSavePrescription}>
-                          Salvar Prescrição
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-                
-                <div className="space-y-4">
-                  {patientInfo.prescriptions.map((prescription) => (
-                    <Card key={prescription.id}>
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between">
-                          <CardTitle className="text-base">Prescrição Médica</CardTitle>
-                          <p className="text-sm text-muted-foreground">{prescription.date}</p>
-                        </div>
-                        <CardDescription>Por: {prescription.doctor}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-sm font-medium mb-2">Medicações</h3>
-                            <ul className="space-y-2">
-                              {prescription.items.map((item, index) => (
-                                <li key={index} className="p-2 bg-medgray-100 rounded-md text-sm">
-                                  {item.medication} {item.dose}, {item.frequency}, {item.route}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          <div>
-                            <h3 className="text-sm font-medium mb-2">Orientações para Enfermagem</h3>
-                            <ul className="space-y-2">
-                              {prescription.nursingInstructions.map((instr, index) => (
-                                <li key={index} className="p-2 bg-medgray-100 rounded-md text-sm">
-                                  {instr.instruction}, {instr.frequency}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          <div>
-                            <h3 className="text-sm font-medium mb-2">Dieta</h3>
-                            <div className="p-2 bg-medgray-100 rounded-md text-sm">
-                              {prescription.diet}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <FileText className="h-4 w-4 mr-1" />
-                          Visualizar
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-              
-              {/* Lab Orders Tab */}
-              <TabsContent value="laborders" className="p-6">
-                <div className="flex justify-between mb-6">
-                  <h2 className="text-lg font-semibold">Pedidos de Exames</h2>
-                  
-                  <Dialog open={showExamDialog} onOpenChange={setShowExamDialog}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Solicitar Exames
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
-                      <DialogHeader>
-                        <DialogTitle>Solicitar Exames</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="relative">
-                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="search"
-                            placeholder="Buscar exames..."
-                            className="pl-8"
-                            value={examSearchTerm}
-                            onChange={(e) => setExamSearchTerm(e.target.value)}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Tabs defaultValue="laboratory" onValueChange={setActiveExamCategory}>
-                            <TabsList className="w-full bg-medgray-200 grid grid-cols-3 h-auto">
-                              <TabsTrigger value="laboratory" className="data-[state=active]:bg-white py-2">
-                                Laboratoriais
-                              </TabsTrigger>
-                              <TabsTrigger value="imaging" className="data-[state=active]:bg-white py-2">
-                                Imagem
-                              </TabsTrigger>
-                              <TabsTrigger value="cardiological" className="data-[state=active]:bg-white py-2">
-                                Cardiológicos
-                              </TabsTrigger>
-                            </TabsList>
-                            
-                            <TabsContent value="laboratory" className="mt-4">
-                              <div className="grid grid-cols-2 gap-2">
-                                {getFilteredExams().map((exam) => (
-                                  <div 
-                                    key={exam.id}
-                                    className={`flex items-center p-2 rounded-md cursor-pointer ${
-                                      selectedExams.includes(exam.name) 
-                                        ? 'bg-primary/10 border border-primary/20' 
-                                        : 'bg-medgray-100 hover:bg-medgray-200'
-                                    }`}
-                                    onClick={() => handleToggleExam(exam.name)}
-                                  >
-                                    <div className={`w-5 h-5 rounded-md border mr-2 flex items-center justify-center ${
-                                      selectedExams.includes(exam.name) 
-                                        ? 'bg-primary border-primary text-white' 
-                                        : 'border-gray-300'
-                                    }`}>
-                                      {selectedExams.includes(exam.name) && (
-                                        <Check className="h-3 w-3" />
-                                      )}
-                                    </div>
-                                    <span className="text-sm">{exam.name}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </TabsContent>
-                            
-                            <TabsContent value="imaging" className="mt-4">
-                              <div className="grid grid-cols-2 gap-2">
-                                {getFilteredExams().map((exam) => (
-                                  <div 
-                                    key={exam.id}
-                                    className={`flex items-center p-2 rounded-md cursor-pointer ${
-                                      selectedExams.includes(exam.name) 
-                                        ? 'bg-primary/10 border border-primary/20' 
-                                        : 'bg-medgray-100 hover:bg-medgray-200'
-                                    }`}
-                                    onClick={() => handleToggleExam(exam.name)}
-                                  >
-                                    <div className={`w-5 h-5 rounded-md border mr-2 flex items-center justify-center ${
-                                      selectedExams.includes(exam.name) 
-                                        ? 'bg-primary border-primary text-white' 
-                                        : 'border-gray-300'
-                                    }`}>
-                                      {selectedExams.includes(exam.name) && (
-                                        <Check className="h-3 w-3" />
-                                      )}
-                                    </div>
-                                    <span className="text-sm">{exam.name}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </TabsContent>
-                            
-                            <TabsContent value="cardiological" className="mt-4">
-                              <div className="grid grid-cols-2 gap-2">
-                                {getFilteredExams().map((exam) => (
-                                  <div 
-                                    key={exam.id}
-                                    className={`flex items-center p-2 rounded-md cursor-pointer ${
-                                      selectedExams.includes(exam.name) 
-                                        ? 'bg-primary/10 border border-primary/20' 
-                                        : 'bg-medgray-100 hover:bg-medgray-200'
-                                    }`}
-                                    onClick={() => handleToggleExam(exam.name)}
-                                  >
-                                    <div className={`w-5 h-5 rounded-md border mr-2 flex items-center justify-center ${
-                                      selectedExams.includes(exam.name) 
-                                        ? 'bg-primary border-primary text-white' 
-                                        : 'border-gray-300'
-                                    }`}>
-                                      {selectedExams.includes(exam.name) && (
-                                        <Check className="h-3 w-3" />
-                                      )}
-                                    </div>
-                                    <span className="text-sm">{exam.name}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </TabsContent>
-                          </Tabs>
-                        </div>
-                        
-                        {selectedExams.length > 0 && (
-                          <div>
-                            <h3 className="text-sm font-medium mb-2">Exames Selecionados ({selectedExams.length})</h3>
-                            <ul className="max-h-32 overflow-y-auto space-y-1 p-2 bg-medgray-100 rounded-md">
-                              {selectedExams.map((exam, index) => (
-                                <li key={index} className="text-sm flex items-center">
-                                  <Check className="h-3 w-3 mr-1 text-green-600" />
-                                  {exam}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setShowExamDialog(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleSaveExams}>
-                          Solicitar Exames
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-                
-                <div className="space-y-4">
-                  {patientInfo.labTests.length > 0 ? (
-                    patientInfo.labTests.map((test) => (
-                      <div 
-                        key={test.id} 
-                        className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm"
-                      >
-                        <div>
-                          <h3 className="font-medium">{test.name}</h3>
-                          <p className="text-sm text-muted-foreground">{test.date}</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge 
-                            variant="outline" 
-                            className={
-                              test.status === "Pendente" 
-                                ? "bg-amber-100 text-amber-800 hover:bg-amber-100" 
-                                : test.status === "Agendado"
-                                  ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                                  : "bg-green-100 text-green-800 hover:bg-green-100"
-                            }
-                          >
-                            {test.status}
-                          </Badge>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <FileText className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground">Nenhum exame solicitado</p>
-                  )}
-                </div>
-              </TabsContent>
-              
-              {/* Lab Results Tab */}
-              <TabsContent value="labresults" className="p-6">
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold">Resultados de Exames</h2>
-                </div>
-                
-                <div className="space-y-4">
-                  <p className="text-muted-foreground">Nenhum resultado de exame disponível no momento.</p>
-                </div>
-              </TabsContent>
-              
-              {/* Discharge Tab */}
-              <TabsContent value="discharge" className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Alta</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="cid">CID</Label>
-                          <div className="flex gap-2">
-                            <Input id="cid" placeholder="Buscar CID..." />
-                            <Button variant="outline" size="icon">
-                              <Search className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="discharge-reason">Motivo da Alta</Label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o motivo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="alta-medica">Alta Médica</SelectItem>
-                              <SelectItem value="alta-melhorada">Alta Melhorada</SelectItem>
-                              <SelectItem value="alta-a-pedido">Alta a Pedido</SelectItem>
-                              <SelectItem value="transferencia">Transferência</SelectItem>
-                              <SelectItem value="obito">Óbito</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="discharge-notes">Observações</Label>
-                          <Textarea id="discharge-notes" rows={4} placeholder="Observações sobre a alta..." />
-                        </div>
-                        
-                        <Button className="w-full">
-                          Confirmar Alta
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Atestado</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="certificate-cid">CID</Label>
-                          <div className="flex gap-2">
-                            <Input id="certificate-cid" placeholder="Buscar CID..." />
-                            <Button variant="outline" size="icon">
-                              <Search className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="days-off">Dias de Afastamento</Label>
-                          <Input id="days-off" type="number" placeholder="Número de dias" min="1" />
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="show-cid" className="rounded border-gray-300" />
-                          <Label htmlFor="show-cid" className="text-sm">Mostrar CID no atestado</Label>
-                        </div>
-                        
-                        <Button className="w-full">
-                          Imprimir Atestado
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-              
-              {/* Hospitalization Tab */}
-              <TabsContent value="hospitalization" className="p-6">
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold">Pedido de Internação</h2>
-                </div>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="destination">Destino</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o destino" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="propria-unidade">Própria Unidade</SelectItem>
-                            <SelectItem value="outra-unidade">Outra Unidade</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="health-unit">Unidade de Saúde</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a unidade de saúde" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="enfermaria">Enfermaria</SelectItem>
-                            <SelectItem value="uti">UTI</SelectItem>
-                            <SelectItem value="centro-cirurgico">Centro Cirúrgico</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="hospitalization-notes">Observações</Label>
-                        <Textarea id="hospitalization-notes" rows={4} placeholder="Observações sobre a internação..." />
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-amber-500 mb-4">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        <p>O preenchimento do pedido de internação não substitui a AIH.</p>
-                      </div>
-                      
-                      <Button className="w-full">
-                        Solicitar Internação
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
-  );
-};
-
-export default PatientRecord;
