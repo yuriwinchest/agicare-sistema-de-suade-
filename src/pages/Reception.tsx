@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -38,7 +37,20 @@ const Reception = () => {
   
   // Load patients when component mounts
   useEffect(() => {
-    setPatients(getPatients());
+    const loadPatientList = () => {
+      setPatients(getPatients());
+    };
+    
+    // Initial load
+    loadPatientList();
+    
+    // Refresh list when component becomes visible after navigation
+    window.addEventListener('focus', loadPatientList);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('focus', loadPatientList);
+    };
   }, []);
   
   // Filter patients based on search term and filters
@@ -74,8 +86,9 @@ const Reception = () => {
     navigate(`/patient-reception/${patient.id}`);
   };
 
+  // Handle clicking on a patient to navigate to confirmation page
   const handlePatientClick = (patient: any) => {
-    // Navega para a página de confirmação de dados do paciente
+    // Navigate to the patient reception confirmation page
     navigate(`/patient-reception/${patient.id}`);
   };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -20,7 +19,6 @@ import { ArrowLeft, ArrowRight, ClipboardList, Stethoscope, CalendarCheck } from
 import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
 import { getPatientById, confirmPatientAppointment } from "@/services/patientService";
 
-// Static data for selections
 const specialties = [
   { id: "1", name: "Clínica Médica" },
   { id: "2", name: "Cardiologia" },
@@ -61,7 +59,6 @@ const PatientReception = () => {
   const { toast } = useToast();
   const [patient, setPatient] = useState<any>(null);
   
-  // Form state
   const [formData, setFormData] = useState({
     attendanceType: "",
     specialty: "",
@@ -71,18 +68,20 @@ const PatientReception = () => {
     observations: "",
   });
   
-  // Fetch patient data when component mounts
   useEffect(() => {
     if (id) {
       const patientData = getPatientById(id);
       if (patientData) {
         setPatient(patientData);
-      } else if (id === "001") {
-        // Fallback for the hard-coded patient
-        setPatient(patientInfo);
+      } else {
+        toast({
+          title: "Paciente não encontrado",
+          description: "Não foi possível encontrar os dados do paciente.",
+          variant: "destructive",
+        });
       }
     }
-  }, [id]);
+  }, [id, toast]);
   
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -91,7 +90,6 @@ const PatientReception = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if all required fields are filled
     if (!formData.attendanceType || !formData.specialty || !formData.professional) {
       toast({
         title: "Campos obrigatórios",
@@ -102,33 +100,35 @@ const PatientReception = () => {
     }
     
     if (id) {
-      // Get the professional name based on ID
       const professionalObj = professionals.find(p => p.id === formData.professional);
       const specialtyObj = specialties.find(s => s.id === formData.specialty);
       const attendanceTypeObj = attendanceTypes.find(a => a.id === formData.attendanceType);
+      const healthPlanObj = healthPlans.find(h => h.id === formData.healthPlan);
       
-      // Prepare appointment data
       const appointmentData = {
         ...formData,
-        // Map IDs to actual names
         professional: professionalObj?.name || "",
         specialty: specialtyObj?.name || "",
         attendanceType: attendanceTypeObj?.name || "",
-        // Set to waiting status for ambulatory
+        healthPlan: healthPlanObj?.name || "",
         status: "Aguardando"
       };
       
-      // Update patient with appointment data
-      confirmPatientAppointment(id, appointmentData);
+      const updatedPatient = confirmPatientAppointment(id, appointmentData);
       
-      // Success notification
-      toast({
-        title: "Atendimento registrado",
-        description: "O paciente foi encaminhado para atendimento ambulatorial.",
-      });
-      
-      // Navigate to the ambulatory page
-      navigate("/ambulatory");
+      if (updatedPatient) {
+        toast({
+          title: "Atendimento registrado",
+          description: "O paciente foi encaminhado para atendimento ambulatorial.",
+        });
+        navigate("/ambulatory");
+      } else {
+        toast({
+          title: "Erro ao registrar atendimento",
+          description: "Não foi possível registrar o atendimento do paciente.",
+          variant: "destructive",
+        });
+      }
     }
   };
   

@@ -41,21 +41,45 @@ export const getPatientById = (id: string) => {
   return patients.find(patient => patient.id === id);
 };
 
+// Generate a unique ID
+const generateUniqueId = () => {
+  // Get the last ID in the patients array and increment it
+  if (patients.length === 0) {
+    return "001";
+  }
+  
+  // Extract the highest numeric ID and increment by 1
+  const highestId = Math.max(...patients.map(p => parseInt(p.id)));
+  return (highestId + 1).toString().padStart(3, '0');
+};
+
 // Save new patient or update existing one
 export const savePatient = (patient: any) => {
   const existingPatientIndex = patients.findIndex(p => p.id === patient.id);
   
   if (existingPatientIndex >= 0) {
+    // Update existing patient
     patients[existingPatientIndex] = { ...patients[existingPatientIndex], ...patient };
   } else {
+    // Generate a new ID if none exists
+    const newPatient = { ...patient };
+    if (!newPatient.id) {
+      newPatient.id = generateUniqueId();
+    }
+    
     // Add reception and date fields for new patients
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     const date = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
     
+    // Set default status for new patients
+    if (!newPatient.status) {
+      newPatient.status = "Agendado";
+    }
+    
     // Add new patient to the beginning of the array
     patients.unshift({ 
-      ...patient, 
+      ...newPatient, 
       reception: "RECEPÇÃO CENTRAL",
       date,
       time
@@ -65,15 +89,18 @@ export const savePatient = (patient: any) => {
   // Save to localStorage
   saveToLocalStorage();
   
-  return patient;
+  // Return the patient (with the new ID if it was just created)
+  return patients.find(p => p.cpf === patient.cpf) || patient;
 };
 
 // Save draft patient data (during form filling)
 export const saveDraftPatient = (patientData: any) => {
   try {
     localStorage.setItem('draftPatient', JSON.stringify(patientData));
+    return true;
   } catch (error) {
     console.error("Error saving draft patient:", error);
+    return false;
   }
 };
 
@@ -94,8 +121,10 @@ export const loadDraftPatient = () => {
 export const clearDraftPatient = () => {
   try {
     localStorage.removeItem('draftPatient');
+    return true;
   } catch (error) {
     console.error("Error clearing draft patient:", error);
+    return false;
   }
 };
 
