@@ -50,7 +50,8 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Editor } from "@tinymce/tinymce-react";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const templateData = [
   { codigo: "1", nome: "RAIO-X TÓRAX" },
@@ -80,7 +81,7 @@ const LaudoTab = () => {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [attachments, setAttachments] = useState<{type: string, url: string, name: string}[]>([]);
   
-  const editorRef = useRef<any>(null);
+  const quillRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleSelectTemplate = (template: {codigo: string, nome: string}) => {
@@ -110,9 +111,7 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
   };
   
   const handleSaveReport = () => {
-    if (editorRef.current) {
-      console.log(editorRef.current.getContent());
-    }
+    console.log("Conteúdo do laudo:", reportText);
     
     toast({
       title: "Laudo salvo",
@@ -140,11 +139,14 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
           }
         ]);
         
-        if (editorRef.current) {
+        if (quillRef.current) {
+          const quill = quillRef.current.getEditor();
           if (file.type.startsWith('image/')) {
-            editorRef.current.execCommand('mceInsertContent', false, `<img src="${fileUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`);
+            const range = quill.getSelection();
+            quill.insertEmbed(range ? range.index : 0, 'image', fileUrl);
           } else if (isPdf) {
-            editorRef.current.execCommand('mceInsertContent', false, `<p><a href="${fileUrl}" target="_blank" class="pdf-attachment">${file.name} (PDF)</a></p>`);
+            const range = quill.getSelection();
+            quill.insertText(range ? range.index : 0, `${file.name} (PDF) `, 'link', fileUrl);
           }
         }
         
@@ -163,6 +165,27 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
       fileInputRef.current.value = '';
     }
   };
+
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'list', 'bullet',
+    'align',
+    'link', 'image'
+  ];
   
   return (
     <div className="space-y-6">
@@ -331,59 +354,28 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
-                <Editor
-                  apiKey="rsh41jbv58da92e62s3kr4soxukqv8qbf8q7n4gxc897n3ar"
-                  onInit={(evt, editor) => editorRef.current = editor}
-                  initialValue={reportText}
-                  init={{
-                    height: 400,
-                    menubar: true,
-                    plugins: [
-                      'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 
-                      'searchreplace', 'table', 'visualblocks', 'wordcount',
-                      'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'a11ychecker', 
-                      'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 
-                      'advtemplate', 'mentions', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 
-                      'typography', 'inlinecss', 'markdown'
-                    ],
-                    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | ' +
-                      'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
-                      'bullist numlist checklist outdent indent | ' +
-                      'removeformat | table image media link | help',
-                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-                    font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
-                    file_picker_callback: function (callback, value, meta) {
-                      if (fileInputRef.current) {
-                        fileInputRef.current.click();
-                        fileInputRef.current.onchange = function () {
-                          if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files.length > 0) {
-                            const file = fileInputRef.current.files[0];
-                            const reader = new FileReader();
-                            reader.onload = function () {
-                              callback(reader.result as string, {
-                                title: file.name,
-                                alt: file.name
-                              });
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        };
-                      }
-                    },
-                    images_upload_handler: function (blobInfo, progress) {
-                      return new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = function () {
-                          resolve(reader.result as string);
-                        };
-                        reader.onerror = function () {
-                          reject('Error reading file');
-                        };
-                        reader.readAsDataURL(blobInfo.blob());
-                      });
-                    }
-                  }}
+                <ReactQuill
+                  ref={quillRef}
+                  value={reportText}
+                  onChange={setReportText}
+                  modules={modules}
+                  formats={formats}
+                  theme="snow"
+                  className="h-96"
+                  placeholder="Digite o conteúdo do laudo aqui..."
                 />
+                
+                <div className="p-2 bg-gray-50 border-t flex justify-between items-center">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1"
+                  >
+                    <Image className="h-4 w-4" />
+                    <span>Inserir Imagem/PDF</span>
+                  </Button>
+                </div>
                 
                 <input 
                   type="file" 
