@@ -12,10 +12,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signin } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
-  
-  const from = location.state?.from?.pathname || "/dashboard";
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +26,7 @@ const Login = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema Salutem EMR",
         });
-        navigate(from, { replace: true });
+        // No need to navigate here, the DestinationModal will handle that
       } else {
         toast({
           title: "Erro ao fazer login",

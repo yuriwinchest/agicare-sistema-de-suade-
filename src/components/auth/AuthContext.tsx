@@ -16,6 +16,8 @@ type AuthContextType = {
   signout: () => void;
   updateUserSettings: (data: Partial<User>) => void;
   isAuthenticated: boolean;
+  showDestinationModal: boolean;
+  setShowDestinationModal: (show: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,6 +33,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
 
   // Check if user was previously logged in
   useEffect(() => {
@@ -54,6 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       setUser(mockUser);
       setIsAuthenticated(true);
+      setShowDestinationModal(true); // Show the destination modal after login
       localStorage.setItem("user", JSON.stringify(mockUser));
       return true;
     }
@@ -80,6 +84,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signout,
     updateUserSettings,
     isAuthenticated,
+    showDestinationModal,
+    setShowDestinationModal,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

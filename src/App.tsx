@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 
 // Auth Provider
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
+import DestinationModal from "./components/auth/DestinationModal";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <DestinationModal />
           <Routes>
             <Route path="/login" element={<Login />} />
             
