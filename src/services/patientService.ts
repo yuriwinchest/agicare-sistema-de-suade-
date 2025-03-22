@@ -34,7 +34,11 @@ initFromLocalStorage();
 export const getPatients = () => {
   // Always refresh from localStorage first to ensure we have the latest data
   initFromLocalStorage();
-  return patients;
+  return patients.map(patient => ({
+    ...patient,
+    // Ensure every patient has an allergies array
+    allergies: patient.allergies || []
+  }));
 };
 
 // Get patient by ID
@@ -49,12 +53,12 @@ export const getPatientById = (id: string) => {
     // Ensure patient has all necessary fields for PatientInfoHeader
     return {
       ...patient,
-      // If allergies doesn't exist, provide an empty array
+      // Always provide an allergies array
       allergies: patient.allergies || []
     };
   }
   
-  return patient;
+  return null;
 };
 
 // Generate a unique ID

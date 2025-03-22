@@ -17,7 +17,10 @@ interface PatientInfoProps {
 
 const PatientInfoHeader: React.FC<PatientInfoProps> = ({ patientInfo }) => {
   const [showAllergies, setShowAllergies] = useState(false);
-  const hasAllergies = patientInfo.allergies && patientInfo.allergies.length > 0;
+  
+  // Add safety check for allergies to prevent "Cannot read properties of undefined (reading 'length')"
+  const allergies = patientInfo.allergies || [];
+  const hasAllergies = allergies.length > 0;
   
   return (
     <Card className="col-span-full section-fade">
@@ -55,7 +58,7 @@ const PatientInfoHeader: React.FC<PatientInfoProps> = ({ patientInfo }) => {
               >
                 <AlertCircle className="text-amber-500 h-5 w-5 mr-1" />
                 <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                  Alergias: {patientInfo.allergies.length}
+                  Alergias: {allergies.length}
                 </Badge>
               </div>
             </div>
@@ -66,7 +69,7 @@ const PatientInfoHeader: React.FC<PatientInfoProps> = ({ patientInfo }) => {
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
             <h3 className="font-medium text-amber-800 mb-2">Alergias Registradas</h3>
             <ul className="space-y-2">
-              {patientInfo.allergies.map((allergy, index) => (
+              {allergies.map((allergy, index) => (
                 <li key={index} className="text-sm">
                   <span className="font-medium">{allergy.substance}:</span> {allergy.reaction}
                 </li>
