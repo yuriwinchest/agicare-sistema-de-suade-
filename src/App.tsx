@@ -12,6 +12,7 @@ import MainMenu from "./pages/MainMenu";
 import Ambulatory from "./pages/Ambulatory";
 import Appointment from "./pages/Appointment";
 import Reception from "./pages/Reception";
+import PatientReception from "./pages/PatientReception";
 import Hospitalization from "./pages/Hospitalization";
 import PatientRecord from "./pages/PatientRecord";
 import PatientConsultation from "./pages/PatientConsultation";
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/ambulatory" element={<Ambulatory />} />
                 <Route path="/appointment" element={<Appointment />} />
                 <Route path="/reception" element={<Reception />} />
+                <Route path="/patient-reception/:id" element={<PatientReception />} />
                 <Route path="/hospitalization" element={<Hospitalization />} />
                 <Route path="/patient/:id" element={<PatientRecord />} />
                 <Route path="/patient-consultation" element={<PatientConsultation />} />

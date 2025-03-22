@@ -25,6 +25,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for patients
 const mockPatients = [
@@ -36,6 +37,7 @@ const mockPatients = [
 
 const Reception = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [receptionFilter, setReceptionFilter] = useState("");
@@ -65,6 +67,12 @@ const Reception = () => {
       default:
         return "status-waiting";
     }
+  };
+
+  // Função para lidar com check-in de paciente
+  const handleCheckIn = (patient: any) => {
+    // Navega para a página de complemento de atendimento do paciente
+    navigate(`/patient-reception/${patient.id}`);
   };
 
   return (
@@ -197,10 +205,7 @@ const Reception = () => {
                               size="sm" 
                               variant="ghost"
                               className="teal-hover"
-                              onClick={() => {
-                                // Handle check-in
-                                console.log("Check-in patient", patient.id);
-                              }}
+                              onClick={() => handleCheckIn(patient)}
                             >
                               <CheckCircle2 className="h-4 w-4" />
                               <span className="sr-only">Check-in</span>
