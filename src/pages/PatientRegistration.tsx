@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -6,18 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, Save, Printer, FileText, Upload } from "lucide-react";
+import { ChevronLeft, Save } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { savePatient } from "@/services/patientService";
+import { savePatient, saveDraftPatient, loadDraftPatient, clearDraftPatient } from "@/services/patientService";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
   
-  const [patientData, setPatientData] = useState({
+  const defaultPatientData = {
     id: Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
     name: "",
     cpf: "",
@@ -37,7 +37,20 @@ const PatientRegistration = () => {
     healthPlan: "",
     healthCardNumber: "",
     status: "Agendado"
-  });
+  };
+  
+  const [patientData, setPatientData] = useState(defaultPatientData);
+  
+  useEffect(() => {
+    const draftData = loadDraftPatient();
+    if (draftData) {
+      setPatientData(draftData);
+    }
+  }, []);
+  
+  useEffect(() => {
+    saveDraftPatient(patientData);
+  }, [patientData, activeTab]);
   
   const handleChange = (field: string, value: any) => {
     if (field.includes(".")) {
@@ -72,6 +85,7 @@ const PatientRegistration = () => {
     }
     
     savePatient(patientData);
+    clearDraftPatient();
     
     toast({
       title: "Cadastro Salvo",
@@ -92,17 +106,12 @@ const PatientRegistration = () => {
           
           <div className="text-xl font-semibold text-teal-700">Cadastro do Paciente</div>
           
-          <div className="flex gap-2">
-            <Button size="sm" onClick={handleSave}>
-              <Save className="mr-2 h-4 w-4" />
-              Salvar
-            </Button>
-          </div>
+          <div> </div>
         </div>
         
         <Card className="system-modal">
           <CardContent className="p-6">
-            <Tabs defaultValue="dados-pessoais" onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="w-full justify-start rounded-none border-b h-auto mb-6">
                 <TabsTrigger value="dados-pessoais" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   Dados Pessoais
@@ -557,19 +566,7 @@ const PatientRegistration = () => {
               </TabsContent>
             </Tabs>
             
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" className="gap-2">
-                <Printer className="h-4 w-4" />
-                Imprimir
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <FileText className="h-4 w-4" />
-                Anexar
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <Upload className="h-4 w-4" />
-                Exportar
-              </Button>
+            <div className="flex justify-end mt-6">
               <Button className="gap-2" onClick={handleSave}>
                 <Save className="h-4 w-4" />
                 Salvar e Finalizar
