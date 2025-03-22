@@ -56,7 +56,7 @@ const navItems = [
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-screen bg-gradient-to-br from-emerald-600/5 via-teal-500/10 to-blue-600/5">
         <Sidebar />
         <MainContent>{children}</MainContent>
       </div>
@@ -193,7 +193,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex-1 flex flex-col min-h-screen">
       {/* Header */}
-      <header className="h-16 border-b border-border bg-white flex items-center justify-between px-4 sticky top-0 z-30">
+      <header className="h-16 border-b border-border system-header flex items-center justify-between px-4 sticky top-0 z-30">
         <div className="flex items-center">
           <button 
             onClick={toggle}
@@ -208,7 +208,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
                 {user?.unit ? `${user.unit} - Sala ${user.room}` : 'Selecionar Local'}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="system-modal">
               <DialogHeader>
                 <DialogTitle>Configurar Local de Atendimento</DialogTitle>
               </DialogHeader>
@@ -264,7 +264,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
       </header>
       
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-medgray-100">
+      <main className="flex-1 overflow-auto">
         {children}
       </main>
     </div>

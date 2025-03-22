@@ -8,10 +8,10 @@
     --background: 210 30% 99%;
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
+    --card: 175 68% 41% / 0.05;
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 175 68% 41% / 0.05;
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 175 68% 41%;
@@ -73,7 +73,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-emerald-600/5 via-teal-500/10 to-blue-600/5 text-foreground min-h-screen;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -148,7 +148,7 @@
   }
   
   .card-with-hover {
-    @apply bg-white shadow-sm hover:shadow-md transition-all duration-200 rounded-lg border border-teal-500/10 hover:border-teal-500/30;
+    @apply bg-white/80 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg border border-teal-500/10 hover:border-teal-500/30;
   }
   
   .system-header {
@@ -156,7 +156,12 @@
   }
   
   .system-card {
-    @apply border border-teal-500/10 bg-white hover:border-teal-500/20 transition-all duration-200 rounded-lg shadow-sm hover:shadow-md;
+    @apply border border-teal-500/10 bg-white/80 hover:border-teal-500/20 transition-all duration-200 rounded-lg shadow-sm hover:shadow-md;
+  }
+
+  /* Add new modal styling */
+  .system-modal {
+    @apply bg-gradient-to-br from-white/90 via-teal-50/80 to-blue-50/80 backdrop-blur-md border border-teal-200/50;
   }
 }
 

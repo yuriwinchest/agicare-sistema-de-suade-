@@ -59,7 +59,7 @@ const DestinationModal = () => {
 
   return (
     <Dialog open={showDestinationModal} onOpenChange={setShowDestinationModal}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md system-modal">
         <DialogHeader>
           <DialogTitle className="text-center mb-4">Escolher Opções</DialogTitle>
         </DialogHeader>
