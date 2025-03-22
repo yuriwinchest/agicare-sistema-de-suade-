@@ -341,27 +341,27 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
-                {/* Rich Text Editor */}
+                {/* Rich Text Editor with your API key */}
                 <Editor
-                  apiKey="your-tinymce-api-key" // Você pode obter uma chave gratuita em https://www.tiny.cloud/
+                  apiKey="rsh41jbv58da92e62s3kr4soxukqv8qbf8q7n4gxc897n3ar"
                   onInit={(evt, editor) => editorRef.current = editor}
                   initialValue={reportText}
                   init={{
                     height: 400,
-                    menubar: false,
+                    menubar: true,
                     plugins: [
-                      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                      'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                      'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 
+                      'searchreplace', 'table', 'visualblocks', 'wordcount', 'checklist', 'mediaembed', 'casechange', 
+                      'export', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 
+                      'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'mentions', 'tableofcontents', 
+                      'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown'
                     ],
-                    toolbar: 'undo redo | ' +
-                      'bold italic underline strikethrough | ' +
-                      'fontfamily fontsize forecolor backcolor | ' +
-                      'alignleft aligncenter alignright alignjustify | ' +
-                      'bullist numlist outdent indent | ' +
-                      'removeformat | table link image | help',
+                    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | ' +
+                      'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
+                      'bullist numlist checklist outdent indent | ' +
+                      'removeformat | table image media link | help',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-                    font_size_formats: '8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 28pt 36pt 48pt 72pt',
+                    font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
                     file_picker_callback: function (callback, value, meta) {
                       // Trigger file input click
                       if (fileInputRef.current) {
@@ -381,6 +381,18 @@ Os riscos tais dentro da normalidade. Como conclusão constam as seguintes infor
                           }
                         };
                       }
+                    },
+                    images_upload_handler: function (blobInfo, progress) {
+                      return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = function () {
+                          resolve(reader.result as string);
+                        };
+                        reader.onerror = function () {
+                          reject('Error reading file');
+                        };
+                        reader.readAsDataURL(blobInfo.blob());
+                      });
                     }
                   }}
                 />
