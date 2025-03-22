@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   Table,
   TableBody,
@@ -31,7 +31,8 @@ import {
   ListOrdered,
   Link as LinkIcon,
   Image,
-  Type
+  Type,
+  FileText
 } from "lucide-react";
 import {
   Select,
@@ -50,13 +51,6 @@ import {
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import ProfessionalSearchDialog from "../laudo/ProfessionalSearchDialog";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
 import {
   Dialog,
   DialogContent,
@@ -77,6 +71,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // Sample data for laudo templates
 const templateData = [
@@ -92,15 +91,21 @@ const templateData = [
   { codigo: "15", nome: "RADIOGRAFIA PELO CORPO" }
 ];
 
+// Font sizes in pixels for a more numeric representation
 const fontSizes = [
-  { value: 'xs', label: 'Extra Small' },
-  { value: 'sm', label: 'Small' },
-  { value: 'base', label: 'Normal' },
-  { value: 'lg', label: 'Large' },
-  { value: 'xl', label: 'Extra Large' },
-  { value: '2xl', label: 'XX Large' },
-  { value: '3xl', label: 'XXX Large' },
+  { value: '10px', label: '10px' },
+  { value: '12px', label: '12px' },
+  { value: '14px', label: '14px' },
+  { value: '16px', label: '16px' },
+  { value: '18px', label: '18px' },
+  { value: '20px', label: '20px' },
+  { value: '24px', label: '24px' },
+  { value: '28px', label: '28px' },
+  { value: '32px', label: '32px' },
 ];
+
+// Acceptable file types for attachments
+const acceptableFileTypes = "image/*,.pdf";
 
 const LaudoTab = () => {
   const { toast } = useToast();
@@ -114,7 +119,8 @@ const LaudoTab = () => {
   const [currentTab, setCurrentTab] = useState("search"); // "search" or "edit"
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [fontSizeDialogOpen, setFontSizeDialogOpen] = useState(false);
-  const [currentFontSize, setCurrentFontSize] = useState("base");
+  const [currentFontSize, setCurrentFontSize] = useState("16px");
+  const [attachments, setAttachments] = useState<{type: string, url: string, name: string}[]>([]);
   const [fontStyle, setFontStyle] = useState({
     bold: false,
     italic: false,
@@ -162,11 +168,12 @@ const LaudoTab = () => {
     return { text: selectedText, start, end };
   };
 
+  // Apply formatting only to selected text
   const applyFormatting = (format: string) => {
     if (!editorRef.current) return;
     
     const { text: selectedText, start, end } = getSelectedText();
-    if (start === end && format !== 'list' && format !== 'orderedList') {
+    if (start === end && !['list', 'orderedList'].includes(format)) {
       toast({
         title: "Nenhum texto selecionado",
         description: "Selecione o texto para aplicar a formatação.",
@@ -197,12 +204,24 @@ const LaudoTab = () => {
         break;
       case 'alignLeft':
         setFontStyle(prev => ({...prev, align: "left"}));
+        if (selectedText) {
+          newText = `${reportText.substring(0, start)}<div style="text-align: left;">${selectedText}</div>${reportText.substring(end)}`;
+          newSelectionEnd = start + 30 + selectedText.length + 6;
+        }
         break;
       case 'alignCenter':
         setFontStyle(prev => ({...prev, align: "center"}));
+        if (selectedText) {
+          newText = `${reportText.substring(0, start)}<div style="text-align: center;">${selectedText}</div>${reportText.substring(end)}`;
+          newSelectionEnd = start + 32 + selectedText.length + 6;
+        }
         break;
       case 'alignRight':
         setFontStyle(prev => ({...prev, align: "right"}));
+        if (selectedText) {
+          newText = `${reportText.substring(0, start)}<div style="text-align: right;">${selectedText}</div>${reportText.substring(end)}`;
+          newSelectionEnd = start + 31 + selectedText.length + 6;
+        }
         break;
       case 'list':
         newText = `${reportText.substring(0, start)}\n- ${selectedText.split('\n').join('\n- ')}${reportText.substring(end)}`;
@@ -240,6 +259,7 @@ const LaudoTab = () => {
     }, 0);
   };
   
+  // Apply font size to selected text only
   const applyFontSize = (size: string) => {
     if (!editorRef.current) return;
     
@@ -253,8 +273,8 @@ const LaudoTab = () => {
       return;
     }
     
-    // Apply font size to selected text
-    const fontSizeTag = `<span class="text-${size}">${selectedText}</span>`;
+    // Apply font size to selected text with style attribute
+    const fontSizeTag = `<span style="font-size: ${size};">${selectedText}</span>`;
     const newText = `${reportText.substring(0, start)}${fontSizeTag}${reportText.substring(end)}`;
     
     setReportText(newText);
@@ -270,41 +290,76 @@ const LaudoTab = () => {
     }, 0);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Handle file uploads (images and PDFs)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const imgTag = `![${file.name}](${reader.result})`;
+    // Process each file
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      const isPdf = file.type === 'application/pdf';
       
-      if (editorRef.current) {
-        const textarea = editorRef.current;
-        const cursorPos = textarea.selectionStart;
-        const textBefore = reportText.substring(0, cursorPos);
-        const textAfter = reportText.substring(cursorPos);
+      reader.onloadend = () => {
+        const fileUrl = reader.result as string;
         
-        setReportText(`${textBefore}\n${imgTag}\n${textAfter}`);
-        setImageDialogOpen(false);
+        // Add to attachments array
+        setAttachments(prev => [
+          ...prev, 
+          { 
+            type: file.type, 
+            url: fileUrl, 
+            name: file.name 
+          }
+        ]);
         
-        // Reset file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+        // Insert reference at cursor position
+        if (editorRef.current) {
+          const textarea = editorRef.current;
+          const cursorPos = textarea.selectionStart;
+          const textBefore = reportText.substring(0, cursorPos);
+          const textAfter = reportText.substring(cursorPos);
+          
+          if (isPdf) {
+            // For PDFs, just add a reference text
+            setReportText(`${textBefore}\n[Arquivo PDF: ${file.name}]\n${textAfter}`);
+          } else {
+            // For images, add the actual image tag
+            const imgIndex = attachments.length;
+            setReportText(`${textBefore}\n<img src="${fileUrl}" alt="${file.name}" style="max-width: 100%; height: auto;">\n${textAfter}`);
+          }
+          
+          setImageDialogOpen(false);
+          
+          toast({
+            title: isPdf ? "PDF anexado" : "Imagem inserida",
+            description: `O arquivo "${file.name}" foi anexado ao laudo.`,
+          });
         }
-        
-        toast({
-          title: "Imagem inserida",
-          description: "A imagem foi inserida no laudo com sucesso.",
-        });
-      }
-    };
+      };
+      
+      reader.readAsDataURL(file);
+    });
     
-    reader.readAsDataURL(file);
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Preview rendering (displays actual images instead of image tags)
+  const getFormattedPreview = () => {
+    // Replace image tags with actual images
+    let formattedContent = reportText;
+    
+    // Return the formatted content for preview
+    return { __html: formattedContent };
   };
   
   return (
     <div className="space-y-6">
       {currentTab === "search" ? (
+        // Search tab content
         <Card>
           <CardHeader className="bg-teal-600 text-white rounded-t-lg">
             <CardTitle className="text-xl">Consulta do Template de Laudo</CardTitle>
@@ -390,6 +445,7 @@ const LaudoTab = () => {
           </CardContent>
         </Card>
       ) : (
+        // Edit tab content
         <Card>
           <CardHeader className="bg-teal-600 text-white rounded-t-lg">
             <CardTitle className="text-xl">Cadastro do Template do Laudo</CardTitle>
@@ -468,6 +524,7 @@ const LaudoTab = () => {
             <div>
               <label htmlFor="editor" className="block text-sm font-medium mb-2">Conteúdo do Laudo</label>
               <div className="border rounded-md overflow-hidden">
+                {/* Editor toolbar */}
                 <div className="flex items-center p-2 bg-gray-50 border-b overflow-x-auto">
                   <Button 
                     variant="ghost" 
@@ -496,8 +553,10 @@ const LaudoTab = () => {
                   >
                     <Underline className="h-4 w-4" />
                   </Button>
-                  <Dialog open={fontSizeDialogOpen} onOpenChange={setFontSizeDialogOpen}>
-                    <DialogTrigger asChild>
+                  
+                  {/* Font size dropdown with numeric values */}
+                  <Popover open={fontSizeDialogOpen} onOpenChange={setFontSizeDialogOpen}>
+                    <PopoverTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -505,27 +564,25 @@ const LaudoTab = () => {
                         title="Tamanho da fonte"
                       >
                         <Type className="h-4 w-4" />
-                        <span className="text-xs">Tamanho</span>
+                        <span className="text-xs">{currentFontSize}</span>
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[300px]">
-                      <DialogHeader>
-                        <DialogTitle>Selecione o tamanho da fonte</DialogTitle>
-                      </DialogHeader>
-                      <div className="flex flex-col gap-2 py-4">
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-2">
+                      <div className="flex flex-col gap-1">
                         {fontSizes.map((size) => (
                           <Button 
                             key={size.value}
                             variant="ghost" 
-                            className={`justify-start ${currentFontSize === size.value ? 'bg-gray-100' : ''}`}
+                            className={`justify-start h-8 px-2 ${currentFontSize === size.value ? 'bg-gray-100' : ''}`}
                             onClick={() => applyFontSize(size.value)}
                           >
-                            <span className={`text-${size.value}`}>{size.label}</span>
+                            <span style={{ fontSize: size.value }}>{size.label}</span>
                           </Button>
                         ))}
                       </div>
-                    </DialogContent>
-                  </Dialog>
+                    </PopoverContent>
+                  </Popover>
+                  
                   <span className="mx-2 text-gray-300">|</span>
                   <Button 
                     variant="ghost" 
@@ -583,36 +640,44 @@ const LaudoTab = () => {
                   >
                     <LinkIcon className="h-4 w-4" />
                   </Button>
+                  
+                  {/* File upload button for images and PDFs */}
                   <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="w-8 h-8 p-0"
-                        title="Inserir imagem"
+                        className="w-auto h-8 p-1 flex gap-1 items-center"
+                        title="Anexar arquivo"
                       >
-                        <Image className="h-4 w-4" />
+                        <Image className="h-4 w-4 mr-1" />
+                        <FileText className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md">
                       <DialogHeader>
-                        <DialogTitle>Inserir Imagem</DialogTitle>
+                        <DialogTitle>Anexar Arquivo</DialogTitle>
                         <DialogDescription>
-                          Selecione uma imagem para inserir no laudo
+                          Selecione uma imagem ou PDF para inserir no laudo
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
-                        <div className="flex items-center gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Selecione um arquivo</label>
                           <Input
-                            id="image-upload"
+                            id="file-upload"
                             type="file"
-                            accept="image/*"
+                            accept={acceptableFileTypes}
                             ref={fileInputRef}
-                            onChange={handleImageUpload}
+                            onChange={handleFileUpload}
+                            multiple
                           />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Formatos aceitos: imagens (JPG, PNG, GIF) e PDF
+                          </p>
                         </div>
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="flex justify-between">
                         <DialogClose asChild>
                           <Button variant="outline">Cancelar</Button>
                         </DialogClose>
@@ -620,18 +685,44 @@ const LaudoTab = () => {
                     </DialogContent>
                   </Dialog>
                 </div>
-                <Textarea 
-                  id="editor" 
-                  ref={editorRef}
-                  value={reportText}
-                  onChange={(e) => setReportText(e.target.value)}
-                  className={`min-h-[300px] rounded-none border-none focus-visible:ring-0 font-serif text-${fontStyle.align}`}
-                  style={{
-                    fontWeight: fontStyle.bold ? 'bold' : 'normal',
-                    fontStyle: fontStyle.italic ? 'italic' : 'normal',
-                    textDecoration: fontStyle.underline ? 'underline' : 'none',
-                  }}
-                />
+                
+                {/* Text editor area */}
+                <div className="relative">
+                  <Textarea 
+                    id="editor" 
+                    ref={editorRef}
+                    value={reportText}
+                    onChange={(e) => setReportText(e.target.value)}
+                    className="min-h-[300px] rounded-none border-none focus-visible:ring-0 font-serif text-black"
+                  />
+                  
+                  {/* Preview panel for attached files */}
+                  {attachments.length > 0 && (
+                    <div className="p-4 border-t bg-gray-50">
+                      <h4 className="font-medium mb-2">Anexos ({attachments.length})</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {attachments.map((file, index) => (
+                          <div key={index} className="border rounded-md p-2 bg-white">
+                            {file.type.startsWith('image/') ? (
+                              <div className="aspect-video flex items-center justify-center bg-gray-100 rounded mb-1 overflow-hidden">
+                                <img 
+                                  src={file.url} 
+                                  alt={file.name} 
+                                  className="max-w-full max-h-full object-contain" 
+                                />
+                              </div>
+                            ) : (
+                              <div className="aspect-video flex items-center justify-center bg-gray-100 rounded mb-1">
+                                <FileText className="h-8 w-8 text-gray-400" />
+                              </div>
+                            )}
+                            <p className="text-xs truncate">{file.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -666,6 +757,7 @@ const LaudoTab = () => {
         </Card>
       )}
       
+      {/* Professional search dialog */}
       <ProfessionalSearchDialog 
         open={professionalDialogOpen} 
         onOpenChange={setProfessionalDialogOpen} 
