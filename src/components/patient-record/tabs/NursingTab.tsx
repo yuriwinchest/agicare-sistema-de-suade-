@@ -15,11 +15,18 @@ import {
   Thermometer, 
   Activity, 
   Plus,
-  Lock
+  Lock,
+  Pill,
+  Droplet,
+  Stethoscope,
+  FileSpreadsheet,
+  CheckSquare,
+  Search
 } from "lucide-react";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface NursingTabProps {
   vitalSigns: {
@@ -30,7 +37,7 @@ interface NursingTabProps {
     respiratory: string;
     oxygen: string;
   }[];
-  readOnly?: boolean;  // Nova propriedade para modo somente leitura
+  readOnly?: boolean;  // Propriedade para modo somente leitura
 }
 
 const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false }) => {
@@ -42,6 +49,7 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
     respiratory: "",
     oxygen: ""
   });
+  const [searchDate, setSearchDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   const handleVitalSignChange = (field: string, value: string) => {
     setNewVitalSigns(prev => ({ ...prev, [field]: value }));
@@ -60,6 +68,73 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
       oxygen: ""
     });
   };
+
+  // Dados simulados para demonstração
+  const hydricBalanceData = [
+    { date: "21/03/2023", intake: "2500ml", output: "1800ml", balance: "+700ml" },
+    { date: "20/03/2023", intake: "2100ml", output: "2300ml", balance: "-200ml" },
+  ];
+  
+  const evolutionData = [
+    { 
+      date: "21/03/2023", 
+      time: "14:30", 
+      content: "Paciente apresentando melhora do quadro respiratório. Saturação em 98% em ar ambiente. Mantém-se afebril e hemodinamicamente estável." 
+    },
+    { 
+      date: "20/03/2023", 
+      time: "08:15", 
+      content: "Paciente referindo dor moderada em região abdominal. Administrado analgésico conforme prescrição médica com melhora do quadro." 
+    },
+  ];
+  
+  const proceduresData = [
+    { 
+      date: "21/03/2023", 
+      time: "10:00", 
+      procedure: "Troca de Curativos", 
+      status: "Realizado" 
+    },
+    { 
+      date: "21/03/2023", 
+      time: "08:30", 
+      procedure: "Coleta de Exames", 
+      status: "Realizado" 
+    },
+    { 
+      date: "20/03/2023", 
+      time: "16:45", 
+      procedure: "Punção Venosa Periférica", 
+      status: "Realizado" 
+    },
+  ];
+  
+  const medicationData = [
+    { 
+      date: "21/03/2023", 
+      time: "12:00", 
+      medication: "Dipirona", 
+      dose: "500mg", 
+      route: "Oral", 
+      status: "Administrado" 
+    },
+    { 
+      date: "21/03/2023", 
+      time: "08:00", 
+      medication: "Metoclopramida", 
+      dose: "10mg", 
+      route: "Endovenosa", 
+      status: "Administrado" 
+    },
+    { 
+      date: "20/03/2023", 
+      time: "22:00", 
+      medication: "Paracetamol", 
+      dose: "750mg", 
+      route: "Oral", 
+      status: "Administrado" 
+    },
+  ];
   
   return (
     <div className="space-y-6">
@@ -84,29 +159,36 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
       <Tabs value={nursingTab} onValueChange={setNursingTab} className="w-full">
         <TabsList className="grid grid-cols-7 mb-4">
           <TabsTrigger value="atendimento" className="text-xs">
-            Atendimento Enfermagem
+            <Thermometer className="h-3.5 w-3.5 mr-1" />
+            Sinais Vitais
           </TabsTrigger>
           <TabsTrigger value="balanço" className="text-xs">
+            <Droplet className="h-3.5 w-3.5 mr-1" />
             Balanço Hídrico
           </TabsTrigger>
           <TabsTrigger value="evolucao" className="text-xs">
-            Evolução Enfermagem
+            <FileText className="h-3.5 w-3.5 mr-1" />
+            Evolução
           </TabsTrigger>
           <TabsTrigger value="procedimentos" className="text-xs">
-            Procedimentos de Enfermagem
+            <Stethoscope className="h-3.5 w-3.5 mr-1" />
+            Procedimentos
           </TabsTrigger>
           <TabsTrigger value="sae" className="text-xs">
+            <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
             SAE
           </TabsTrigger>
           <TabsTrigger value="formularios" className="text-xs">
-            Formulários Clínicos
+            <ClipboardList className="h-3.5 w-3.5 mr-1" />
+            Formulários
           </TabsTrigger>
-          <TabsTrigger value="checagem" className="text-xs">
-            Checagem
+          <TabsTrigger value="medicacao" className="text-xs">
+            <Pill className="h-3.5 w-3.5 mr-1" />
+            Medicação
           </TabsTrigger>
         </TabsList>
         
-        {/* Atendimento Enfermagem */}
+        {/* Atendimento Enfermagem / Sinais Vitais */}
         <TabsContent value="atendimento" className="space-y-6">
           {!readOnly && (
             <Card>
@@ -216,51 +298,96 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
         <TabsContent value="balanço" className="space-y-6">
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-md font-medium mb-4">Histórico de Balanço</h3>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <Label>Data Inicial</Label>
-                  <div className="flex items-center mt-2">
-                    <Input
-                      type="date"
-                      defaultValue={format(new Date(), 'yyyy-MM-dd')}
-                      readOnly={readOnly}
-                    />
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-md font-medium">Histórico de Balanço Hídrico</h3>
+                
+                <div className="flex items-center space-x-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="searchDate" className="text-xs">Data</Label>
+                    <div className="flex items-center">
+                      <Input
+                        id="searchDate"
+                        type="date"
+                        value={searchDate}
+                        onChange={(e) => setSearchDate(e.target.value)}
+                        className="h-8 w-40"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <Label>Data Final</Label>
-                  <div className="flex items-center mt-2">
-                    <Input
-                      type="date"
-                      defaultValue={format(new Date(), 'yyyy-MM-dd')}
-                      readOnly={readOnly}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="border rounded-md mt-4">
-                <div className="grid grid-cols-7 bg-gray-100 p-2 text-xs font-medium border-b">
-                  <div>Ações</div>
-                  <div>Tipo</div>
-                  <div>Administrado</div>
-                  <div>Eliminação</div>
-                  <div>Data de Início</div>
-                  <div>Data de Término</div>
-                  <div>Resultado</div>
-                </div>
-                <div className="p-4 text-center text-sm text-muted-foreground">
-                  Nenhum dado encontrado
-                </div>
-              </div>
-              
-              {!readOnly && (
-                <div className="flex justify-end mt-4">
-                  <Button className="bg-teal-500 hover:bg-teal-600">
+                  
+                  <Button size="sm" variant="outline" className="mt-6">
+                    <Search className="h-4 w-4 mr-1" />
                     Filtrar
                   </Button>
                 </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardContent className="py-4">
+                    <div className="flex flex-col items-center">
+                      <h3 className="text-sm font-medium text-blue-600">TOTAL GANHOS</h3>
+                      <p className="text-xl font-bold text-blue-700">2500 ml</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-amber-50 border-amber-200">
+                  <CardContent className="py-4">
+                    <div className="flex flex-col items-center">
+                      <h3 className="text-sm font-medium text-amber-600">TOTAL PERDAS</h3>
+                      <p className="text-xl font-bold text-amber-700">1800 ml</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-green-50 border-green-200">
+                  <CardContent className="py-4">
+                    <div className="flex flex-col items-center">
+                      <h3 className="text-sm font-medium text-green-600">BALANÇO TOTAL</h3>
+                      <p className="text-xl font-bold text-green-700">+700 ml</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="border rounded-md overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Entrada</TableHead>
+                      <TableHead>Saída</TableHead>
+                      <TableHead>Balanço</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {hydricBalanceData.length > 0 ? (
+                      hydricBalanceData.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{item.date}</TableCell>
+                          <TableCell className="text-blue-600">{item.intake}</TableCell>
+                          <TableCell className="text-amber-600">{item.output}</TableCell>
+                          <TableCell className={item.balance.startsWith('+') ? 'text-green-600' : 'text-red-600'}>
+                            {item.balance}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4">
+                          Nenhum registro de balanço hídrico encontrado
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {readOnly && (
+                <p className="text-amber-600 text-sm mt-4">
+                  Modo de visualização ativo. Para registrar um novo balanço hídrico, acesse através do menu de Enfermagem.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -268,95 +395,285 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
         
         {/* Evolução Enfermagem */}
         <TabsContent value="evolucao" className="space-y-6">
-          {!readOnly && (
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-md font-medium mb-4">Evolução de Enfermagem</h3>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-md font-medium">Evoluções de Enfermagem</h3>
+                
+                {!readOnly && (
+                  <Button size="sm" className="bg-teal-500 hover:bg-teal-600">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Nova Evolução
+                  </Button>
+                )}
+              </div>
+              
+              {evolutionData.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Data e Hora</Label>
-                    <div className="flex gap-2">
-                      <div className="flex items-center relative flex-1">
-                        <Input
-                          type="date"
-                          defaultValue={format(new Date(), 'yyyy-MM-dd')}
-                        />
-                        <CalendarIcon className="absolute right-3 h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex items-center relative flex-1">
-                        <Input
-                          type="time"
-                          defaultValue={format(new Date(), 'HH:mm')}
-                        />
-                        <Clock className="absolute right-3 h-4 w-4 text-muted-foreground" />
-                      </div>
+                  {evolutionData.map((evolution, index) => (
+                    <Card key={index} className="bg-gray-50 border">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center text-sm">
+                            <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-3">{evolution.date}</span>
+                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="text-muted-foreground">{evolution.time}</span>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-white rounded-md border">
+                          <p className="text-sm">{evolution.content}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-6 bg-gray-50 rounded-md">
+                  <FileText className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-muted-foreground">Nenhuma evolução de enfermagem registrada</p>
+                </div>
+              )}
+              
+              {readOnly && (
+                <p className="text-amber-600 text-sm mt-4">
+                  Modo de visualização ativo. Para registrar uma nova evolução, acesse através do menu de Enfermagem.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Procedimentos de Enfermagem */}
+        <TabsContent value="procedimentos" className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-md font-medium">Procedimentos de Enfermagem</h3>
+                
+                {!readOnly && (
+                  <Button size="sm" className="bg-teal-500 hover:bg-teal-600">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Novo Procedimento
+                  </Button>
+                )}
+              </div>
+              
+              <div className="border rounded-md overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Procedimento</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {proceduresData.length > 0 ? (
+                      proceduresData.map((proc, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            {proc.date} {proc.time}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <Stethoscope className="mr-2 h-4 w-4 text-teal-500" />
+                              {proc.procedure}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              <CheckSquare className="mr-1 h-3 w-3" />
+                              {proc.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center py-4">
+                          Nenhum procedimento registrado
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {readOnly && (
+                <p className="text-amber-600 text-sm mt-4">
+                  Modo de visualização ativo. Para registrar novos procedimentos, acesse através do menu de Enfermagem.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* SAE */}
+        <TabsContent value="sae">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-md font-medium mb-4">Sistematização da Assistência de Enfermagem (SAE)</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium border-b pb-2">Diagnósticos de Enfermagem</h4>
+                  <div className="p-4 bg-gray-50 rounded-md text-center">
+                    <p className="text-muted-foreground">Nenhum diagnóstico registrado</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium border-b pb-2">Intervenções de Enfermagem</h4>
+                  <div className="p-4 bg-gray-50 rounded-md text-center">
+                    <p className="text-muted-foreground">Nenhuma intervenção registrada</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 space-y-4">
+                <h4 className="text-sm font-medium border-b pb-2">Resultados Esperados</h4>
+                <div className="p-4 bg-gray-50 rounded-md text-center">
+                  <p className="text-muted-foreground">Nenhum resultado esperado registrado</p>
+                </div>
+              </div>
+              
+              {readOnly && (
+                <p className="text-amber-600 text-sm mt-4">
+                  Modo de visualização ativo. Para implementar o SAE, acesse através do menu de Enfermagem.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Formulários Clínicos */}
+        <TabsContent value="formularios">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-md font-medium mb-4">Formulários Clínicos de Enfermagem</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card className="bg-gray-50">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-1">Escala de Braden</h4>
+                    <p className="text-sm text-muted-foreground mb-3">Avaliação de risco para lesão por pressão</p>
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                      Não preenchido
+                    </Badge>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gray-50">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-1">Escala de Morse</h4>
+                    <p className="text-sm text-muted-foreground mb-3">Avaliação de risco de queda</p>
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                      Não preenchido
+                    </Badge>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gray-50">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-1">Escala de Glasgow</h4>
+                    <p className="text-sm text-muted-foreground mb-3">Avaliação neurológica</p>
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                      Não preenchido
+                    </Badge>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {readOnly && (
+                <p className="text-amber-600 text-sm mt-4">
+                  Modo de visualização ativo. Para preencher formulários clínicos, acesse através do menu de Enfermagem.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Checagem de Medicação */}
+        <TabsContent value="medicacao" className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-md font-medium">Checagem de Medicamentos</h3>
+                
+                <div className="flex items-center space-x-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="searchMedDate" className="text-xs">Data</Label>
+                    <div className="flex items-center">
+                      <Input
+                        id="searchMedDate"
+                        type="date"
+                        value={searchDate}
+                        onChange={(e) => setSearchDate(e.target.value)}
+                        className="h-8 w-40"
+                      />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label>Anotação</Label>
-                    <Textarea 
-                      className="min-h-32" 
-                      placeholder="Registre a evolução de enfermagem do paciente..."
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button className="bg-teal-500 hover:bg-teal-600">
-                      <Save className="mr-2 h-4 w-4" />
-                      Salvar Evolução
-                    </Button>
-                  </div>
+                  <Button size="sm" variant="outline" className="mt-6">
+                    <Search className="h-4 w-4 mr-1" />
+                    Filtrar
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          <div>
-            <h3 className="text-md font-medium mb-3">Evoluções Anteriores</h3>
-            <p className="text-muted-foreground">Nenhuma evolução registrada</p>
-          </div>
-        </TabsContent>
-        
-        {/* Placeholder para outras abas */}
-        <TabsContent value="procedimentos">
-          <div className="p-4 border rounded-md bg-gray-50">
-            <h3 className="text-md font-medium mb-2">Procedimentos de Enfermagem</h3>
-            <p className="text-muted-foreground">Área para registrar procedimentos de enfermagem realizados no paciente.</p>
-            {readOnly && (
-              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="sae">
-          <div className="p-4 border rounded-md bg-gray-50">
-            <h3 className="text-md font-medium mb-2">Sistematização da Assistência de Enfermagem</h3>
-            <p className="text-muted-foreground">Área para documentar o processo de enfermagem.</p>
-            {readOnly && (
-              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="formularios">
-          <div className="p-4 border rounded-md bg-gray-50">
-            <h3 className="text-md font-medium mb-2">Formulários Clínicos</h3>
-            <p className="text-muted-foreground">Acesso aos formulários clínicos específicos de enfermagem.</p>
-            {readOnly && (
-              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="checagem">
-          <div className="p-4 border rounded-md bg-gray-50">
-            <h3 className="text-md font-medium mb-2">Checagem</h3>
-            <p className="text-muted-foreground">Verificação e checagem de prescrições e procedimentos.</p>
-            {readOnly && (
-              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
-            )}
-          </div>
+              </div>
+              
+              <div className="border rounded-md overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Medicação</TableHead>
+                      <TableHead>Dose/Via</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {medicationData.length > 0 ? (
+                      medicationData.map((med, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            {med.date} {med.time}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <Pill className="mr-2 h-4 w-4 text-purple-500" />
+                              {med.medication}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {med.dose} / {med.route}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              <CheckSquare className="mr-1 h-3 w-3" />
+                              {med.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4">
+                          Nenhuma medicação registrada
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {readOnly && (
+                <p className="text-amber-600 text-sm mt-4">
+                  Modo de visualização ativo. Para realizar checagem de medicações, acesse através do menu de Enfermagem.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

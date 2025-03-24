@@ -3,7 +3,17 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
-import { saveVitalSigns, saveAnamnesis, completeNursingAssessment } from "@/services/nursingService";
+import { useNotification } from "@/hooks/useNotification";
+import { 
+  saveVitalSigns, 
+  saveAnamnesis, 
+  savePhysicalExam,
+  saveHydricBalance,
+  saveNursingEvolution,
+  saveProcedures,
+  saveMedications,
+  completeNursingAssessment 
+} from "@/services/nursingService";
 import { usePatientData } from "@/hooks/usePatientData";
 import AssessmentContainer from "@/components/nursing/AssessmentContainer";
 
@@ -11,6 +21,7 @@ const NursingAssessment = () => {
   const { id } = useParams<{id: string}>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const notification = useNotification();
   const [nursingTab, setNursingTab] = useState("sinais-vitais");
   
   const { patientData, loading, error } = usePatientData(id);
@@ -24,15 +35,12 @@ const NursingAssessment = () => {
       const success = saveVitalSigns(id, vitalSignsData);
       
       if (success) {
-        toast({
-          title: "Sinais vitais salvos",
+        notification.success("Sinais vitais salvos", {
           description: "Os sinais vitais foram salvos com sucesso!"
         });
       } else {
-        toast({
-          title: "Erro ao salvar",
-          description: "Ocorreu um erro ao tentar salvar os sinais vitais.",
-          variant: "destructive"
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar os sinais vitais."
         });
       }
     }
@@ -43,15 +51,95 @@ const NursingAssessment = () => {
       const success = saveAnamnesis(id, anamnesisData);
       
       if (success) {
-        toast({
-          title: "Anamnese salva",
+        notification.success("Anamnese salva", {
           description: "Os dados da anamnese foram salvos com sucesso!"
         });
       } else {
-        toast({
-          title: "Erro ao salvar",
-          description: "Ocorreu um erro ao tentar salvar a anamnese.",
-          variant: "destructive"
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar a anamnese."
+        });
+      }
+    }
+  };
+  
+  const handleSavePhysicalExam = (data: any) => {
+    if (id) {
+      const success = savePhysicalExam(id, data);
+      if (success) {
+        notification.success("Exame físico salvo", {
+          description: "Os dados do exame físico foram salvos com sucesso!"
+        });
+        // Move to next tab
+        setNursingTab("balance-hidrico");
+      } else {
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar o exame físico."
+        });
+      }
+    }
+  };
+  
+  const handleSaveHydricBalance = (data: any) => {
+    if (id) {
+      const success = saveHydricBalance(id, data);
+      if (success) {
+        notification.success("Balanço hídrico salvo", {
+          description: "Os dados do balanço hídrico foram salvos com sucesso!"
+        });
+        // Move to next tab
+        setNursingTab("evolucao");
+      } else {
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar o balanço hídrico."
+        });
+      }
+    }
+  };
+  
+  const handleSaveNursingEvolution = (data: any) => {
+    if (id) {
+      const success = saveNursingEvolution(id, data);
+      if (success) {
+        notification.success("Evolução salva", {
+          description: "A evolução de enfermagem foi salva com sucesso!"
+        });
+        // Move to next tab
+        setNursingTab("procedimentos");
+      } else {
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar a evolução."
+        });
+      }
+    }
+  };
+  
+  const handleSaveProcedures = (data: any) => {
+    if (id) {
+      const success = saveProcedures(id, data);
+      if (success) {
+        notification.success("Procedimentos salvos", {
+          description: "Os procedimentos foram salvos com sucesso!"
+        });
+        // Move to next tab
+        setNursingTab("medicacao");
+      } else {
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar os procedimentos."
+        });
+      }
+    }
+  };
+  
+  const handleSaveMedications = (data: any) => {
+    if (id) {
+      const success = saveMedications(id, data);
+      if (success) {
+        notification.success("Medicações salvas", {
+          description: "As medicações foram salvas com sucesso!"
+        });
+      } else {
+        notification.error("Erro ao salvar", {
+          description: "Ocorreu um erro ao tentar salvar as medicações."
         });
       }
     }
@@ -62,17 +150,15 @@ const NursingAssessment = () => {
       const success = completeNursingAssessment(id, { name: "Enfermeiro(a)" });
       
       if (success) {
-        toast({
-          title: "Avaliação concluída",
-          description: "A avaliação de enfermagem foi concluída com sucesso!"
+        notification.success("Avaliação concluída", {
+          description: "A avaliação de enfermagem foi concluída com sucesso!",
+          duration: 5000
         });
         
         navigate('/nursing');
       } else {
-        toast({
-          title: "Erro ao finalizar",
-          description: "Ocorreu um erro ao tentar finalizar a avaliação.",
-          variant: "destructive"
+        notification.error("Erro ao finalizar", {
+          description: "Ocorreu um erro ao tentar finalizar a avaliação."
         });
       }
     }
@@ -117,6 +203,11 @@ const NursingAssessment = () => {
           setNursingTab={setNursingTab}
           onSaveVitalSigns={handleSaveVitalSigns}
           onSaveAnamnesis={handleSaveAnamnesis}
+          onSavePhysicalExam={handleSavePhysicalExam}
+          onSaveHydricBalance={handleSaveHydricBalance}
+          onSaveNursingEvolution={handleSaveNursingEvolution}
+          onSaveProcedures={handleSaveProcedures}
+          onSaveMedications={handleSaveMedications}
           onCancel={handleGoBack}
           onFinish={handleFinishAssessment}
         />

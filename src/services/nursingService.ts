@@ -17,9 +17,85 @@ interface AnamnesisData {
   medications: string;
 }
 
+interface PhysicalExamData {
+  generalState: string;
+  skin: string;
+  head: string;
+  eyes: string;
+  ears: string;
+  nose: string;
+  mouth: string;
+  neck: string;
+  chest: string;
+  abdomen: string;
+  extremities: string;
+  neurological: string;
+  consciousness: string;
+  additional: string;
+}
+
+interface HydricBalanceEntry {
+  id: string;
+  date: string;
+  time: string;
+  type: string;
+  administeredValue?: string;
+  eliminationValue?: string;
+  description?: string;
+}
+
+interface HydricBalanceData {
+  entries: HydricBalanceEntry[];
+  total: {
+    intake: number;
+    output: number;
+    balance: number;
+  };
+  date: string;
+}
+
+interface NursingEvolutionData {
+  date: string;
+  time: string;
+  evolution: string;
+  previousEvolutions?: any[];
+}
+
+interface ProcedureData {
+  procedures: {
+    id: string;
+    date: string;
+    time: string;
+    procedure: string;
+    details?: string;
+    status: string;
+    completedAt?: string;
+  }[];
+}
+
+interface MedicationData {
+  medications: {
+    id: string;
+    date: string;
+    time: string;
+    medication: string;
+    dose: string;
+    route: string;
+    observations?: string;
+    status: string;
+    administered: boolean;
+    checkedAt?: string;
+  }[];
+}
+
 interface NursingAssessmentData {
   vitalSigns?: VitalSigns;
   anamnesis?: AnamnesisData;
+  physicalExam?: PhysicalExamData;
+  hydricBalance?: HydricBalanceData;
+  evolution?: NursingEvolutionData;
+  procedures?: ProcedureData;
+  medication?: MedicationData;
   status?: string;
   lastUpdate?: string;
   completedBy?: string;
@@ -93,6 +169,158 @@ export const saveAnamnesis = (patientId: string, anamnesis: AnamnesisData): bool
   }
 };
 
+// Salvar exame físico para um paciente
+export const savePhysicalExam = (patientId: string, physicalExam: PhysicalExamData): boolean => {
+  try {
+    // Sanitizar dados
+    Object.keys(physicalExam).forEach(key => {
+      const k = key as keyof PhysicalExamData;
+      if (typeof physicalExam[k] === 'string') {
+        physicalExam[k] = physicalExam[k].replace(/<[^>]*>?/gm, '');
+      }
+    });
+    
+    // Buscar paciente atual
+    const patient = getPatientById(patientId);
+    if (!patient) return false;
+    
+    // Atualizar dados de enfermagem
+    const nursingData = patient.nursingData || {};
+    nursingData.physicalExam = physicalExam;
+    nursingData.lastUpdate = new Date().toISOString();
+    
+    // Salvar paciente atualizado
+    savePatient({
+      ...patient,
+      nursingData
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao salvar exame físico:", error);
+    return false;
+  }
+};
+
+// Salvar balanço hídrico para um paciente
+export const saveHydricBalance = (patientId: string, hydricBalance: HydricBalanceData): boolean => {
+  try {
+    // Buscar paciente atual
+    const patient = getPatientById(patientId);
+    if (!patient) return false;
+    
+    // Atualizar dados de enfermagem
+    const nursingData = patient.nursingData || {};
+    nursingData.hydricBalance = hydricBalance;
+    nursingData.lastUpdate = new Date().toISOString();
+    
+    // Salvar paciente atualizado
+    savePatient({
+      ...patient,
+      nursingData
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao salvar balanço hídrico:", error);
+    return false;
+  }
+};
+
+// Salvar evolução de enfermagem para um paciente
+export const saveNursingEvolution = (patientId: string, evolution: NursingEvolutionData): boolean => {
+  try {
+    // Sanitizar dados
+    if (typeof evolution.evolution === 'string') {
+      evolution.evolution = evolution.evolution.replace(/<[^>]*>?/gm, '');
+    }
+    
+    // Buscar paciente atual
+    const patient = getPatientById(patientId);
+    if (!patient) return false;
+    
+    // Atualizar dados de enfermagem
+    const nursingData = patient.nursingData || {};
+    
+    // Adicionar evolução atual ao histórico
+    const previousEvolutions = nursingData.evolution?.previousEvolutions || [];
+    if (nursingData.evolution) {
+      previousEvolutions.unshift({
+        date: nursingData.evolution.date,
+        time: nursingData.evolution.time,
+        evolution: nursingData.evolution.evolution,
+      });
+    }
+    
+    nursingData.evolution = {
+      ...evolution,
+      previousEvolutions,
+    };
+    nursingData.lastUpdate = new Date().toISOString();
+    
+    // Salvar paciente atualizado
+    savePatient({
+      ...patient,
+      nursingData
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao salvar evolução de enfermagem:", error);
+    return false;
+  }
+};
+
+// Salvar procedimentos para um paciente
+export const saveProcedures = (patientId: string, procedures: ProcedureData): boolean => {
+  try {
+    // Buscar paciente atual
+    const patient = getPatientById(patientId);
+    if (!patient) return false;
+    
+    // Atualizar dados de enfermagem
+    const nursingData = patient.nursingData || {};
+    nursingData.procedures = procedures;
+    nursingData.lastUpdate = new Date().toISOString();
+    
+    // Salvar paciente atualizado
+    savePatient({
+      ...patient,
+      nursingData
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao salvar procedimentos:", error);
+    return false;
+  }
+};
+
+// Salvar medicações para um paciente
+export const saveMedications = (patientId: string, medication: MedicationData): boolean => {
+  try {
+    // Buscar paciente atual
+    const patient = getPatientById(patientId);
+    if (!patient) return false;
+    
+    // Atualizar dados de enfermagem
+    const nursingData = patient.nursingData || {};
+    nursingData.medication = medication;
+    nursingData.lastUpdate = new Date().toISOString();
+    
+    // Salvar paciente atualizado
+    savePatient({
+      ...patient,
+      nursingData
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao salvar medicações:", error);
+    return false;
+  }
+};
+
 // Completar avaliação de enfermagem
 export const completeNursingAssessment = (patientId: string, nurseData: {name: string}): boolean => {
   try {
@@ -129,5 +357,30 @@ export const getNursingAssessment = (patientId: string): NursingAssessmentData |
   } catch (error) {
     console.error("Erro ao obter dados de enfermagem:", error);
     return null;
+  }
+};
+
+// Serviço genérico para salvar qualquer tipo de dado de enfermagem
+export const saveNursingData = (patientId: string, dataType: string, data: any): boolean => {
+  try {
+    // Buscar paciente atual
+    const patient = getPatientById(patientId);
+    if (!patient) return false;
+    
+    // Atualizar dados de enfermagem
+    const nursingData = patient.nursingData || {};
+    nursingData[dataType] = data;
+    nursingData.lastUpdate = new Date().toISOString();
+    
+    // Salvar paciente atualizado
+    savePatient({
+      ...patient,
+      nursingData
+    });
+    
+    return true;
+  } catch (error) {
+    console.error(`Erro ao salvar dados de enfermagem (${dataType}):`, error);
+    return false;
   }
 };

@@ -10,6 +10,11 @@ interface AssessmentContainerProps {
   setNursingTab: (tab: string) => void;
   onSaveVitalSigns: (data: any) => void;
   onSaveAnamnesis: (data: any) => void;
+  onSavePhysicalExam: (data: any) => void;
+  onSaveHydricBalance: (data: any) => void;
+  onSaveNursingEvolution: (data: any) => void;
+  onSaveProcedures: (data: any) => void;
+  onSaveMedications: (data: any) => void;
   onCancel: () => void;
   onFinish: () => void;
 }
@@ -20,6 +25,11 @@ const AssessmentContainer = ({
   setNursingTab,
   onSaveVitalSigns,
   onSaveAnamnesis,
+  onSavePhysicalExam,
+  onSaveHydricBalance,
+  onSaveNursingEvolution,
+  onSaveProcedures,
+  onSaveMedications,
   onCancel,
   onFinish
 }: AssessmentContainerProps) => {
@@ -39,6 +49,11 @@ const AssessmentContainer = ({
             patientData={patientData}
             onSaveVitalSigns={onSaveVitalSigns}
             onSaveAnamnesis={onSaveAnamnesis}
+            onSavePhysicalExam={onSavePhysicalExam}
+            onSaveHydricBalance={onSaveHydricBalance}
+            onSaveNursingEvolution={onSaveNursingEvolution}
+            onSaveProcedures={onSaveProcedures}
+            onSaveMedications={onSaveMedications}
           />
         </CardContent>
       </Card>
