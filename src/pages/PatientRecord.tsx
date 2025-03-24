@@ -68,7 +68,7 @@ const PatientRecord = () => {
   
   return (
     <Layout>
-      <div className="page-container">
+      <div className="page-container relative">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" size="sm" onClick={handleGoBack}>
             <ChevronLeft className="mr-1 h-4 w-4" />
@@ -87,6 +87,59 @@ const PatientRecord = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
           <PatientInfoHeader patientInfo={patientInfo} />
+        </div>
+        
+        {/* Patient destination buttons - Fixed on right side */}
+        <div className="fixed right-4 top-1/3 flex flex-col gap-2 z-10">
+          <Button 
+            variant="outline" 
+            onClick={handleGoBack} 
+            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+          >
+            <RotateCcw className="h-5 w-5 text-blue-600" />
+            <span className="text-xs font-medium">VOLTAR</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/electronic-medical-record")} 
+            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+          >
+            <LogOut className="h-5 w-5 text-red-600" />
+            <span className="text-xs font-medium">ALTA</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              toast({
+                title: "Medicação",
+                description: "Paciente encaminhado para medicação",
+              });
+            }} 
+            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+          >
+            <Pill className="h-5 w-5 text-purple-600" />
+            <span className="text-xs font-medium">MEDICAÇÃO</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleCreateObservation} 
+            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+          >
+            <EyeIcon className="h-5 w-5 text-teal-600" />
+            <span className="text-xs font-medium">OBSERVAÇÃO</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleFinalizeConsult} 
+            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+          >
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <span className="text-xs font-medium">FINALIZAR</span>
+          </Button>
         </div>
         
         <Card className="section-fade" style={{ animationDelay: "0.1s" }}>
@@ -204,41 +257,6 @@ const PatientRecord = () => {
             </Tabs>
           </CardContent>
         </Card>
-        
-        {/* Patient destination buttons */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-md py-2 px-4 border-t z-10">
-          <div className="container mx-auto flex items-center justify-between">
-            <Button variant="outline" onClick={handleGoBack} className="flex flex-col items-center gap-1 h-auto py-2">
-              <RotateCcw className="h-5 w-5 text-blue-600" />
-              <span className="text-xs font-medium">VOLTAR</span>
-            </Button>
-            
-            <Button variant="outline" onClick={() => navigate("/electronic-medical-record")} className="flex flex-col items-center gap-1 h-auto py-2">
-              <LogOut className="h-5 w-5 text-red-600" />
-              <span className="text-xs font-medium">ALTA</span>
-            </Button>
-            
-            <Button variant="outline" onClick={() => {
-              toast({
-                title: "Medicação",
-                description: "Paciente encaminhado para medicação",
-              });
-            }} className="flex flex-col items-center gap-1 h-auto py-2">
-              <Pill className="h-5 w-5 text-purple-600" />
-              <span className="text-xs font-medium">MEDICAÇÃO</span>
-            </Button>
-            
-            <Button variant="outline" onClick={handleCreateObservation} className="flex flex-col items-center gap-1 h-auto py-2">
-              <EyeIcon className="h-5 w-5 text-teal-600" />
-              <span className="text-xs font-medium">OBSERVAÇÃO</span>
-            </Button>
-            
-            <Button variant="outline" onClick={handleFinalizeConsult} className="flex flex-col items-center gap-1 h-auto py-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-xs font-medium">FINALIZAR ATENDIMENTO</span>
-            </Button>
-          </div>
-        </div>
         
         <PatientDestinationDialog 
           open={showDestinationDialog} 
