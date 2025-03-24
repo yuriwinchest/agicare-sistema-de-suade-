@@ -127,7 +127,7 @@ export const saveNursingData = (patientId: string, dataType: NursingDataType, da
 const OFFLINE_SYNC_QUEUE_KEY = 'nursingOfflineSyncQueue';
 
 // Adiciona um item à fila de sincronização offline
-const addToOfflineQueue = (patientId: string, dataType: string, data: any): void => {
+const addToOfflineQueue = (patientId: string, dataType: NursingDataType, data: any): void => {
   try {
     // Obtém a fila atual
     const queue = getOfflineQueue();
@@ -136,9 +136,9 @@ const addToOfflineQueue = (patientId: string, dataType: string, data: any): void
     queue.push({
       patientId,
       dataType,
-      data,
       timestamp: Date.now(),
-      synced: false
+      synced: false,
+      data
     });
     
     // Salva a fila atualizada
