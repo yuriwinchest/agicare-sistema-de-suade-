@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "./SidebarContext";
@@ -39,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -56,7 +56,7 @@ const navItems = [
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gradient-to-br from-emerald-600/5 via-teal-500/10 to-blue-600/5">
+      <div className="flex min-h-screen bg-gradient-to-br from-emerald-600/5 via-teal-500/10 to-blue-600/5 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <Sidebar />
         <MainContent>{children}</MainContent>
       </div>
@@ -69,7 +69,6 @@ const Sidebar = () => {
   const location = useLocation();
   const { user, signout } = useAuth();
   
-  // Close sidebar when route changes, except for the menu page
   useEffect(() => {
     if (location.pathname !== '/menu') {
       close();
@@ -78,7 +77,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile sidebar backdrop */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
@@ -86,16 +84,14 @@ const Sidebar = () => {
         />
       )}
       
-      {/* Sidebar */}
       <aside 
         className={cn(
           "fixed lg:sticky top-0 z-50 lg:z-0 h-full border-r border-border shadow-sm transition-all duration-300 ease-in-out",
           isOpen ? "w-64 left-0" : "w-0 lg:w-20 -left-20 lg:left-0",
-          "bg-gradient-to-b from-teal-500/95 to-blue-600/95 text-white"
+          "bg-gradient-to-b from-teal-500/95 to-blue-600/95 text-white dark:from-slate-800 dark:to-slate-900"
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
           <div className="p-4 border-b border-white/10 flex items-center justify-between h-16">
             <Link to="/dashboard" className="flex items-center">
               <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
@@ -111,7 +107,6 @@ const Sidebar = () => {
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 py-4 overflow-y-auto">
             <TooltipProvider delayDuration={0}>
               <ul className="space-y-1 px-2">
@@ -145,7 +140,6 @@ const Sidebar = () => {
             </TooltipProvider>
           </nav>
 
-          {/* User Section */}
           <div className="p-4 border-t border-white/10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -200,21 +194,19 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   
   return (
     <div className="flex-1 flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="h-16 border-b border-border system-header flex items-center justify-between px-4 sticky top-0 z-30">
+      <header className="h-16 border-b border-border bg-background/80 backdrop-blur-sm flex items-center justify-between px-4 sticky top-0 z-30">
         <div className="flex items-center">
           <button 
             onClick={toggle}
-            className="w-10 h-10 rounded-md flex items-center justify-center text-gray-500 hover:bg-gray-100 lg:mr-4"
+            className="w-10 h-10 rounded-md flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 lg:mr-4"
           >
             <Menu size={20} />
           </button>
           
-          {/* Only show unit selector if not on menu page */}
           {location.pathname !== '/menu' && (
             <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="border-teal-500/30 text-teal-600">
+                <Button variant="outline" size="sm" className="border-teal-500/30 text-teal-600 dark:border-teal-500/50 dark:text-teal-400">
                   {user?.unit ? `${user.unit} - Sala ${user.room}` : 'Selecionar Local'}
                 </Button>
               </DialogTrigger>
@@ -259,7 +251,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => setIsSettingsOpen(false)} className="bg-teal-500 hover:bg-teal-600">Salvar</Button>
+                  <Button onClick={() => setIsSettingsOpen(false)} className="bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700">Salvar</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -267,14 +259,14 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
         </div>
         
         <div className="flex items-center space-x-2">
-          <button className="w-10 h-10 rounded-md flex items-center justify-center text-gray-500 hover:bg-gray-100 relative">
+          <button className="w-10 h-10 rounded-md flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 relative">
             <Bell size={20} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
+          <ThemeToggle />
         </div>
       </header>
       
-      {/* Main Content */}
       <main className="flex-1 overflow-auto">
         {children}
       </main>
