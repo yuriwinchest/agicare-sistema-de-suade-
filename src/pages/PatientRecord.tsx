@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -21,7 +22,11 @@ import {
   UserCheck, 
   Bed,
   ClipboardIcon,
-  FileSpreadsheet
+  FileSpreadsheet,
+  RotateCcw,
+  LogOut,
+  EyeIcon,
+  CheckCircle
 } from "lucide-react";
 
 import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
@@ -30,6 +35,7 @@ import AnamnesisTab from "@/components/patient-record/tabs/AnamnesisTab";
 import NursingTab from "@/components/patient-record/tabs/NursingTab";
 import ClinicalRecordTab from "@/components/patient-record/tabs/ClinicalRecordTab";
 import LaudoTab from "@/components/patient-record/tabs/LaudoTab";
+import PatientDestinationDialog from "@/components/patient-record/PatientDestinationDialog";
 
 import { 
   patientInfo, 
@@ -43,17 +49,14 @@ const PatientRecord = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("summary");
+  const [showDestinationDialog, setShowDestinationDialog] = useState(false);
   
   const handleGoBack = () => {
     navigate(-1);
   };
   
   const handleFinalizeConsult = () => {
-    toast({
-      title: "Atendimento Finalizado",
-      description: "O atendimento foi finalizado com sucesso",
-    });
-    navigate(-1);
+    setShowDestinationDialog(true);
   };
   
   const handleCreateObservation = () => {
@@ -201,6 +204,53 @@ const PatientRecord = () => {
             </Tabs>
           </CardContent>
         </Card>
+        
+        {/* Patient destination buttons */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-md py-2 px-4 border-t z-10">
+          <div className="container mx-auto flex items-center justify-between">
+            <Button variant="outline" onClick={handleGoBack} className="flex flex-col items-center gap-1 h-auto py-2">
+              <RotateCcw className="h-5 w-5 text-blue-600" />
+              <span className="text-xs font-medium">VOLTAR</span>
+            </Button>
+            
+            <Button variant="outline" onClick={() => navigate("/electronic-medical-record")} className="flex flex-col items-center gap-1 h-auto py-2">
+              <LogOut className="h-5 w-5 text-red-600" />
+              <span className="text-xs font-medium">ALTA</span>
+            </Button>
+            
+            <Button variant="outline" onClick={() => {
+              toast({
+                title: "Medicação",
+                description: "Paciente encaminhado para medicação",
+              });
+            }} className="flex flex-col items-center gap-1 h-auto py-2">
+              <Pill className="h-5 w-5 text-purple-600" />
+              <span className="text-xs font-medium">MEDICAÇÃO</span>
+            </Button>
+            
+            <Button variant="outline" onClick={handleCreateObservation} className="flex flex-col items-center gap-1 h-auto py-2">
+              <EyeIcon className="h-5 w-5 text-teal-600" />
+              <span className="text-xs font-medium">OBSERVAÇÃO</span>
+            </Button>
+            
+            <Button variant="outline" onClick={handleFinalizeConsult} className="flex flex-col items-center gap-1 h-auto py-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <span className="text-xs font-medium">FINALIZAR ATENDIMENTO</span>
+            </Button>
+          </div>
+        </div>
+        
+        <PatientDestinationDialog 
+          open={showDestinationDialog} 
+          onOpenChange={setShowDestinationDialog}
+          onConfirm={(destination) => {
+            toast({
+              title: "Atendimento Finalizado",
+              description: `O paciente foi encaminhado para ${destination}`,
+            });
+            navigate("/electronic-medical-record");
+          }}
+        />
       </div>
     </Layout>
   );
