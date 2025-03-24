@@ -17,6 +17,7 @@ import Hospitalization from "./pages/Hospitalization";
 import PatientRecord from "./pages/PatientRecord";
 import PatientConsultation from "./pages/PatientConsultation";
 import PatientRegistration from "./pages/PatientRegistration";
+import ElectronicMedicalRecord from "./pages/ElectronicMedicalRecord";
 import NotFound from "./pages/NotFound";
 
 // Auth Provider
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="/patient/:id" element={<PatientRecord />} />
                 <Route path="/patient-consultation" element={<PatientConsultation />} />
                 <Route path="/patient-registration/:id?" element={<PatientRegistration />} />
+                <Route path="/electronic-medical-record" element={<ElectronicMedicalRecord />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />
