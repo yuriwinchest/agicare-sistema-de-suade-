@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -72,10 +71,8 @@ const PatientReception = () => {
     if (id) {
       const patientData = getPatientById(id);
       if (patientData) {
-        // Make sure patient data has the expected structure for PatientInfoHeader
         const formattedPatient = {
           ...patientData,
-          // Set default values for patientInfo if they don't exist
           allergies: patientData.allergies || []
         };
         setPatient(formattedPatient);
@@ -117,7 +114,7 @@ const PatientReception = () => {
         specialty: specialtyObj?.name || "",
         attendanceType: attendanceTypeObj?.name || "",
         healthPlan: healthPlanObj?.name || "",
-        status: "Enfermagem" // Alterado de "Aguardando" para "Enfermagem"
+        status: "Enfermagem"
       };
       
       const updatedPatient = confirmPatientAppointment(id, appointmentData);

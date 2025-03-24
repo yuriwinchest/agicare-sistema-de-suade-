@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -242,7 +243,10 @@ const PatientRecord = () => {
               </TabsContent>
               
               <TabsContent value="nursing" className="p-6">
-                <NursingTab vitalSigns={patientInfo.vitalSigns} />
+                <NursingTab 
+                  vitalSigns={patientInfo.vitalSigns} 
+                  readOnly={true} // Definindo como somente leitura
+                />
               </TabsContent>
               
               <TabsContent value="clinical">

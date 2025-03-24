@@ -14,10 +14,12 @@ import {
   FileText, 
   Thermometer, 
   Activity, 
-  Plus 
+  Plus,
+  Lock
 } from "lucide-react";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface NursingTabProps {
   vitalSigns: {
@@ -28,9 +30,10 @@ interface NursingTabProps {
     respiratory: string;
     oxygen: string;
   }[];
+  readOnly?: boolean;  // Nova propriedade para modo somente leitura
 }
 
-const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
+const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false }) => {
   const [nursingTab, setNursingTab] = useState("atendimento");
   const [newVitalSigns, setNewVitalSigns] = useState({
     temperature: "",
@@ -62,10 +65,20 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
     <div className="space-y-6">
       <div className="flex justify-between mb-6">
         <h2 className="text-lg font-semibold">Enfermagem</h2>
-        <Button size="sm" className="bg-teal-500 hover:bg-teal-600 text-white">
-          <Plus className="mr-1 h-4 w-4" />
-          Novo Registro
-        </Button>
+        
+        {readOnly && (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <Lock className="h-3 w-3 mr-1" />
+            Modo Visualização
+          </Badge>
+        )}
+        
+        {!readOnly && (
+          <Button size="sm" className="bg-teal-500 hover:bg-teal-600 text-white">
+            <Plus className="mr-1 h-4 w-4" />
+            Novo Registro
+          </Button>
+        )}
       </div>
       
       <Tabs value={nursingTab} onValueChange={setNursingTab} className="w-full">
@@ -95,67 +108,69 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
         
         {/* Atendimento Enfermagem */}
         <TabsContent value="atendimento" className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <h3 className="text-md font-medium">Registrar Sinais Vitais</h3>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="temperature">Temperatura</Label>
-                    <Input 
-                      id="temperature" 
-                      placeholder="°C"
-                      value={newVitalSigns.temperature}
-                      onChange={(e) => handleVitalSignChange('temperature', e.target.value)}
-                    />
+          {!readOnly && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <h3 className="text-md font-medium">Registrar Sinais Vitais</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="temperature">Temperatura</Label>
+                      <Input 
+                        id="temperature" 
+                        placeholder="°C"
+                        value={newVitalSigns.temperature}
+                        onChange={(e) => handleVitalSignChange('temperature', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="pressure">Pressão Arterial</Label>
+                      <Input 
+                        id="pressure" 
+                        placeholder="mmHg"
+                        value={newVitalSigns.pressure}
+                        onChange={(e) => handleVitalSignChange('pressure', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="pulse">Pulso</Label>
+                      <Input 
+                        id="pulse" 
+                        placeholder="bpm"
+                        value={newVitalSigns.pulse}
+                        onChange={(e) => handleVitalSignChange('pulse', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="respiratory">Freq. Respiratória</Label>
+                      <Input 
+                        id="respiratory" 
+                        placeholder="irpm"
+                        value={newVitalSigns.respiratory}
+                        onChange={(e) => handleVitalSignChange('respiratory', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="oxygen">Saturação O2</Label>
+                      <Input 
+                        id="oxygen" 
+                        placeholder="%"
+                        value={newVitalSigns.oxygen}
+                        onChange={(e) => handleVitalSignChange('oxygen', e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pressure">Pressão Arterial</Label>
-                    <Input 
-                      id="pressure" 
-                      placeholder="mmHg"
-                      value={newVitalSigns.pressure}
-                      onChange={(e) => handleVitalSignChange('pressure', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pulse">Pulso</Label>
-                    <Input 
-                      id="pulse" 
-                      placeholder="bpm"
-                      value={newVitalSigns.pulse}
-                      onChange={(e) => handleVitalSignChange('pulse', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="respiratory">Freq. Respiratória</Label>
-                    <Input 
-                      id="respiratory" 
-                      placeholder="irpm"
-                      value={newVitalSigns.respiratory}
-                      onChange={(e) => handleVitalSignChange('respiratory', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="oxygen">Saturação O2</Label>
-                    <Input 
-                      id="oxygen" 
-                      placeholder="%"
-                      value={newVitalSigns.oxygen}
-                      onChange={(e) => handleVitalSignChange('oxygen', e.target.value)}
-                    />
+                  
+                  <div className="flex justify-end">
+                    <Button className="bg-teal-500 hover:bg-teal-600" onClick={handleSaveVitalSigns}>
+                      <Save className="mr-2 h-4 w-4" />
+                      Salvar
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="flex justify-end">
-                  <Button className="bg-teal-500 hover:bg-teal-600" onClick={handleSaveVitalSigns}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Salvar
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
           
           <div>
             <h3 className="text-md font-medium mb-3">Histórico de Sinais Vitais</h3>
@@ -209,6 +224,7 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
                     <Input
                       type="date"
                       defaultValue={format(new Date(), 'yyyy-MM-dd')}
+                      readOnly={readOnly}
                     />
                   </div>
                 </div>
@@ -218,6 +234,7 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
                     <Input
                       type="date"
                       defaultValue={format(new Date(), 'yyyy-MM-dd')}
+                      readOnly={readOnly}
                     />
                   </div>
                 </div>
@@ -238,58 +255,62 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
                 </div>
               </div>
               
-              <div className="flex justify-end mt-4">
-                <Button className="bg-teal-500 hover:bg-teal-600">
-                  Filtrar
-                </Button>
-              </div>
+              {!readOnly && (
+                <div className="flex justify-end mt-4">
+                  <Button className="bg-teal-500 hover:bg-teal-600">
+                    Filtrar
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
         
         {/* Evolução Enfermagem */}
         <TabsContent value="evolucao" className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-md font-medium mb-4">Evolução de Enfermagem</h3>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Data e Hora</Label>
-                  <div className="flex gap-2">
-                    <div className="flex items-center relative flex-1">
-                      <Input
-                        type="date"
-                        defaultValue={format(new Date(), 'yyyy-MM-dd')}
-                      />
-                      <CalendarIcon className="absolute right-3 h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex items-center relative flex-1">
-                      <Input
-                        type="time"
-                        defaultValue={format(new Date(), 'HH:mm')}
-                      />
-                      <Clock className="absolute right-3 h-4 w-4 text-muted-foreground" />
+          {!readOnly && (
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="text-md font-medium mb-4">Evolução de Enfermagem</h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Data e Hora</Label>
+                    <div className="flex gap-2">
+                      <div className="flex items-center relative flex-1">
+                        <Input
+                          type="date"
+                          defaultValue={format(new Date(), 'yyyy-MM-dd')}
+                        />
+                        <CalendarIcon className="absolute right-3 h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex items-center relative flex-1">
+                        <Input
+                          type="time"
+                          defaultValue={format(new Date(), 'HH:mm')}
+                        />
+                        <Clock className="absolute right-3 h-4 w-4 text-muted-foreground" />
+                      </div>
                     </div>
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Anotação</Label>
+                    <Textarea 
+                      className="min-h-32" 
+                      placeholder="Registre a evolução de enfermagem do paciente..."
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button className="bg-teal-500 hover:bg-teal-600">
+                      <Save className="mr-2 h-4 w-4" />
+                      Salvar Evolução
+                    </Button>
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>Anotação</Label>
-                  <Textarea 
-                    className="min-h-32" 
-                    placeholder="Registre a evolução de enfermagem do paciente..."
-                  />
-                </div>
-                
-                <div className="flex justify-end">
-                  <Button className="bg-teal-500 hover:bg-teal-600">
-                    <Save className="mr-2 h-4 w-4" />
-                    Salvar Evolução
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
           
           <div>
             <h3 className="text-md font-medium mb-3">Evoluções Anteriores</h3>
@@ -302,6 +323,9 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
           <div className="p-4 border rounded-md bg-gray-50">
             <h3 className="text-md font-medium mb-2">Procedimentos de Enfermagem</h3>
             <p className="text-muted-foreground">Área para registrar procedimentos de enfermagem realizados no paciente.</p>
+            {readOnly && (
+              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
+            )}
           </div>
         </TabsContent>
         
@@ -309,6 +333,9 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
           <div className="p-4 border rounded-md bg-gray-50">
             <h3 className="text-md font-medium mb-2">Sistematização da Assistência de Enfermagem</h3>
             <p className="text-muted-foreground">Área para documentar o processo de enfermagem.</p>
+            {readOnly && (
+              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
+            )}
           </div>
         </TabsContent>
         
@@ -316,6 +343,9 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
           <div className="p-4 border rounded-md bg-gray-50">
             <h3 className="text-md font-medium mb-2">Formulários Clínicos</h3>
             <p className="text-muted-foreground">Acesso aos formulários clínicos específicos de enfermagem.</p>
+            {readOnly && (
+              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
+            )}
           </div>
         </TabsContent>
         
@@ -323,6 +353,9 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns }) => {
           <div className="p-4 border rounded-md bg-gray-50">
             <h3 className="text-md font-medium mb-2">Checagem</h3>
             <p className="text-muted-foreground">Verificação e checagem de prescrições e procedimentos.</p>
+            {readOnly && (
+              <p className="text-amber-600 text-sm mt-2">Modo de visualização ativo. Para editar, acesse através do menu de Enfermagem.</p>
+            )}
           </div>
         </TabsContent>
       </Tabs>
