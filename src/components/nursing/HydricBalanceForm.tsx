@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,8 +26,8 @@ import {
   Calendar, 
   Clock, 
   Droplet, 
-  DropletPlus, 
-  DropletMinus 
+  Plus as DropletPlus, 
+  Minus as DropletMinus 
 } from "lucide-react";
 
 const hydricBalanceSchema = z.object({
@@ -375,3 +374,4 @@ const HydricBalanceForm = ({ initialValues, onSave }: HydricBalanceFormProps) =>
 };
 
 export default HydricBalanceForm;
+

@@ -28,14 +28,16 @@ const nursingEvolutionSchema = z.object({
 type NursingEvolutionFormValues = z.infer<typeof nursingEvolutionSchema>;
 
 interface NursingEvolutionFormProps {
-  initialValues?: NursingEvolutionFormValues;
+  initialValues?: NursingEvolutionFormValues & {
+    previousEvolutions?: any[];
+  };
   onSave: (data: NursingEvolutionFormValues) => void;
 }
 
 const NursingEvolutionForm = ({ initialValues, onSave }: NursingEvolutionFormProps) => {
-  const [evolutions, setEvolutions] = useState<any[]>([
-    ...(initialValues?.previousEvolutions || []),
-  ]);
+  const [evolutions, setEvolutions] = useState<any[]>(
+    initialValues?.previousEvolutions || []
+  );
   
   const form = useForm<NursingEvolutionFormValues>({
     resolver: zodResolver(nursingEvolutionSchema),
@@ -49,7 +51,6 @@ const NursingEvolutionForm = ({ initialValues, onSave }: NursingEvolutionFormPro
   const handleSubmit = (values: NursingEvolutionFormValues) => {
     onSave(values);
     
-    // Add to local state for display
     setEvolutions([
       {
         id: Date.now().toString(),
@@ -58,7 +59,6 @@ const NursingEvolutionForm = ({ initialValues, onSave }: NursingEvolutionFormPro
       ...evolutions,
     ]);
     
-    // Reset evolution field but keep date and time
     form.reset({
       date: values.date,
       time: values.time,

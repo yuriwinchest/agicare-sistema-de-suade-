@@ -15,6 +15,11 @@ interface AssessmentTabsProps {
   patientData: any;
   onSaveVitalSigns: (data: any) => void;
   onSaveAnamnesis: (data: any) => void;
+  onSavePhysicalExam: (data: any) => void;
+  onSaveHydricBalance: (data: any) => void;
+  onSaveNursingEvolution: (data: any) => void;
+  onSaveProcedures: (data: any) => void;
+  onSaveMedications: (data: any) => void;
 }
 
 const AssessmentTabs = ({ 
@@ -22,15 +27,14 @@ const AssessmentTabs = ({
   onTabChange, 
   patientData, 
   onSaveVitalSigns, 
-  onSaveAnamnesis 
+  onSaveAnamnesis,
+  onSavePhysicalExam,
+  onSaveHydricBalance,
+  onSaveNursingEvolution,
+  onSaveProcedures,
+  onSaveMedications
 }: AssessmentTabsProps) => {
   const { success } = useNotification();
-  
-  const handleSaveGeneric = (formName: string) => {
-    success(`${formName} salvo com sucesso`, {
-      description: "Os dados foram salvos no prontuário do paciente"
-    });
-  };
   
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
@@ -75,35 +79,35 @@ const AssessmentTabs = ({
       <TabsContent value="exame-fisico" className="space-y-4">
         <PhysicalExamForm 
           initialValues={patientData.nursingData?.physicalExam}
-          onSave={(data) => handleSaveGeneric("Exame físico")}
+          onSave={onSavePhysicalExam}
         />
       </TabsContent>
       
       <TabsContent value="balance-hidrico" className="space-y-4">
         <HydricBalanceForm 
           initialValues={patientData.nursingData?.hydricBalance}
-          onSave={(data) => handleSaveGeneric("Balanço hídrico")}
+          onSave={onSaveHydricBalance}
         />
       </TabsContent>
       
       <TabsContent value="evolucao" className="space-y-4">
         <NursingEvolutionForm 
           initialValues={patientData.nursingData?.evolution}
-          onSave={(data) => handleSaveGeneric("Evolução de enfermagem")}
+          onSave={onSaveNursingEvolution}
         />
       </TabsContent>
       
       <TabsContent value="procedimentos" className="space-y-4">
         <ProceduresForm 
           initialValues={patientData.nursingData?.procedures}
-          onSave={(data) => handleSaveGeneric("Procedimentos")}
+          onSave={onSaveProcedures}
         />
       </TabsContent>
       
       <TabsContent value="medicacao" className="space-y-4">
         <MedicationCheckForm 
           initialValues={patientData.nursingData?.medication}
-          onSave={(data) => handleSaveGeneric("Checagem de medicação")}
+          onSave={onSaveMedications}
         />
       </TabsContent>
     </Tabs>

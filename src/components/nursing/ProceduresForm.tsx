@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -47,7 +47,6 @@ interface ProceduresFormProps {
   onSave: (data: any) => void;
 }
 
-// Lista de procedimentos de enfermagem comuns
 const commonProcedures = [
   "Punção Venosa Periférica",
   "Troca de Curativos",
@@ -90,7 +89,6 @@ const ProceduresForm = ({ initialValues, onSave }: ProceduresFormProps) => {
     const updatedProcedures = [...procedures, newProcedure];
     setProcedures(updatedProcedures);
     
-    // Reset form fields but keep date and time
     form.reset({
       date: values.date,
       time: values.time,
@@ -99,7 +97,6 @@ const ProceduresForm = ({ initialValues, onSave }: ProceduresFormProps) => {
       status: "pending",
     });
     
-    // Also save updated procedures to parent
     onSave({ procedures: updatedProcedures });
   };
   

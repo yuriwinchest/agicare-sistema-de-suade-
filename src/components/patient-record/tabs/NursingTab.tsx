@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-  CalendarIcon, 
+  Calendar as CalendarIcon, 
   Clock, 
   Save, 
   ClipboardList, 
@@ -415,7 +414,7 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
                       <CardContent className="p-4">
                         <div className="flex justify-between items-center mb-2">
                           <div className="flex items-center text-sm">
-                            <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <CalendarIcon className="h-4 w-4 mr-1 text-muted-foreground" />
                             <span className="text-muted-foreground mr-3">{evolution.date}</span>
                             <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
                             <span className="text-muted-foreground">{evolution.time}</span>
@@ -429,16 +428,7 @@ const NursingTab: React.FC<NursingTabProps> = ({ vitalSigns, readOnly = false })
                   ))}
                 </div>
               ) : (
-                <div className="text-center p-6 bg-gray-50 rounded-md">
-                  <FileText className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-muted-foreground">Nenhuma evolução de enfermagem registrada</p>
-                </div>
-              )}
-              
-              {readOnly && (
-                <p className="text-amber-600 text-sm mt-4">
-                  Modo de visualização ativo. Para registrar uma nova evolução, acesse através do menu de Enfermagem.
-                </p>
+                <p className="text-muted-foreground">Nenhuma evolução registrada</p>
               )}
             </CardContent>
           </Card>
