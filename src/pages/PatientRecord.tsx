@@ -64,6 +64,8 @@ const PatientRecord = () => {
       title: "Paciente em Observação",
       description: "O paciente foi colocado em observação",
     });
+    // Navigate back to the appointment page
+    navigate("/appointment");
   };
 
   const handleMedicationClick = () => {
@@ -73,8 +75,8 @@ const PatientRecord = () => {
       description: "Paciente encaminhado para medicação",
     });
     
-    // Navigate back to the patient list
-    navigate("/electronic-medical-record");
+    // Navigate back to the appointment page
+    navigate("/appointment");
   };
   
   return (
@@ -113,7 +115,7 @@ const PatientRecord = () => {
           
           <Button 
             variant="outline" 
-            onClick={() => navigate("/electronic-medical-record")} 
+            onClick={() => navigate("/appointment")} 
             className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
           >
             <LogOut className="h-5 w-5 text-red-600" />
@@ -272,7 +274,7 @@ const PatientRecord = () => {
               title: "Atendimento Finalizado",
               description: `O paciente foi encaminhado para ${destination}`,
             });
-            navigate("/electronic-medical-record");
+            navigate("/appointment");
           }}
         />
       </div>
