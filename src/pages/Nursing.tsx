@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -10,7 +9,7 @@ import {
   Calendar,
   Thermometer,
   Heart,
-  Lungs,
+  Stethoscope, // Changed from Lungs to Stethoscope
   Droplet,
   Edit,
   User

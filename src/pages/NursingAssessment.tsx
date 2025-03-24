@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Save, ArrowRight, Thermometer, Activity, Heart, Lungs, CalendarIcon, Clock } from "lucide-react";
+import { ChevronLeft, Save, ArrowRight, Thermometer, Activity, Heart, Stethoscope, CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { getPatients } from "@/services/patientService";
 
@@ -19,7 +19,6 @@ const NursingAssessment = () => {
   const [nursingTab, setNursingTab] = useState("sinais-vitais");
   const [patientData, setPatientData] = useState<any>(null);
   
-  // Form state for vital signs
   const [vitalSigns, setVitalSigns] = useState({
     temperature: "",
     pressure: "",
@@ -29,7 +28,6 @@ const NursingAssessment = () => {
   });
   
   useEffect(() => {
-    // Load patient data based on ID
     if (id) {
       const allPatients = getPatients();
       const patient = allPatients.find(p => p.id === id);
@@ -48,26 +46,20 @@ const NursingAssessment = () => {
   };
   
   const handleSaveVitalSigns = () => {
-    // Here we would save the vital signs data
-    // For now, just show a success toast
     toast({
       title: "Sinais vitais salvos",
       description: "Os sinais vitais foram salvos com sucesso!"
     });
     
-    // Navigate back to nursing page
     navigate('/nursing');
   };
   
   const handleFinishAssessment = () => {
-    // Here we would save all nursing assessment data
-    // For now, just show a success toast
     toast({
       title: "Avaliação concluída",
       description: "A avaliação de enfermagem foi concluída com sucesso!"
     });
     
-    // Navigate back to nursing page
     navigate('/nursing');
   };
   
@@ -111,7 +103,6 @@ const NursingAssessment = () => {
             </div>
           </div>
           
-          {/* Patient Info */}
           <Card className="bg-white shadow-sm">
             <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -135,7 +126,6 @@ const NursingAssessment = () => {
             </CardContent>
           </Card>
           
-          {/* Nursing Assessment Form */}
           <Card>
             <CardContent className="p-6">
               <h2 className="text-lg font-semibold mb-4">Avaliação de Enfermagem</h2>
@@ -165,7 +155,6 @@ const NursingAssessment = () => {
                   </TabsTrigger>
                 </TabsList>
                 
-                {/* Vital Signs */}
                 <TabsContent value="sinais-vitais" className="space-y-4">
                   <div className="space-y-4">
                     <h3 className="text-md font-medium">Registrar Sinais Vitais</h3>
@@ -226,7 +215,6 @@ const NursingAssessment = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Other tabs with placeholders */}
                 <TabsContent value="anamnese" className="space-y-4">
                   <div className="space-y-4">
                     <h3 className="text-md font-medium">Anamnese de Enfermagem</h3>
@@ -273,30 +261,5 @@ const NursingAssessment = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Placeholder content for other tabs */}
-                {["exame-fisico", "balance-hidrico", "evolucao", "procedimentos", "medicacao"].map((tab) => (
-                  <TabsContent key={tab} value={tab} className="space-y-4">
-                    <div className="p-4 border rounded-md bg-gray-50">
-                      <h3 className="text-md font-medium mb-2">
-                        {tab === "exame-fisico" && "Exame Físico"}
-                        {tab === "balance-hidrico" && "Balanço Hídrico"}
-                        {tab === "evolucao" && "Evolução de Enfermagem"}
-                        {tab === "procedimentos" && "Procedimentos de Enfermagem"}
-                        {tab === "medicacao" && "Medicação"}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Esta seção será implementada em breve.
-                      </p>
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </Layout>
-  );
-};
+                {
 
-export default NursingAssessment;
