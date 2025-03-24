@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,23 +28,33 @@ const nursingEvolutionSchema = z.object({
 
 type NursingEvolutionFormValues = z.infer<typeof nursingEvolutionSchema>;
 
+interface EvolutionEntry {
+  id: string;
+  date: string;
+  time: string;
+  evolution: string;
+}
+
 interface NursingEvolutionFormProps {
-  initialValues?: NursingEvolutionFormValues & {
-    previousEvolutions?: any[];
+  initialValues?: {
+    date?: string;
+    time?: string;
+    evolution?: string;
+    previousEvolutions?: EvolutionEntry[];
   };
   onSave: (data: NursingEvolutionFormValues) => void;
 }
 
 const NursingEvolutionForm = ({ initialValues, onSave }: NursingEvolutionFormProps) => {
-  const [evolutions, setEvolutions] = useState<any[]>(
+  const [evolutions, setEvolutions] = useState<EvolutionEntry[]>(
     initialValues?.previousEvolutions || []
   );
   
   const form = useForm<NursingEvolutionFormValues>({
     resolver: zodResolver(nursingEvolutionSchema),
     defaultValues: {
-      date: format(new Date(), 'yyyy-MM-dd'),
-      time: format(new Date(), 'HH:mm'),
+      date: initialValues?.date || format(new Date(), 'yyyy-MM-dd'),
+      time: initialValues?.time || format(new Date(), 'HH:mm'),
       evolution: initialValues?.evolution || "",
     },
   });

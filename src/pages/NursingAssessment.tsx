@@ -1,20 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { useNotification } from "@/hooks/useNotification";
-import { 
-  saveVitalSigns, 
-  saveAnamnesis, 
-  savePhysicalExam,
-  saveHydricBalance,
-  saveNursingEvolution,
-  saveProcedures,
-  saveMedications,
-  completeNursingAssessment 
-} from "@/services/nursingService";
 import { usePatientData } from "@/hooks/usePatientData";
+import { useNursingData } from "@/hooks/useNursingData";
 import AssessmentContainer from "@/components/nursing/AssessmentContainer";
 
 const NursingAssessment = () => {
@@ -25,14 +16,43 @@ const NursingAssessment = () => {
   const [nursingTab, setNursingTab] = useState("sinais-vitais");
   
   const { patientData, loading, error } = usePatientData(id);
+
+  // Usa o hook de dados de enfermagem se o ID do paciente estiver disponível
+  const {
+    saveVitalSigns,
+    saveAnamnesis,
+    savePhysicalExam,
+    saveHydricBalance,
+    saveNursingEvolution,
+    saveProcedures,
+    saveMedications,
+    syncData,
+    isSyncing,
+    isOnline
+  } = useNursingData(id || "");
   
   const handleGoBack = () => {
     navigate('/nursing');
   };
   
+  // Se o dispositivo ficar offline, notifica o usuário
+  useEffect(() => {
+    const handleOffline = () => {
+      notification.warning("Dispositivo offline", {
+        description: "Suas alterações serão salvas localmente e sincronizadas quando a conexão for restaurada."
+      });
+    };
+    
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  
   const handleSaveVitalSigns = (vitalSignsData: any) => {
     if (id) {
-      const success = saveVitalSigns(id, vitalSignsData);
+      const success = saveVitalSigns(vitalSignsData);
       
       if (success) {
         notification.success("Sinais vitais salvos", {
@@ -48,7 +68,7 @@ const NursingAssessment = () => {
   
   const handleSaveAnamnesis = (anamnesisData: any) => {
     if (id) {
-      const success = saveAnamnesis(id, anamnesisData);
+      const success = saveAnamnesis(anamnesisData);
       
       if (success) {
         notification.success("Anamnese salva", {
@@ -64,7 +84,7 @@ const NursingAssessment = () => {
   
   const handleSavePhysicalExam = (data: any) => {
     if (id) {
-      const success = savePhysicalExam(id, data);
+      const success = savePhysicalExam(data);
       if (success) {
         notification.success("Exame físico salvo", {
           description: "Os dados do exame físico foram salvos com sucesso!"
@@ -81,7 +101,7 @@ const NursingAssessment = () => {
   
   const handleSaveHydricBalance = (data: any) => {
     if (id) {
-      const success = saveHydricBalance(id, data);
+      const success = saveHydricBalance(data);
       if (success) {
         notification.success("Balanço hídrico salvo", {
           description: "Os dados do balanço hídrico foram salvos com sucesso!"
@@ -98,7 +118,7 @@ const NursingAssessment = () => {
   
   const handleSaveNursingEvolution = (data: any) => {
     if (id) {
-      const success = saveNursingEvolution(id, data);
+      const success = saveNursingEvolution(data);
       if (success) {
         notification.success("Evolução salva", {
           description: "A evolução de enfermagem foi salva com sucesso!"
@@ -115,7 +135,7 @@ const NursingAssessment = () => {
   
   const handleSaveProcedures = (data: any) => {
     if (id) {
-      const success = saveProcedures(id, data);
+      const success = saveProcedures(data);
       if (success) {
         notification.success("Procedimentos salvos", {
           description: "Os procedimentos foram salvos com sucesso!"
@@ -132,7 +152,7 @@ const NursingAssessment = () => {
   
   const handleSaveMedications = (data: any) => {
     if (id) {
-      const success = saveMedications(id, data);
+      const success = saveMedications(data);
       if (success) {
         notification.success("Medicações salvas", {
           description: "As medicações foram salvas com sucesso!"
@@ -147,20 +167,23 @@ const NursingAssessment = () => {
   
   const handleFinishAssessment = () => {
     if (id) {
-      const success = completeNursingAssessment(id, { name: "Enfermeiro(a)" });
-      
-      if (success) {
-        notification.success("Avaliação concluída", {
-          description: "A avaliação de enfermagem foi concluída com sucesso!",
+      // Tenta sincronizar os dados antes de finalizar
+      if (!isOnline) {
+        notification.warning("Dispositivo offline", {
+          description: "A avaliação foi salva localmente e será sincronizada quando a conexão for restaurada.",
           duration: 5000
         });
-        
-        navigate('/nursing');
       } else {
-        notification.error("Erro ao finalizar", {
-          description: "Ocorreu um erro ao tentar finalizar a avaliação."
-        });
+        // Sincroniza os dados
+        syncData();
       }
+      
+      notification.success("Avaliação concluída", {
+        description: "A avaliação de enfermagem foi concluída com sucesso!",
+        duration: 5000
+      });
+      
+      navigate('/nursing');
     }
   };
   
@@ -197,6 +220,19 @@ const NursingAssessment = () => {
   return (
     <Layout>
       <div className="page-container">
+        {!isOnline && (
+          <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-4 text-sm flex items-center justify-between">
+            <span>Modo offline: suas alterações serão sincronizadas quando a conexão for restaurada.</span>
+            <button 
+              onClick={syncData} 
+              disabled={!isOnline || isSyncing}
+              className="text-xs bg-yellow-200 px-2 py-1 rounded hover:bg-yellow-300 disabled:opacity-50"
+            >
+              {isSyncing ? "Sincronizando..." : "Tentar sincronizar"}
+            </button>
+          </div>
+        )}
+        
         <AssessmentContainer
           patientData={patientData}
           nursingTab={nursingTab}
