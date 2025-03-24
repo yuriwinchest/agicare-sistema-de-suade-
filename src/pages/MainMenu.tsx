@@ -57,7 +57,7 @@ const MainMenu = () => {
     { icon: Calendar, title: "Agendamento", path: "/appointment" },
     { icon: ClipboardCheck, title: "Recepção", path: "/reception" },
     { icon: FileText, title: "Prontuário Eletrônico", path: "/electronic-medical-record" },
-    { icon: Stethoscope, title: "Enfermagem", path: "/patient/nursing" },
+    { icon: Stethoscope, title: "Enfermagem", path: "/nursing" },
     { icon: FileClock, title: "Prontuário Eletrônico Agenda", path: "/appointment" },
     { icon: ClipboardList, title: "Controle de Leito", path: "/beds" },
     { icon: FileText, title: "Prontuário Eletrônico Internação", path: "/hospitalization" },
