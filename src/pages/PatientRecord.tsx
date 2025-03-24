@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -44,6 +43,8 @@ import {
   specialities 
 } from "@/components/patient-record/PatientRecordData";
 
+import { updatePatientRedirection } from "@/services/patientService";
+
 const PatientRecord = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -60,19 +61,47 @@ const PatientRecord = () => {
   };
   
   const handleCreateObservation = () => {
+    // Update patient status to "Observação"
+    if (id) {
+      updatePatientRedirection(id, "Observação");
+    }
+    
+    // Show toast
     toast({
       title: "Paciente em Observação",
       description: "O paciente foi colocado em observação",
     });
+    
     // Navigate back to the appointment page
     navigate("/appointment");
   };
 
   const handleMedicationClick = () => {
+    // Update patient status to "Medicação"
+    if (id) {
+      updatePatientRedirection(id, "Medicação");
+    }
+    
     // Show toast message
     toast({
       title: "Medicação",
       description: "Paciente encaminhado para medicação",
+    });
+    
+    // Navigate back to the appointment page
+    navigate("/appointment");
+  };
+  
+  const handlePatientDischarge = () => {
+    // Update patient status to "Alta"
+    if (id) {
+      updatePatientRedirection(id, "Alta");
+    }
+    
+    // Show toast message
+    toast({
+      title: "Alta",
+      description: "Paciente recebeu alta médica",
     });
     
     // Navigate back to the appointment page
@@ -115,7 +144,7 @@ const PatientRecord = () => {
           
           <Button 
             variant="outline" 
-            onClick={() => navigate("/appointment")} 
+            onClick={handlePatientDischarge} 
             className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
           >
             <LogOut className="h-5 w-5 text-red-600" />
@@ -270,6 +299,11 @@ const PatientRecord = () => {
           open={showDestinationDialog} 
           onOpenChange={setShowDestinationDialog}
           onConfirm={(destination) => {
+            // Update patient status to the selected destination
+            if (id) {
+              updatePatientRedirection(id, destination);
+            }
+            
             toast({
               title: "Atendimento Finalizado",
               description: `O paciente foi encaminhado para ${destination}`,

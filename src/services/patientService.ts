@@ -41,6 +41,27 @@ export const getPatients = () => {
   }));
 };
 
+// Get active appointments (patients with status != "Atendido" and other completed statuses)
+export const getActiveAppointments = () => {
+  // Always refresh from localStorage first
+  initFromLocalStorage();
+  
+  // Filter out patients who have already been directed to other areas
+  return patients
+    .filter(patient => 
+      patient.status !== "Atendido" && 
+      patient.status !== "Medicação" && 
+      patient.status !== "Observação" &&
+      patient.status !== "Alta" &&
+      patient.status !== "Internação" &&
+      !patient.redirected  // Check for redirected flag
+    )
+    .map(patient => ({
+      ...patient,
+      allergies: patient.allergies || []
+    }));
+};
+
 // Get patient by ID
 export const getPatientById = (id: string) => {
   // Always refresh from localStorage first
@@ -244,4 +265,29 @@ export const updateAmbulatoryPatient = (patient: any) => {
   saveAmbulatoryToLocalStorage();
   
   return patient;
+};
+
+// Update patient status when redirected from doctor
+export const updatePatientRedirection = (patientId: string, destination: string) => {
+  // Always refresh from localStorage first
+  initFromLocalStorage();
+  
+  const patientIndex = patients.findIndex(p => p.id === patientId);
+  
+  if (patientIndex >= 0) {
+    // Update patient status to the destination
+    patients[patientIndex] = { 
+      ...patients[patientIndex], 
+      status: destination,
+      redirected: true,  // Add flag to mark as redirected
+      redirectionTime: new Date().toISOString()  // Add timestamp for when redirected
+    };
+    
+    // Save to localStorage
+    saveToLocalStorage();
+    
+    return patients[patientIndex];
+  }
+  
+  return null;
 };

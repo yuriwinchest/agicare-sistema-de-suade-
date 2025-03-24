@@ -1,11 +1,9 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Search, Clock, User, Stethoscope, X, CalendarCheck } from "lucide-react";
@@ -16,30 +14,36 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-
-// Mock scheduled patients data
-const scheduledPatientsData = [
-  { id: "101", name: "Eduardo Sanchez", time: "09:00", specialty: "Cardiologia", doctor: "Dr. Ricardo Mendes" },
-  { id: "102", name: "Luiza Dias", time: "09:30", specialty: "Dermatologia", doctor: "Dra. Isabela Rocha" },
-  { id: "103", name: "Samuel Oliveira", time: "10:00", specialty: "Ortopedia", doctor: "Dr. Fernando Costa" },
-  { id: "104", name: "Helena Martins", time: "10:30", specialty: "Pediatria", doctor: "Dra. Camila Santos" },
-  { id: "105", name: "Matheus Pereira", time: "11:00", specialty: "Neurologia", doctor: "Dr. Henrique Lima" },
-  { id: "106", name: "Vitória Silva", time: "11:30", specialty: "Ginecologia", doctor: "Dra. Laura Almeida" },
-  { id: "107", name: "Felipe Mendes", time: "14:00", specialty: "Oftalmologia", doctor: "Dr. Lucas Ferreira" },
-  { id: "108", name: "Carolina Souza", time: "14:30", specialty: "Psiquiatria", doctor: "Dra. Beatriz Carvalho" },
-];
+import { getActiveAppointments } from "@/services/patientService";
 
 const Appointment = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState<Date>(new Date());
+  const [patients, setPatients] = useState<any[]>([]);
   
-  const filteredPatients = scheduledPatientsData.filter((patient) =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.id.includes(searchTerm) ||
-    patient.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.doctor.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const loadAppointments = () => {
+      const activeAppointments = getActiveAppointments();
+      setPatients(activeAppointments);
+    };
+    
+    loadAppointments();
+    
+    window.addEventListener('focus', loadAppointments);
+    
+    return () => {
+      window.removeEventListener('focus', loadAppointments);
+    };
+  }, []);
+  
+  const filteredPatients = patients.filter((patient) =>
+    patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.id?.includes(searchTerm) ||
+    patient.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.professional?.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const handleCallPatient = (patient: any) => {
@@ -132,12 +136,12 @@ const Appointment = () => {
                       <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
                         <div>
                           <p className="text-sm text-muted-foreground">Especialidade</p>
-                          <p className="font-medium">{patient.specialty}</p>
+                          <p className="font-medium">{patient.specialty || patient.speciality || "Não especificada"}</p>
                         </div>
                         
                         <div>
                           <p className="text-sm text-muted-foreground">Médico</p>
-                          <p className="font-medium">{patient.doctor}</p>
+                          <p className="font-medium">{patient.doctor || patient.professional || "Não definido"}</p>
                         </div>
                         
                         <div className="flex items-center">
