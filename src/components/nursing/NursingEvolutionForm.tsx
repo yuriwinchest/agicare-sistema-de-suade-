@@ -62,11 +62,16 @@ const NursingEvolutionForm = ({ initialValues, onSave }: NursingEvolutionFormPro
   const handleSubmit = (values: NursingEvolutionFormValues) => {
     onSave(values);
     
+    // Make sure date and time are not optional by using values directly from the form data
+    const newEvolutionEntry: EvolutionEntry = {
+      id: Date.now().toString(),
+      date: values.date,
+      time: values.time,
+      evolution: values.evolution,
+    };
+    
     setEvolutions([
-      {
-        id: Date.now().toString(),
-        ...values,
-      },
+      newEvolutionEntry,
       ...evolutions,
     ]);
     

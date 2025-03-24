@@ -62,16 +62,19 @@ export interface MedicationCheck {
   }>;
 }
 
+// Define accepted data types as a union of string literals
+export type NursingDataType = 'vitalSigns' | 'anamnesis' | 'evolution' | 'hydricBalance' | 'procedures' | 'medication' | 'physicalExam';
+
 export interface OfflineSyncItem {
   patientId: string;
-  dataType: 'vitalSigns' | 'anamnesis' | 'evolution' | 'hydricBalance' | 'procedures' | 'medication';
+  dataType: NursingDataType;
   data: any;
   timestamp: number;
   synced: boolean;
 }
 
 // Adiciona ou atualiza os sinais vitais de um paciente
-export const saveNursingData = (patientId: string, dataType: string, data: any): boolean => {
+export const saveNursingData = (patientId: string, dataType: NursingDataType, data: any): boolean => {
   try {
     // Busca o paciente atual
     const patient = getPatientById(patientId);
