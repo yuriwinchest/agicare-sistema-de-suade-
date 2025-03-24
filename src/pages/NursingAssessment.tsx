@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -261,5 +262,30 @@ const NursingAssessment = () => {
                   </div>
                 </TabsContent>
                 
-                {
+                {/* Placeholder content for other tabs */}
+                {["exame-fisico", "balance-hidrico", "evolucao", "procedimentos", "medicacao"].map((tab) => (
+                  <TabsContent key={tab} value={tab} className="space-y-4">
+                    <div className="p-4 border rounded-md bg-gray-50">
+                      <h3 className="text-md font-medium mb-2">
+                        {tab === "exame-fisico" && "Exame Físico"}
+                        {tab === "balance-hidrico" && "Balanço Hídrico"}
+                        {tab === "evolucao" && "Evolução de Enfermagem"}
+                        {tab === "procedimentos" && "Procedimentos de Enfermagem"}
+                        {tab === "medicacao" && "Medicação"}
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Esta seção será implementada em breve.
+                      </p>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </Layout>
+  );
+};
 
+export default NursingAssessment;
