@@ -65,6 +65,17 @@ const PatientRecord = () => {
       description: "O paciente foi colocado em observação",
     });
   };
+
+  const handleMedicationClick = () => {
+    // Show toast message
+    toast({
+      title: "Medicação",
+      description: "Paciente encaminhado para medicação",
+    });
+    
+    // Navigate back to the patient list
+    navigate("/electronic-medical-record");
+  };
   
   return (
     <Layout>
@@ -111,12 +122,7 @@ const PatientRecord = () => {
           
           <Button 
             variant="outline" 
-            onClick={() => {
-              toast({
-                title: "Medicação",
-                description: "Paciente encaminhado para medicação",
-              });
-            }} 
+            onClick={handleMedicationClick}
             className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
           >
             <Pill className="h-5 w-5 text-purple-600" />
