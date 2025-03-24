@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -9,10 +10,9 @@ import {
   Calendar,
   Thermometer,
   Heart,
-  Stethoscope, // Changed from Lungs to Stethoscope
-  Droplet,
-  Edit,
-  User
+  Stethoscope,
+  User,
+  Edit
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { getPatients } from "@/services/patientService";
+
+// Função para sanitizar input de busca
+const sanitizeSearchInput = (input: string): string => {
+  // Remove caracteres especiais e tags HTML
+  return input.replace(/<[^>]*>?/gm, '').replace(/[^\w\s]/gi, '');
+};
 
 const Nursing = () => {
   const navigate = useNavigate();
@@ -34,12 +40,16 @@ const Nursing = () => {
     // Load patients
     const loadPatients = () => {
       const allPatients = getPatients();
-      // Filter patients with status "Enfermagem" or similar
       setPatients(allPatients);
     };
     
     loadPatients();
   }, []);
+
+  // Sanitização do termo de busca
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(sanitizeSearchInput(value));
+  };
 
   // Filter patients based on search term and active tab
   const filteredPatients = patients.filter((patient) => {
@@ -63,6 +73,43 @@ const Nursing = () => {
     navigate(`/nursing/assessment/${patient.id}`);
   };
   
+  // Stats calculation for dashboard cards
+  const calculateStats = () => {
+    let totalTemp = 0;
+    let totalPressureSystolic = 0;
+    let totalPressureDiastolic = 0;
+    let count = 0;
+    
+    patients.forEach(patient => {
+      if (patient.nursingData?.vitalSigns) {
+        const vs = patient.nursingData.vitalSigns;
+        
+        if (vs.temperature) {
+          totalTemp += parseFloat(vs.temperature.replace(',', '.')) || 0;
+          count++;
+        }
+        
+        if (vs.pressure) {
+          const pressureParts = vs.pressure.split('/');
+          if (pressureParts.length === 2) {
+            totalPressureSystolic += parseInt(pressureParts[0]) || 0;
+            totalPressureDiastolic += parseInt(pressureParts[1]) || 0;
+          }
+        }
+      }
+    });
+    
+    return {
+      avgTemp: count > 0 ? (totalTemp / count).toFixed(1) : "36,8",
+      avgPressure: count > 0 ? 
+        `${Math.round(totalPressureSystolic / count)}/${Math.round(totalPressureDiastolic / count)}` : 
+        "120/80",
+      totalPatients: patients.length
+    };
+  };
+  
+  const stats = calculateStats();
+  
   return (
     <Layout>
       <div className="page-container">
@@ -83,7 +130,7 @@ const Nursing = () => {
                     placeholder="Nome ou ID do paciente"
                     className="pl-9"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                   />
                 </div>
                 <Button>Pesquisar</Button>
@@ -211,7 +258,7 @@ const Nursing = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-center py-2">36,8°C</div>
+                <div className="text-3xl font-bold text-center py-2">{stats.avgTemp}°C</div>
                 <div className="text-xs text-gray-500 text-center">Média dos últimos pacientes</div>
               </CardContent>
             </Card>
@@ -224,7 +271,7 @@ const Nursing = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-center py-2">120/80</div>
+                <div className="text-3xl font-bold text-center py-2">{stats.avgPressure}</div>
                 <div className="text-xs text-gray-500 text-center">Média dos últimos pacientes</div>
               </CardContent>
             </Card>
@@ -237,12 +284,11 @@ const Nursing = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-center py-2">{patients.length}</div>
+                <div className="text-3xl font-bold text-center py-2">{stats.totalPatients}</div>
                 <div className="text-xs text-gray-500 text-center">Atendimentos hoje</div>
               </CardContent>
             </Card>
           </div>
-          
         </div>
       </div>
     </Layout>
