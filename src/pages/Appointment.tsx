@@ -39,11 +39,12 @@ const Appointment = () => {
   }, []);
   
   const filteredPatients = patients.filter((patient) =>
-    patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.id?.includes(searchTerm) ||
     patient.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.professional?.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.professional?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (patient.status !== "Enfermagem")
   );
   
   const handleCallPatient = (patient: any) => {

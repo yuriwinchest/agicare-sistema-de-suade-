@@ -117,7 +117,7 @@ const PatientReception = () => {
         specialty: specialtyObj?.name || "",
         attendanceType: attendanceTypeObj?.name || "",
         healthPlan: healthPlanObj?.name || "",
-        status: "Aguardando"
+        status: "Enfermagem" // Alterado de "Aguardando" para "Enfermagem"
       };
       
       const updatedPatient = confirmPatientAppointment(id, appointmentData);
@@ -125,7 +125,7 @@ const PatientReception = () => {
       if (updatedPatient) {
         toast({
           title: "Atendimento registrado",
-          description: "O paciente foi encaminhado para atendimento ambulatorial.",
+          description: "O paciente foi encaminhado para a enfermagem.",
         });
         navigate("/ambulatory");
       } else {
