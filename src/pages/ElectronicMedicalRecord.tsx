@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { 
@@ -26,10 +25,23 @@ const ElectronicMedicalRecord = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("todos");
-  const [patients, setPatients] = useState<any[]>(getPatients());
+  const [patients, setPatients] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toLocaleDateString('pt-BR'));
   
-  // Filtrar pacientes com base na busca
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const result = await getPatients();
+        setPatients(result);
+      } catch (error) {
+        console.error("Erro ao carregar pacientes:", error);
+        setPatients([]);
+      }
+    };
+    
+    loadPatients();
+  }, []);
+  
   const filteredPatients = patients.filter((patient) => {
     if (!searchTerm) return true;
     
@@ -52,12 +64,11 @@ const ElectronicMedicalRecord = () => {
   };
 
   const getStatusColor = (id: string) => {
-    // Simulando cores diferentes baseadas no ID
     const lastDigit = parseInt(id.charAt(id.length - 1));
     
-    if (lastDigit % 3 === 0) return "bg-yellow-400"; // Status amarelo
-    if (lastDigit % 3 === 1) return "bg-red-500";    // Status vermelho
-    return "bg-blue-500";                           // Status azul
+    if (lastDigit % 3 === 0) return "bg-yellow-400";
+    if (lastDigit % 3 === 1) return "bg-red-500";
+    return "bg-blue-500";
   };
 
   return (

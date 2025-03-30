@@ -1,3 +1,4 @@
+
 import { supabase, Patient } from './supabaseClient';
 
 // Função para iniciar a migração de dados do localStorage para o Supabase, se necessário
@@ -84,52 +85,46 @@ export const getPatients = async (): Promise<Patient[]> => {
   }
 };
 
-// Get active appointments
-export const getActiveAppointments = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .not('status', 'in', '("Atendido","Medicação","Observação","Alta","Internação")')
-      .eq('redirected', false);
-      
-    if (error) {
-      throw error;
-    }
-    
-    return data.map(patient => ({
-      ...patient,
-      nursingData: patient.nursing_data ? JSON.parse(patient.nursing_data) : {},
-      redirectionTime: patient.redirection_time,
-      allergies: patient.allergies || []
-    }));
-  } catch (error) {
-    console.error("Erro ao buscar consultas ativas:", error);
-    
-    // Fallback para localStorage
-    const storedPatients = localStorage.getItem('patients');
-    if (storedPatients) {
-      return JSON.parse(storedPatients)
-        .filter((patient: any) => 
-          patient.status !== "Atendido" && 
-          patient.status !== "Medicação" && 
-          patient.status !== "Observação" &&
-          patient.status !== "Alta" &&
-          patient.status !== "Internação" &&
-          !patient.redirected
-        )
-        .map((patient: any) => ({
-          ...patient,
-          allergies: patient.allergies || []
-        }));
-    }
-    
-    return [];
+// Get active appointments - versão síncrona para compatibilidade
+export const getActiveAppointments = () => {
+  const storedPatients = localStorage.getItem('patients');
+  if (storedPatients) {
+    return JSON.parse(storedPatients)
+      .filter((patient: any) => 
+        patient.status !== "Atendido" && 
+        patient.status !== "Medicação" && 
+        patient.status !== "Observação" &&
+        patient.status !== "Alta" &&
+        patient.status !== "Internação" &&
+        !patient.redirected
+      )
+      .map((patient: any) => ({
+        ...patient,
+        allergies: patient.allergies || []
+      }));
   }
+  
+  return [];
 };
 
-// Get patient by ID
-export const getPatientById = async (id: string): Promise<Patient | null> => {
+// Get patient by ID - versão síncrona para compatibilidade
+export const getPatientById = (id: string): Patient | null => {
+  const storedPatients = localStorage.getItem('patients');
+  if (storedPatients) {
+    const patient = JSON.parse(storedPatients).find((p: any) => p.id === id);
+    if (patient) {
+      return {
+        ...patient,
+        allergies: patient.allergies || []
+      };
+    }
+  }
+  
+  return null;
+};
+
+// Get patient by ID async version
+export const getPatientByIdAsync = async (id: string): Promise<Patient | null> => {
   try {
     const { data, error } = await supabase
       .from('patients')
@@ -155,67 +150,34 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
     console.error("Erro ao buscar paciente:", error);
     
     // Fallback para localStorage
-    const storedPatients = localStorage.getItem('patients');
-    if (storedPatients) {
-      const patient = JSON.parse(storedPatients).find((p: any) => p.id === id);
-      if (patient) {
-        return {
-          ...patient,
-          allergies: patient.allergies || []
-        };
-      }
-    }
-    
-    return null;
+    return getPatientById(id);
   }
 };
 
 // Generate a unique ID
-const generateUniqueId = async () => {
-  try {
-    // Buscar o paciente com o maior ID numérico
-    const { data, error } = await supabase
-      .from('patients')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1);
-      
-    if (error) {
-      throw error;
+const generateUniqueId = (): string => {
+  // Fallback para geração local
+  const storedPatients = localStorage.getItem('patients');
+  if (storedPatients) {
+    const patients = JSON.parse(storedPatients);
+    if (patients.length === 0) {
+      return "001";
     }
-    
-    if (data && data.length > 0) {
-      const highestId = parseInt(data[0].id);
-      return (highestId + 1).toString().padStart(3, '0');
-    }
-    
-    return "001";
-  } catch (error) {
-    console.error("Erro ao gerar ID:", error);
-    
-    // Fallback para geração local
-    const storedPatients = localStorage.getItem('patients');
-    if (storedPatients) {
-      const patients = JSON.parse(storedPatients);
-      if (patients.length === 0) {
-        return "001";
-      }
-      const highestId = Math.max(...patients.map((p: any) => parseInt(p.id)));
-      return (highestId + 1).toString().padStart(3, '0');
-    }
-    
-    return "001";
+    const highestId = Math.max(...patients.map((p: any) => parseInt(p.id)));
+    return (highestId + 1).toString().padStart(3, '0');
   }
+  
+  return "001";
 };
 
 // Save new patient or update existing one
-export const savePatient = async (patient: any): Promise<Patient | null> => {
+export const savePatient = (patient: any): Patient => {
   try {
     let patientToSave = { ...patient };
     
     // Se não houver ID, gerar um novo
     if (!patientToSave.id) {
-      patientToSave.id = await generateUniqueId();
+      patientToSave.id = generateUniqueId();
       
       // Adicionar campos de recepção e data para novos pacientes
       const now = new Date();
@@ -230,50 +192,59 @@ export const savePatient = async (patient: any): Promise<Patient | null> => {
         status: patientToSave.status || "Agendado"
       };
     }
+
+    // Backup no localStorage e persistência assíncrona no Supabase
+    const savedPatient = saveToLocalStorage(patientToSave);
     
-    // Preparar dados para Supabase (adaptar campos)
-    const supabasePatient = {
-      id: patientToSave.id,
-      name: patientToSave.name,
-      cpf: patientToSave.cpf,
-      phone: patientToSave.phone,
-      date: patientToSave.date,
-      time: patientToSave.time,
-      status: patientToSave.status,
-      reception: patientToSave.reception,
-      specialty: patientToSave.specialty,
-      professional: patientToSave.professional,
-      observations: patientToSave.observations,
-      redirected: patientToSave.redirected || false,
-      redirection_time: patientToSave.redirectionTime,
-      allergies: patientToSave.allergies || [],
-      nursing_data: patientToSave.nursingData ? JSON.stringify(patientToSave.nursingData) : null
-    };
+    // Atualizar no Supabase de forma assíncrona
+    savePatientToSupabase(savedPatient).catch(err => 
+      console.error("Erro ao salvar paciente no Supabase:", err)
+    );
     
-    const { data, error } = await supabase
-      .from('patients')
-      .upsert(supabasePatient, { onConflict: 'id' })
-      .select()
-      .single();
-      
-    if (error) {
-      throw error;
-    }
-    
-    // Backup no localStorage
-    saveToLocalStorage(patientToSave);
-    
-    return {
-      ...data,
-      nursingData: data.nursing_data ? JSON.parse(data.nursing_data) : {},
-      redirectionTime: data.redirection_time,
-      allergies: data.allergies || []
-    };
+    return savedPatient;
   } catch (error) {
     console.error("Erro ao salvar paciente:", error);
     
     // Fallback para localStorage
     return saveToLocalStorage(patient);
+  }
+};
+
+// Função para salvar o paciente no Supabase de forma assíncrona
+const savePatientToSupabase = async (patient: Patient) => {
+  try {
+    // Preparar dados para Supabase (adaptar campos)
+    const supabasePatient = {
+      id: patient.id,
+      name: patient.name,
+      cpf: patient.cpf,
+      phone: patient.phone,
+      date: patient.date,
+      time: patient.time,
+      status: patient.status,
+      reception: patient.reception,
+      specialty: patient.specialty,
+      professional: patient.professional,
+      observations: patient.observations,
+      redirected: patient.redirected || false,
+      redirection_time: patient.redirectionTime,
+      allergies: patient.allergies || [],
+      nursing_data: patient.nursingData ? JSON.stringify(patient.nursingData) : null
+    };
+    
+    const { data, error } = await supabase
+      .from('patients')
+      .upsert(supabasePatient, { onConflict: 'id' })
+      .select();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Erro ao salvar paciente no Supabase:", error);
+    throw error;
   }
 };
 
@@ -360,10 +331,10 @@ export const clearDraftPatient = () => {
 };
 
 // Update patient status and send to ambulatory
-export const confirmPatientAppointment = async (patientId: string, appointmentData: any) => {
+export const confirmPatientAppointment = (patientId: string, appointmentData: any) => {
   try {
     // Buscar paciente
-    const patient = await getPatientById(patientId);
+    const patient = getPatientById(patientId);
     
     if (!patient) {
       console.error("Paciente não encontrado:", patientId);
@@ -378,7 +349,7 @@ export const confirmPatientAppointment = async (patientId: string, appointmentDa
     };
     
     // Salvar paciente atualizado
-    const savedPatient = await savePatient(updatedPatient);
+    const savedPatient = savePatient(updatedPatient);
     
     if (!savedPatient) {
       console.error("Falha ao salvar paciente:", patientId);
@@ -386,7 +357,7 @@ export const confirmPatientAppointment = async (patientId: string, appointmentDa
     }
     
     // Atualizar lista ambulatorial (simulando relação com o banco de dados)
-    await updateAmbulatoryPatient(savedPatient);
+    updateAmbulatoryPatient(savedPatient);
     
     return savedPatient;
   } catch (error) {
@@ -433,7 +404,7 @@ export const getAmbulatoryPatients = () => {
 };
 
 // Update or add patient to ambulatory
-export const updateAmbulatoryPatient = async (patient: any) => {
+export const updateAmbulatoryPatient = (patient: any) => {
   try {
     // Buscar lista ambulatorial atual
     const ambulatoryPatients = getAmbulatoryPatients();
@@ -471,10 +442,10 @@ export const updateAmbulatoryPatient = async (patient: any) => {
 };
 
 // Update patient status when redirected from doctor
-export const updatePatientRedirection = async (patientId: string, destination: string) => {
+export const updatePatientRedirection = (patientId: string, destination: string) => {
   try {
     // Buscar paciente
-    const patient = await getPatientById(patientId);
+    const patient = getPatientById(patientId);
     
     if (!patient) {
       console.error("Paciente não encontrado:", patientId);
@@ -490,7 +461,7 @@ export const updatePatientRedirection = async (patientId: string, destination: s
     };
     
     // Salvar paciente atualizado
-    const savedPatient = await savePatient(updatedPatient);
+    const savedPatient = savePatient(updatedPatient);
     
     return savedPatient;
   } catch (error) {

@@ -38,9 +38,14 @@ const Nursing = () => {
   
   useEffect(() => {
     // Load patients
-    const loadPatients = () => {
-      const allPatients = getPatients();
-      setPatients(allPatients);
+    const loadPatients = async () => {
+      try {
+        const result = await getPatients();
+        setPatients(result);
+      } catch (error) {
+        console.error("Erro ao carregar pacientes:", error);
+        setPatients([]);
+      }
     };
     
     loadPatients();
