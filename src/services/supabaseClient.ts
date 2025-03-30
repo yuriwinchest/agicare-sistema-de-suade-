@@ -1,19 +1,11 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// Estas URLs serão fornecidas pelo Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase URL ou chave anônima não definidas. Verifique suas variáveis de ambiente.');
-}
+// Fornecendo URLs padrão para desenvolvimento quando as variáveis de ambiente não estiverem definidas
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-url.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 // Criação do cliente Supabase
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Tipo para definir os dados do paciente
 export type Patient = {
