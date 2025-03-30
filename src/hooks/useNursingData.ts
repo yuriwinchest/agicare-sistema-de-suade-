@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNotification } from './useNotification';
 import { saveNursingData, syncOfflineData, NursingDataType } from '@/services/nursingDataService';
+import { supabase } from '@/services/supabaseClient';
 
 export const useNursingData = (patientId: string) => {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -9,32 +10,32 @@ export const useNursingData = (patientId: string) => {
   const { success, error } = useNotification();
 
   // Função para salvar sinais vitais
-  const saveVitalSigns = (data: any) => {
-    const result = saveNursingData(patientId, 'vitalSigns', data);
+  const saveVitalSigns = async (data: any) => {
+    const result = await saveNursingData(patientId, 'vitalSigns', data);
     return result;
   };
 
   // Função para salvar anamnese
-  const saveAnamnesis = (data: any) => {
-    const result = saveNursingData(patientId, 'anamnesis', data);
+  const saveAnamnesis = async (data: any) => {
+    const result = await saveNursingData(patientId, 'anamnesis', data);
     return result;
   };
 
   // Função para salvar exame físico
-  const savePhysicalExam = (data: any) => {
-    const result = saveNursingData(patientId, 'physicalExam', data);
+  const savePhysicalExam = async (data: any) => {
+    const result = await saveNursingData(patientId, 'physicalExam', data);
     return result;
   };
 
   // Função para salvar balanço hídrico
-  const saveHydricBalance = (data: any) => {
-    const result = saveNursingData(patientId, 'hydricBalance', data);
+  const saveHydricBalance = async (data: any) => {
+    const result = await saveNursingData(patientId, 'hydricBalance', data);
     return result;
   };
 
   // Função para salvar evolução
-  const saveNursingEvolution = (data: any) => {
-    const result = saveNursingData(patientId, 'evolution', {
+  const saveNursingEvolution = async (data: any) => {
+    const result = await saveNursingData(patientId, 'evolution', {
       date: data.date,
       time: data.time,
       evolution: data.evolution,
@@ -43,14 +44,14 @@ export const useNursingData = (patientId: string) => {
   };
 
   // Função para salvar procedimentos
-  const saveProcedures = (data: any) => {
-    const result = saveNursingData(patientId, 'procedures', data);
+  const saveProcedures = async (data: any) => {
+    const result = await saveNursingData(patientId, 'procedures', data);
     return result;
   };
 
   // Função para salvar medicações
-  const saveMedications = (data: any) => {
-    const result = saveNursingData(patientId, 'medication', data);
+  const saveMedications = async (data: any) => {
+    const result = await saveNursingData(patientId, 'medication', data);
     return result;
   };
 
@@ -81,8 +82,25 @@ export const useNursingData = (patientId: string) => {
     }
   };
 
-  // Detecta mudanças na conectividade e tenta sincronizar
+  // Configurar subscription para atualizações em tempo real
   useEffect(() => {
+    // Inscrever-se para atualizações em tempo real do paciente
+    const subscription = supabase
+      .channel(`patient-${patientId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'patients',
+        filter: `id=eq.${patientId}`
+      }, 
+      () => {
+        success("Dados atualizados", {
+          description: "Os dados do paciente foram atualizados no servidor"
+        });
+      })
+      .subscribe();
+    
+    // Detecta mudanças na conectividade e tenta sincronizar
     const handleOnline = () => {
       success("Conexão restaurada", {
         description: "Iniciando sincronização automática..."
@@ -92,11 +110,12 @@ export const useNursingData = (patientId: string) => {
     
     window.addEventListener('online', handleOnline);
     
-    // Limpa os listeners quando o componente é desmontado
+    // Limpa as inscrições quando o componente é desmontado
     return () => {
       window.removeEventListener('online', handleOnline);
+      subscription.unsubscribe();
     };
-  }, []);
+  }, [patientId]);
 
   return {
     saveVitalSigns,

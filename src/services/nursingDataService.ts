@@ -1,5 +1,6 @@
 
-import { savePatient, getPatientById } from './patientService';
+import { supabase } from './supabaseClient';
+import { getPatientById, savePatient } from './patientService';
 
 // Interfaces para tipagem dos dados
 export interface VitalSigns {
@@ -74,10 +75,10 @@ export interface OfflineSyncItem {
 }
 
 // Adiciona ou atualiza os sinais vitais de um paciente
-export const saveNursingData = (patientId: string, dataType: NursingDataType, data: any): boolean => {
+export const saveNursingData = async (patientId: string, dataType: NursingDataType, data: any): Promise<boolean> => {
   try {
     // Busca o paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     
     if (!patient) {
       console.error("Paciente não encontrado:", patientId);
@@ -111,10 +112,10 @@ export const saveNursingData = (patientId: string, dataType: NursingDataType, da
     }
     
     // Salva o paciente atualizado
-    savePatient(patient);
+    await savePatient(patient);
     
     // Adiciona à fila de sincronização offline
-    addToOfflineQueue(patientId, dataType, data);
+    await addToOfflineQueue(patientId, dataType, data);
     
     return true;
   } catch (error) {
@@ -127,35 +128,89 @@ export const saveNursingData = (patientId: string, dataType: NursingDataType, da
 const OFFLINE_SYNC_QUEUE_KEY = 'nursingOfflineSyncQueue';
 
 // Adiciona um item à fila de sincronização offline
-const addToOfflineQueue = (patientId: string, dataType: NursingDataType, data: any): void => {
+const addToOfflineQueue = async (patientId: string, dataType: NursingDataType, data: any): Promise<void> => {
   try {
-    // Obtém a fila atual
-    const queue = getOfflineQueue();
+    const syncItem = {
+      patient_id: patientId,
+      data_type: dataType,
+      data: JSON.stringify(data),
+      timestamp: Date.now(),
+      synced: false
+    };
     
-    // Adiciona o novo item
+    // Salvar no Supabase
+    const { error } = await supabase
+      .from('offline_sync_queue')
+      .insert(syncItem);
+      
+    if (error) {
+      throw error;
+    }
+    
+    // Backup no localStorage
+    const queue = getOfflineQueueFromLocalStorage();
     queue.push({
       patientId,
       dataType,
+      data,
       timestamp: Date.now(),
-      synced: false,
-      data
+      synced: false
     });
     
-    // Salva a fila atualizada
     localStorage.setItem(OFFLINE_SYNC_QUEUE_KEY, JSON.stringify(queue));
   } catch (error) {
     console.error("Erro ao adicionar à fila de sincronização offline:", error);
+    
+    // Fallback para localStorage
+    const queue = getOfflineQueueFromLocalStorage();
+    queue.push({
+      patientId,
+      dataType,
+      data,
+      timestamp: Date.now(),
+      synced: false
+    });
+    
+    localStorage.setItem(OFFLINE_SYNC_QUEUE_KEY, JSON.stringify(queue));
   }
 };
 
-// Obtém a fila de sincronização offline
-export const getOfflineQueue = (): OfflineSyncItem[] => {
+// Obtém a fila de sincronização offline do localStorage (fallback)
+const getOfflineQueueFromLocalStorage = (): OfflineSyncItem[] => {
   try {
     const queue = localStorage.getItem(OFFLINE_SYNC_QUEUE_KEY);
     return queue ? JSON.parse(queue) : [];
   } catch (error) {
-    console.error("Erro ao obter fila de sincronização offline:", error);
+    console.error("Erro ao obter fila de sincronização offline do localStorage:", error);
     return [];
+  }
+};
+
+// Obtém a fila de sincronização offline
+export const getOfflineQueue = async (): Promise<OfflineSyncItem[]> => {
+  try {
+    // Tentar buscar do Supabase
+    const { data, error } = await supabase
+      .from('offline_sync_queue')
+      .select('*')
+      .order('timestamp', { ascending: false });
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data.map(item => ({
+      patientId: item.patient_id,
+      dataType: item.data_type as NursingDataType,
+      data: JSON.parse(item.data),
+      timestamp: item.timestamp,
+      synced: item.synced
+    }));
+  } catch (error) {
+    console.error("Erro ao obter fila de sincronização offline do Supabase:", error);
+    
+    // Fallback para localStorage
+    return getOfflineQueueFromLocalStorage();
   }
 };
 
@@ -167,25 +222,38 @@ export const syncOfflineData = async (): Promise<boolean> => {
       return false;
     }
     
-    const queue = getOfflineQueue();
+    const queue = await getOfflineQueue();
     const unsyncedItems = queue.filter(item => !item.synced);
     
     if (unsyncedItems.length === 0) {
       return true;
     }
     
-    // Simula a sincronização com um servidor externo
-    // Em uma implementação real, aqui seria feita uma chamada à API
+    // Em uma implementação real com Supabase, aqui seria a sincronização com o servidor
     for (const item of unsyncedItems) {
-      // Simula envio para API
       console.log(`Sincronizando dados de ${item.dataType} para paciente ${item.patientId}`);
       
-      // Marca como sincronizado
-      item.synced = true;
+      // Atualizar o status no Supabase
+      const { error } = await supabase
+        .from('offline_sync_queue')
+        .update({ synced: true })
+        .eq('patient_id', item.patientId)
+        .eq('data_type', item.dataType)
+        .eq('timestamp', item.timestamp);
+        
+      if (error) {
+        console.error("Erro ao atualizar status de sincronização:", error);
+      }
     }
     
-    // Atualiza a fila
-    localStorage.setItem(OFFLINE_SYNC_QUEUE_KEY, JSON.stringify(queue));
+    // Atualizar o localStorage como backup
+    const localQueue = getOfflineQueueFromLocalStorage();
+    for (const item of localQueue) {
+      if (!item.synced) {
+        item.synced = true;
+      }
+    }
+    localStorage.setItem(OFFLINE_SYNC_QUEUE_KEY, JSON.stringify(localQueue));
     
     return true;
   } catch (error) {

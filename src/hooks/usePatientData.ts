@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { getPatientById } from "@/services/patientService";
+import { supabase } from "@/services/supabaseClient";
 
 export const usePatientData = (patientId: string | undefined) => {
   const [patientData, setPatientData] = useState<any>(null);
@@ -8,7 +9,7 @@ export const usePatientData = (patientId: string | undefined) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPatientData = () => {
+    const fetchPatientData = async () => {
       setLoading(true);
       
       if (!patientId) {
@@ -18,7 +19,7 @@ export const usePatientData = (patientId: string | undefined) => {
       }
       
       try {
-        const patient = getPatientById(patientId);
+        const patient = await getPatientById(patientId);
         
         if (patient) {
           setPatientData(patient);
@@ -35,6 +36,25 @@ export const usePatientData = (patientId: string | undefined) => {
     };
 
     fetchPatientData();
+    
+    // Configurar assinatura para atualizações em tempo real
+    const subscription = supabase
+      .channel(`patient-${patientId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'patients',
+        filter: `id=eq.${patientId}`
+      }, 
+      () => {
+        console.log("Dados do paciente atualizados, buscando novos dados...");
+        fetchPatientData();
+      })
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [patientId]);
 
   return { patientData, loading, error };

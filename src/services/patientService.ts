@@ -1,140 +1,327 @@
-// Mock database/storage for patients
-let patients: any[] = [
-  { id: "001", name: "Carlos Ferreira", cpf: "123.456.789-01", phone: "(11) 98765-4321", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "14:30", status: "Agendado" },
-  { id: "002", name: "Maria Silva", cpf: "987.654.321-09", phone: "(11) 91234-5678", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "15:00", status: "Confirmado" },
-  { id: "003", name: "João Santos", cpf: "456.789.123-45", phone: "(11) 97890-1234", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "15:30", status: "Aguardando" },
-  { id: "004", name: "Ana Oliveira", cpf: "789.123.456-78", phone: "(11) 94567-8901", reception: "RECEPÇÃO CENTRAL", date: "07/05/2024", time: "16:00", status: "Confirmado" },
-];
+import { supabase, Patient } from './supabaseClient';
 
-// Initialize from localStorage if available
-const initFromLocalStorage = () => {
+// Função para iniciar a migração de dados do localStorage para o Supabase, se necessário
+const migrateLocalDataIfNeeded = async () => {
   try {
+    // Verifica se já existe uma flag indicando que a migração foi feita
+    const migrationDone = localStorage.getItem('supabaseMigrationDone');
+    
+    if (migrationDone === 'true') {
+      return; // Migração já foi realizada
+    }
+
+    // Obtém pacientes do localStorage
     const storedPatients = localStorage.getItem('patients');
     if (storedPatients) {
-      patients = JSON.parse(storedPatients);
+      const patients = JSON.parse(storedPatients);
+      
+      // Insere cada paciente no Supabase
+      for (const patient of patients) {
+        await supabase.from('patients').upsert({
+          id: patient.id,
+          name: patient.name,
+          cpf: patient.cpf,
+          phone: patient.phone,
+          date: patient.date,
+          time: patient.time,
+          status: patient.status,
+          reception: patient.reception,
+          specialty: patient.specialty,
+          professional: patient.professional,
+          observations: patient.observations,
+          redirected: patient.redirected,
+          redirection_time: patient.redirectionTime,
+          // Converte o objeto nursingData para JSON se existir
+          nursing_data: patient.nursingData ? JSON.stringify(patient.nursingData) : null
+        }, { onConflict: 'id' });
+      }
+      
+      // Marca migração como concluída
+      localStorage.setItem('supabaseMigrationDone', 'true');
+      console.log('Migração de pacientes do localStorage para Supabase concluída');
     }
   } catch (error) {
-    console.error("Error loading patients from localStorage:", error);
+    console.error('Erro ao migrar dados:', error);
   }
 };
 
-// Save to localStorage
-const saveToLocalStorage = () => {
-  try {
-    localStorage.setItem('patients', JSON.stringify(patients));
-  } catch (error) {
-    console.error("Error saving patients to localStorage:", error);
-  }
-};
-
-// Initialize on service load
-initFromLocalStorage();
+// Iniciar migração quando o serviço é carregado
+migrateLocalDataIfNeeded();
 
 // Get all patients
-export const getPatients = () => {
-  // Always refresh from localStorage first to ensure we have the latest data
-  initFromLocalStorage();
-  return patients.map(patient => ({
-    ...patient,
-    // Ensure every patient has an allergies array
-    allergies: patient.allergies || []
-  }));
-};
-
-// Get active appointments (patients with status != "Atendido" and other completed statuses)
-export const getActiveAppointments = () => {
-  // Always refresh from localStorage first
-  initFromLocalStorage();
-  
-  // Filter out patients who have already been directed to other areas
-  return patients
-    .filter(patient => 
-      patient.status !== "Atendido" && 
-      patient.status !== "Medicação" && 
-      patient.status !== "Observação" &&
-      patient.status !== "Alta" &&
-      patient.status !== "Internação" &&
-      !patient.redirected  // Check for redirected flag
-    )
-    .map(patient => ({
+export const getPatients = async (): Promise<Patient[]> => {
+  try {
+    // Primeiro tenta buscar do Supabase
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*');
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data.map(patient => ({
       ...patient,
+      nursingData: patient.nursing_data ? JSON.parse(patient.nursing_data) : {},
+      // Converte campos para o formato esperado pelo frontend
+      redirectionTime: patient.redirection_time,
+      // Garante que sempre exista um array de alergias
       allergies: patient.allergies || []
     }));
+  } catch (error) {
+    console.error("Erro ao buscar pacientes:", error);
+    
+    // Fallback para localStorage em caso de erro
+    const storedPatients = localStorage.getItem('patients');
+    if (storedPatients) {
+      return JSON.parse(storedPatients).map((patient: any) => ({
+        ...patient,
+        allergies: patient.allergies || []
+      }));
+    }
+    
+    return [];
+  }
+};
+
+// Get active appointments
+export const getActiveAppointments = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .not('status', 'in', '("Atendido","Medicação","Observação","Alta","Internação")')
+      .eq('redirected', false);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data.map(patient => ({
+      ...patient,
+      nursingData: patient.nursing_data ? JSON.parse(patient.nursing_data) : {},
+      redirectionTime: patient.redirection_time,
+      allergies: patient.allergies || []
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar consultas ativas:", error);
+    
+    // Fallback para localStorage
+    const storedPatients = localStorage.getItem('patients');
+    if (storedPatients) {
+      return JSON.parse(storedPatients)
+        .filter((patient: any) => 
+          patient.status !== "Atendido" && 
+          patient.status !== "Medicação" && 
+          patient.status !== "Observação" &&
+          patient.status !== "Alta" &&
+          patient.status !== "Internação" &&
+          !patient.redirected
+        )
+        .map((patient: any) => ({
+          ...patient,
+          allergies: patient.allergies || []
+        }));
+    }
+    
+    return [];
+  }
 };
 
 // Get patient by ID
-export const getPatientById = (id: string) => {
-  // Always refresh from localStorage first
-  initFromLocalStorage();
-  
-  // Find patient by ID
-  const patient = patients.find(patient => patient.id === id);
-  
-  if (patient) {
-    // Ensure patient has all necessary fields for PatientInfoHeader
+export const getPatientById = async (id: string): Promise<Patient | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error) {
+      throw error;
+    }
+    
+    if (!data) {
+      return null;
+    }
+    
     return {
-      ...patient,
-      // Always provide an allergies array
-      allergies: patient.allergies || []
+      ...data,
+      nursingData: data.nursing_data ? JSON.parse(data.nursing_data) : {},
+      redirectionTime: data.redirection_time,
+      allergies: data.allergies || []
     };
+  } catch (error) {
+    console.error("Erro ao buscar paciente:", error);
+    
+    // Fallback para localStorage
+    const storedPatients = localStorage.getItem('patients');
+    if (storedPatients) {
+      const patient = JSON.parse(storedPatients).find((p: any) => p.id === id);
+      if (patient) {
+        return {
+          ...patient,
+          allergies: patient.allergies || []
+        };
+      }
+    }
+    
+    return null;
   }
-  
-  return null;
 };
 
 // Generate a unique ID
-const generateUniqueId = () => {
-  // Get the last ID in the patients array and increment it
-  if (patients.length === 0) {
+const generateUniqueId = async () => {
+  try {
+    // Buscar o paciente com o maior ID numérico
+    const { data, error } = await supabase
+      .from('patients')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+      
+    if (error) {
+      throw error;
+    }
+    
+    if (data && data.length > 0) {
+      const highestId = parseInt(data[0].id);
+      return (highestId + 1).toString().padStart(3, '0');
+    }
+    
+    return "001";
+  } catch (error) {
+    console.error("Erro ao gerar ID:", error);
+    
+    // Fallback para geração local
+    const storedPatients = localStorage.getItem('patients');
+    if (storedPatients) {
+      const patients = JSON.parse(storedPatients);
+      if (patients.length === 0) {
+        return "001";
+      }
+      const highestId = Math.max(...patients.map((p: any) => parseInt(p.id)));
+      return (highestId + 1).toString().padStart(3, '0');
+    }
+    
     return "001";
   }
-  
-  // Extract the highest numeric ID and increment by 1
-  const highestId = Math.max(...patients.map(p => parseInt(p.id)));
-  return (highestId + 1).toString().padStart(3, '0');
 };
 
 // Save new patient or update existing one
-export const savePatient = (patient: any) => {
-  // Always refresh from localStorage first
-  initFromLocalStorage();
-  
-  const existingPatientIndex = patients.findIndex(p => p.id === patient.id);
-  
-  if (existingPatientIndex >= 0) {
-    // Update existing patient
-    patients[existingPatientIndex] = { ...patients[existingPatientIndex], ...patient };
-  } else {
-    // Generate a new ID if none exists
-    const newPatient = { ...patient };
-    if (!newPatient.id) {
-      newPatient.id = generateUniqueId();
+export const savePatient = async (patient: any): Promise<Patient | null> => {
+  try {
+    let patientToSave = { ...patient };
+    
+    // Se não houver ID, gerar um novo
+    if (!patientToSave.id) {
+      patientToSave.id = await generateUniqueId();
+      
+      // Adicionar campos de recepção e data para novos pacientes
+      const now = new Date();
+      const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      const date = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+      
+      patientToSave = {
+        ...patientToSave,
+        reception: "RECEPÇÃO CENTRAL",
+        date,
+        time,
+        status: patientToSave.status || "Agendado"
+      };
     }
     
-    // Add reception and date fields for new patients
-    const now = new Date();
-    const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const date = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    // Preparar dados para Supabase (adaptar campos)
+    const supabasePatient = {
+      id: patientToSave.id,
+      name: patientToSave.name,
+      cpf: patientToSave.cpf,
+      phone: patientToSave.phone,
+      date: patientToSave.date,
+      time: patientToSave.time,
+      status: patientToSave.status,
+      reception: patientToSave.reception,
+      specialty: patientToSave.specialty,
+      professional: patientToSave.professional,
+      observations: patientToSave.observations,
+      redirected: patientToSave.redirected || false,
+      redirection_time: patientToSave.redirectionTime,
+      allergies: patientToSave.allergies || [],
+      nursing_data: patientToSave.nursingData ? JSON.stringify(patientToSave.nursingData) : null
+    };
     
-    // Set default status for new patients
-    if (!newPatient.status) {
-      newPatient.status = "Agendado";
+    const { data, error } = await supabase
+      .from('patients')
+      .upsert(supabasePatient, { onConflict: 'id' })
+      .select()
+      .single();
+      
+    if (error) {
+      throw error;
     }
     
-    // Add new patient to the beginning of the array
-    patients.unshift({ 
-      ...newPatient, 
-      reception: "RECEPÇÃO CENTRAL",
-      date,
-      time
-    });
+    // Backup no localStorage
+    saveToLocalStorage(patientToSave);
+    
+    return {
+      ...data,
+      nursingData: data.nursing_data ? JSON.parse(data.nursing_data) : {},
+      redirectionTime: data.redirection_time,
+      allergies: data.allergies || []
+    };
+  } catch (error) {
+    console.error("Erro ao salvar paciente:", error);
+    
+    // Fallback para localStorage
+    return saveToLocalStorage(patient);
   }
-  
-  // Save to localStorage
-  saveToLocalStorage();
-  
-  // Return the patient (with the new ID if it was just created)
-  return patients.find(p => p.cpf === patient.cpf) || patient;
+};
+
+// Função auxiliar para salvar no localStorage (como fallback)
+const saveToLocalStorage = (patient: any): Patient => {
+  try {
+    const storedPatients = localStorage.getItem('patients');
+    let patients: any[] = storedPatients ? JSON.parse(storedPatients) : [];
+    
+    const existingPatientIndex = patients.findIndex(p => p.id === patient.id);
+    
+    if (existingPatientIndex >= 0) {
+      // Atualizar paciente existente
+      patients[existingPatientIndex] = { ...patients[existingPatientIndex], ...patient };
+    } else {
+      // Gerar um novo ID se necessário
+      if (!patient.id) {
+        if (patients.length === 0) {
+          patient.id = "001";
+        } else {
+          const highestId = Math.max(...patients.map(p => parseInt(p.id)));
+          patient.id = (highestId + 1).toString().padStart(3, '0');
+        }
+        
+        // Adicionar campos de recepção e data para novos pacientes
+        const now = new Date();
+        const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        const date = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        
+        patient = {
+          ...patient,
+          reception: "RECEPÇÃO CENTRAL",
+          date,
+          time,
+          status: patient.status || "Agendado"
+        };
+      }
+      
+      // Adicionar novo paciente
+      patients.unshift(patient);
+    }
+    
+    localStorage.setItem('patients', JSON.stringify(patients));
+    return patient;
+  } catch (error) {
+    console.error("Erro ao salvar paciente no localStorage:", error);
+    return patient;
+  }
 };
 
 // Save draft patient data (during form filling)
@@ -173,29 +360,39 @@ export const clearDraftPatient = () => {
 };
 
 // Update patient status and send to ambulatory
-export const confirmPatientAppointment = (patientId: string, appointmentData: any) => {
-  // Always refresh from localStorage first
-  initFromLocalStorage();
-  
-  const patientIndex = patients.findIndex(p => p.id === patientId);
-  
-  if (patientIndex >= 0) {
-    patients[patientIndex] = { 
-      ...patients[patientIndex], 
+export const confirmPatientAppointment = async (patientId: string, appointmentData: any) => {
+  try {
+    // Buscar paciente
+    const patient = await getPatientById(patientId);
+    
+    if (!patient) {
+      console.error("Paciente não encontrado:", patientId);
+      return null;
+    }
+    
+    // Atualizar dados do paciente com os dados do agendamento
+    const updatedPatient = {
+      ...patient,
       ...appointmentData,
-      status: "Aguardando" 
+      status: "Aguardando"
     };
     
-    // Update ambulatory list (simulating database relation)
-    updateAmbulatoryPatient(patients[patientIndex]);
+    // Salvar paciente atualizado
+    const savedPatient = await savePatient(updatedPatient);
     
-    // Save to localStorage
-    saveToLocalStorage();
+    if (!savedPatient) {
+      console.error("Falha ao salvar paciente:", patientId);
+      return null;
+    }
     
-    return patients[patientIndex];
+    // Atualizar lista ambulatorial (simulando relação com o banco de dados)
+    await updateAmbulatoryPatient(savedPatient);
+    
+    return savedPatient;
+  } catch (error) {
+    console.error("Erro ao confirmar agendamento:", error);
+    return null;
   }
-  
-  return null;
 };
 
 // Mock ambulatory patients storage
@@ -236,58 +433,68 @@ export const getAmbulatoryPatients = () => {
 };
 
 // Update or add patient to ambulatory
-export const updateAmbulatoryPatient = (patient: any) => {
-  // Always refresh from localStorage
-  initAmbulatoryFromLocalStorage();
-  
-  const existingIndex = ambulatoryPatients.findIndex(p => p.id === patient.id);
-  
-  if (existingIndex >= 0) {
-    ambulatoryPatients[existingIndex] = { ...ambulatoryPatients[existingIndex], ...patient };
-  } else {
-    // Convert reception patient to ambulatory format
-    ambulatoryPatients.unshift({
-      id: patient.id,
-      name: patient.name,
-      priority: "Normal",
-      time: patient.time,
-      specialty: patient.specialty,
-      professional: patient.professional,
-      triage: { 
-        temp: "36.5°C", 
-        pressure: "120/80", 
-        symptoms: patient.observations || "Sem sintomas relatados" 
-      }
-    });
+export const updateAmbulatoryPatient = async (patient: any) => {
+  try {
+    // Buscar lista ambulatorial atual
+    const ambulatoryPatients = getAmbulatoryPatients();
+    
+    const existingIndex = ambulatoryPatients.findIndex(p => p.id === patient.id);
+    
+    if (existingIndex >= 0) {
+      // Atualizar paciente existente
+      ambulatoryPatients[existingIndex] = { ...ambulatoryPatients[existingIndex], ...patient };
+    } else {
+      // Converter paciente da recepção para o formato ambulatorial
+      ambulatoryPatients.unshift({
+        id: patient.id,
+        name: patient.name,
+        priority: "Normal",
+        time: patient.time,
+        specialty: patient.specialty,
+        professional: patient.professional,
+        triage: { 
+          temp: "36.5°C", 
+          pressure: "120/80", 
+          symptoms: patient.observations || "Sem sintomas relatados" 
+        }
+      });
+    }
+    
+    // Salvar lista ambulatorial atualizada
+    saveAmbulatoryToLocalStorage();
+    
+    return patient;
+  } catch (error) {
+    console.error("Erro ao atualizar paciente ambulatorial:", error);
+    return patient;
   }
-  
-  // Save to localStorage
-  saveAmbulatoryToLocalStorage();
-  
-  return patient;
 };
 
 // Update patient status when redirected from doctor
-export const updatePatientRedirection = (patientId: string, destination: string) => {
-  // Always refresh from localStorage first
-  initFromLocalStorage();
-  
-  const patientIndex = patients.findIndex(p => p.id === patientId);
-  
-  if (patientIndex >= 0) {
-    // Update patient status to the destination
-    patients[patientIndex] = { 
-      ...patients[patientIndex], 
+export const updatePatientRedirection = async (patientId: string, destination: string) => {
+  try {
+    // Buscar paciente
+    const patient = await getPatientById(patientId);
+    
+    if (!patient) {
+      console.error("Paciente não encontrado:", patientId);
+      return null;
+    }
+    
+    // Atualizar status do paciente para o destino
+    const updatedPatient = {
+      ...patient,
       status: destination,
-      redirected: true,  // Add flag to mark as redirected
-      redirectionTime: new Date().toISOString()  // Add timestamp for when redirected
+      redirected: true,
+      redirectionTime: new Date().toISOString()
     };
     
-    // Save to localStorage
-    saveToLocalStorage();
+    // Salvar paciente atualizado
+    const savedPatient = await savePatient(updatedPatient);
     
-    return patients[patientIndex];
+    return savedPatient;
+  } catch (error) {
+    console.error("Erro ao atualizar redirecionamento do paciente:", error);
+    return null;
   }
-  
-  return null;
 };
