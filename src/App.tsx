@@ -25,6 +25,7 @@ import NursingAssessment from "./pages/NursingAssessment";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import SystemSummary from "./pages/SystemSummary";
+import SystemOverview from "./pages/SystemOverview";
 
 // Auth Provider
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
@@ -62,6 +63,7 @@ const App = () => (
                   <Route path="/nursing" element={<Nursing />} />
                   <Route path="/nursing/assessment/:id" element={<NursingAssessment />} />
                   <Route path="/system-summary" element={<SystemSummary />} />
+                  <Route path="/system-overview" element={<SystemOverview />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />

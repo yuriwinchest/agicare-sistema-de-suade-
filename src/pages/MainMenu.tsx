@@ -14,7 +14,8 @@ import {
   ClipboardList,
   ImagePlus,
   UserSearch,
-  ClipboardCheck
+  ClipboardCheck,
+  BookOpen
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -154,6 +155,13 @@ const MainMenu = () => {
       path: "/patient-consultation",
       color: "text-sky-500",
       bgColor: "bg-sky-50/30"
+    },
+    { 
+      icon: BookOpen, 
+      title: "Visão Geral do Sistema", 
+      path: "/system-overview",
+      color: "text-teal-500",
+      bgColor: "bg-teal-50/30"
     },
   ];
 
