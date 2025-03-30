@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -68,22 +69,35 @@ const PatientReception = () => {
   });
   
   useEffect(() => {
-    if (id) {
-      const patientData = getPatientById(id);
-      if (patientData) {
-        const formattedPatient = {
-          ...patientData,
-          allergies: patientData.allergies || []
-        };
-        setPatient(formattedPatient);
-      } else {
-        toast({
-          title: "Paciente não encontrado",
-          description: "Não foi possível encontrar os dados do paciente.",
-          variant: "destructive",
-        });
+    const loadPatient = async () => {
+      if (id) {
+        try {
+          const patientData = await getPatientById(id);
+          if (patientData) {
+            const formattedPatient = {
+              ...patientData,
+              allergies: patientData.allergies || []
+            };
+            setPatient(formattedPatient);
+          } else {
+            toast({
+              title: "Paciente não encontrado",
+              description: "Não foi possível encontrar os dados do paciente.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error loading patient:", error);
+          toast({
+            title: "Erro ao carregar dados",
+            description: "Ocorreu um erro ao buscar os dados do paciente.",
+            variant: "destructive",
+          });
+        }
       }
-    }
+    };
+    
+    loadPatient();
   }, [id, toast]);
   
   const handleChange = (field: string, value: string) => {

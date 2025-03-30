@@ -1,4 +1,3 @@
-
 import { supabase, Patient } from './supabaseClient';
 
 // Função para iniciar a migração de dados do localStorage para o Supabase, se necessário
@@ -49,7 +48,7 @@ const migrateLocalDataIfNeeded = async () => {
 // Iniciar migração quando o serviço é carregado
 migrateLocalDataIfNeeded();
 
-// Get all patients
+// Get all patients - now properly async
 export const getPatients = async (): Promise<Patient[]> => {
   try {
     // Primeiro tenta buscar do Supabase
@@ -107,20 +106,46 @@ export const getActiveAppointments = () => {
   return [];
 };
 
-// Get patient by ID - versão síncrona para compatibilidade
-export const getPatientById = (id: string): Patient | null => {
-  const storedPatients = localStorage.getItem('patients');
-  if (storedPatients) {
-    const patient = JSON.parse(storedPatients).find((p: any) => p.id === id);
-    if (patient) {
-      return {
-        ...patient,
-        allergies: patient.allergies || []
-      };
+// Get patient by ID - now properly async
+export const getPatientById = async (id: string): Promise<Patient | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
+    if (error) {
+      throw error;
     }
+    
+    if (!data) {
+      return null;
+    }
+    
+    return {
+      ...data,
+      nursingData: data.nursing_data ? JSON.parse(data.nursing_data) : {},
+      redirectionTime: data.redirection_time,
+      allergies: data.allergies || []
+    };
+  } catch (error) {
+    console.error("Erro ao buscar paciente:", error);
+    
+    // Fallback para localStorage
+    const storedPatients = localStorage.getItem('patients');
+    if (storedPatients) {
+      const patient = JSON.parse(storedPatients).find((p: any) => p.id === id);
+      if (patient) {
+        return {
+          ...patient,
+          allergies: patient.allergies || []
+        };
+      }
+    }
+    
+    return null;
   }
-  
-  return null;
 };
 
 // Get patient by ID async version

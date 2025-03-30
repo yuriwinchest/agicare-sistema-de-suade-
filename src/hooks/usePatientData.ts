@@ -19,7 +19,7 @@ export const usePatientData = (patientId: string | undefined) => {
       }
       
       try {
-        const patient = getPatientById(patientId);
+        const patient = await getPatientById(patientId);
         
         if (patient) {
           setPatientData(patient);

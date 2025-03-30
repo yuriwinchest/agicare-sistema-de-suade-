@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -37,8 +38,14 @@ const Reception = () => {
   
   // Load patients when component mounts
   useEffect(() => {
-    const loadPatientList = () => {
-      setPatients(getPatients());
+    const loadPatientList = async () => {
+      try {
+        const patientsData = await getPatients();
+        setPatients(patientsData);
+      } catch (error) {
+        console.error("Error loading patients:", error);
+        setPatients([]);
+      }
     };
     
     // Initial load
@@ -305,3 +312,4 @@ const Reception = () => {
 };
 
 export default Reception;
+
