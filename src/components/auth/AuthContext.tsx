@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "@/services/supabaseClient";
@@ -37,27 +36,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
 
-  // Check if user was previously logged in
   useEffect(() => {
     const checkSession = async () => {
-      // Check Supabase session first
       const { data: session } = await supabase.auth.getSession();
       
       if (session && session.session) {
-        // Get user data from Supabase
         const { data: userData } = await supabase.auth.getUser();
         
         if (userData && userData.user) {
-          // Try to get additional profile data from a profile table if you have one
-          // Or just use the basic data from auth
-          const user = {
+          const user: User = {
             id: userData.user.id,
             name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
             email: userData.user.email,
             role: userData.user.user_metadata?.role || 'doctor',
           };
           
-          // Check if we have stored local preferences
           const storedPrefs = localStorage.getItem("user_prefs");
           if (storedPrefs) {
             const prefs = JSON.parse(storedPrefs);
@@ -69,7 +62,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsAuthenticated(true);
         }
       } else {
-        // Fallback to local storage for development/demo
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
           setUser(JSON.parse(storedUser));
@@ -80,7 +72,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     checkSession();
     
-    // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         const { data: userData } = await supabase.auth.getUser();
@@ -109,7 +100,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signin = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Try to sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -118,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Erro ao fazer login:", error);
         
-        // Fallback to mock authentication for development/demo
         if (email && password) {
           const mockUser = {
             id: "1",
@@ -137,7 +126,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
       
-      // Successfully authenticated with Supabase
       if (data && data.user) {
         const user = {
           id: data.user.id,
@@ -162,10 +150,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signout = async () => {
     try {
-      // Sign out from Supabase
       await supabase.auth.signOut();
       
-      // Clear local storage and state
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem("user");
@@ -181,7 +167,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       
-      // Store unit/room preferences separately
       const prefs = {
         unit: updatedUser.unit,
         room: updatedUser.room,
