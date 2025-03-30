@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNotification } from './useNotification';
 import { saveNursingData, syncOfflineData } from '@/services/nursingDataService';
 import { supabase } from '@/services/supabaseClient';
+import { getPatientByIdAsync } from '@/services/patientService';
 
 export const useNursingData = (patientId: string) => {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -11,48 +12,83 @@ export const useNursingData = (patientId: string) => {
 
   // Função para salvar sinais vitais
   const saveVitalSigns = async (data: any) => {
-    const result = await saveNursingData(patientId, 'vitalSigns', data);
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'vitalSigns', data);
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar sinais vitais:", err);
+      return false;
+    }
   };
 
   // Função para salvar anamnese
   const saveAnamnesis = async (data: any) => {
-    const result = await saveNursingData(patientId, 'anamnesis', data);
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'anamnesis', data);
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar anamnese:", err);
+      return false;
+    }
   };
 
   // Função para salvar exame físico
   const savePhysicalExam = async (data: any) => {
-    const result = await saveNursingData(patientId, 'physicalExam', data);
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'physicalExam', data);
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar exame físico:", err);
+      return false;
+    }
   };
 
   // Função para salvar balanço hídrico
   const saveHydricBalance = async (data: any) => {
-    const result = await saveNursingData(patientId, 'hydricBalance', data);
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'hydricBalance', data);
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar balanço hídrico:", err);
+      return false;
+    }
   };
 
   // Função para salvar evolução
   const saveNursingEvolution = async (data: any) => {
-    const result = await saveNursingData(patientId, 'evolution', {
-      date: data.date,
-      time: data.time,
-      evolution: data.evolution,
-    });
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'evolution', {
+        date: data.date,
+        time: data.time,
+        evolution: data.evolution,
+      });
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar evolução:", err);
+      return false;
+    }
   };
 
   // Função para salvar procedimentos
   const saveProcedures = async (data: any) => {
-    const result = await saveNursingData(patientId, 'procedures', data);
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'procedures', data);
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar procedimentos:", err);
+      return false;
+    }
   };
 
   // Função para salvar medicações
   const saveMedications = async (data: any) => {
-    const result = await saveNursingData(patientId, 'medication', data);
-    return result;
+    try {
+      const result = await saveNursingData(patientId, 'medication', data);
+      return result;
+    } catch (err) {
+      console.error("Erro ao salvar medicações:", err);
+      return false;
+    }
   };
 
   // Função para forçar a sincronização dos dados offline

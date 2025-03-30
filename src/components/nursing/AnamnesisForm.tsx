@@ -14,7 +14,7 @@ interface AnamnesisFormProps {
     allergies: string;
     medications: string;
   };
-  onSave: (anamnesisData: any) => void;
+  onSave: (anamnesisData: any) => Promise<void>;
 }
 
 const AnamnesisForm = ({ initialValues, onSave }: AnamnesisFormProps) => {
@@ -34,8 +34,8 @@ const AnamnesisForm = ({ initialValues, onSave }: AnamnesisFormProps) => {
     setAnamnesisData(prev => ({ ...prev, [field]: value }));
   };
   
-  const handleSaveAnamnesis = () => {
-    onSave(anamnesisData);
+  const handleSaveAnamnesis = async () => {
+    await onSave(anamnesisData);
     
     toast({
       title: "Anamnese salva",

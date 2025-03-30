@@ -8,15 +8,15 @@ interface AssessmentContainerProps {
   patientData: any;
   nursingTab: string;
   setNursingTab: (tab: string) => void;
-  onSaveVitalSigns: (data: any) => void;
-  onSaveAnamnesis: (data: any) => void;
-  onSavePhysicalExam: (data: any) => void;
-  onSaveHydricBalance: (data: any) => void;
-  onSaveNursingEvolution: (data: any) => void;
-  onSaveProcedures: (data: any) => void;
-  onSaveMedications: (data: any) => void;
+  onSaveVitalSigns: (data: any) => Promise<void>;
+  onSaveAnamnesis: (data: any) => Promise<void>;
+  onSavePhysicalExam: (data: any) => Promise<void>;
+  onSaveHydricBalance: (data: any) => Promise<void>;
+  onSaveNursingEvolution: (data: any) => Promise<void>;
+  onSaveProcedures: (data: any) => Promise<void>;
+  onSaveMedications: (data: any) => Promise<void>;
   onCancel: () => void;
-  onFinish: () => void;
+  onFinish: () => Promise<void>;
 }
 
 const AssessmentContainer = ({

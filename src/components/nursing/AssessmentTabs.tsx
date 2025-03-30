@@ -13,13 +13,13 @@ interface AssessmentTabsProps {
   activeTab: string;
   onTabChange: (value: string) => void;
   patientData: any;
-  onSaveVitalSigns: (data: any) => void;
-  onSaveAnamnesis: (data: any) => void;
-  onSavePhysicalExam: (data: any) => void;
-  onSaveHydricBalance: (data: any) => void;
-  onSaveNursingEvolution: (data: any) => void;
-  onSaveProcedures: (data: any) => void;
-  onSaveMedications: (data: any) => void;
+  onSaveVitalSigns: (data: any) => Promise<void>;
+  onSaveAnamnesis: (data: any) => Promise<void>;
+  onSavePhysicalExam: (data: any) => Promise<void>;
+  onSaveHydricBalance: (data: any) => Promise<void>;
+  onSaveNursingEvolution: (data: any) => Promise<void>;
+  onSaveProcedures: (data: any) => Promise<void>;
+  onSaveMedications: (data: any) => Promise<void>;
 }
 
 const AssessmentTabs = ({ 
@@ -64,49 +64,49 @@ const AssessmentTabs = ({
       
       <TabsContent value="sinais-vitais" className="space-y-4">
         <VitalSignsForm 
-          initialValues={patientData.nursingData?.vitalSigns}
+          initialValues={patientData?.nursingData?.vitalSigns}
           onSave={onSaveVitalSigns}
         />
       </TabsContent>
       
       <TabsContent value="anamnese" className="space-y-4">
         <AnamnesisForm 
-          initialValues={patientData.nursingData?.anamnesis}
+          initialValues={patientData?.nursingData?.anamnesis}
           onSave={onSaveAnamnesis}
         />
       </TabsContent>
       
       <TabsContent value="exame-fisico" className="space-y-4">
         <PhysicalExamForm 
-          initialValues={patientData.nursingData?.physicalExam}
+          initialValues={patientData?.nursingData?.physicalExam}
           onSave={onSavePhysicalExam}
         />
       </TabsContent>
       
       <TabsContent value="balance-hidrico" className="space-y-4">
         <HydricBalanceForm 
-          initialValues={patientData.nursingData?.hydricBalance}
+          initialValues={patientData?.nursingData?.hydricBalance}
           onSave={onSaveHydricBalance}
         />
       </TabsContent>
       
       <TabsContent value="evolucao" className="space-y-4">
         <NursingEvolutionForm 
-          initialValues={patientData.nursingData?.evolution}
+          initialValues={patientData?.nursingData?.evolution}
           onSave={onSaveNursingEvolution}
         />
       </TabsContent>
       
       <TabsContent value="procedimentos" className="space-y-4">
         <ProceduresForm 
-          initialValues={patientData.nursingData?.procedures}
+          initialValues={patientData?.nursingData?.procedures}
           onSave={onSaveProcedures}
         />
       </TabsContent>
       
       <TabsContent value="medicacao" className="space-y-4">
         <MedicationCheckForm 
-          initialValues={patientData.nursingData?.medication}
+          initialValues={patientData?.nursingData?.medication}
           onSave={onSaveMedications}
         />
       </TabsContent>
