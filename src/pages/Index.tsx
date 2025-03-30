@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
 import { useNotification } from "@/hooks/useNotification";
-import { AlertCircle, CheckCircle, Info, AlertTriangle, ExternalLink, ArrowRight } from "lucide-react";
+import { AlertCircle, CheckCircle, Info, AlertTriangle, ExternalLink, ArrowRight, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -52,7 +52,7 @@ const Index = () => {
               <p className="mb-4 text-muted-foreground">
                 Escolha um dos módulos abaixo para começar, ou experimente as melhorias recentes na experiência do usuário:
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 <Button 
                   className="bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 flex items-center"
                   asChild
@@ -70,6 +70,16 @@ const Index = () => {
                   <Link to="/dashboard">
                     Dashboard
                     <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-indigo-500/30 text-indigo-600 dark:border-indigo-500/50 dark:text-indigo-400 flex items-center"
+                  asChild
+                >
+                  <Link to="/system-summary">
+                    Resumo do Sistema
+                    <FileText className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>

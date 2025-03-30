@@ -24,6 +24,7 @@ import Nursing from "./pages/Nursing";
 import NursingAssessment from "./pages/NursingAssessment";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import SystemSummary from "./pages/SystemSummary";
 
 // Auth Provider
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
@@ -60,6 +61,7 @@ const App = () => (
                   <Route path="/electronic-medical-record" element={<ElectronicMedicalRecord />} />
                   <Route path="/nursing" element={<Nursing />} />
                   <Route path="/nursing/assessment/:id" element={<NursingAssessment />} />
+                  <Route path="/system-summary" element={<SystemSummary />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />
