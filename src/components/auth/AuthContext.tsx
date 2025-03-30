@@ -86,10 +86,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: userData } = await supabase.auth.getUser();
         
         if (userData && userData.user) {
-          const user = {
+          const user: User = {
             id: userData.user.id,
             name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-            email: userData.user.email,
+            email: userData.user.email || '',
             role: userData.user.user_metadata?.role || 'doctor',
           };
           
