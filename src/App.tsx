@@ -27,7 +27,7 @@ import Index from "./pages/Index";
 import SystemSummary from "./pages/SystemSummary";
 import SystemOverview from "./pages/SystemOverview";
 
-// Auth Provider
+// Auth Provider - Now importing from the refactored structure
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
 import DestinationModal from "./components/auth/DestinationModal";
 import { SidebarProvider } from "./components/layout/SidebarContext";
