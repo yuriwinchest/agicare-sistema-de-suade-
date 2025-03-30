@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -10,21 +9,35 @@ import { Info, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Digite um email válido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [openTab, setOpenTab] = useState("implemented");
   const { signin } = useAuth();
   const { toast } = useToast();
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  
+  const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
     
     try {
-      const success = await signin(username, password);
+      const success = await signin(values.email, values.password);
       
       if (success) {
         toast({
@@ -72,43 +85,59 @@ const Login = () => {
           <div className="backdrop-blur-sm bg-white/10 rounded-lg border border-white/20 p-6">
             <p className="text-white/70 text-sm mb-6 text-center">Faça login</p>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-10"
-                  placeholder="Usuário"
-                  autoComplete="username"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="Email"
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-10"
+                          autoComplete="email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-200" />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              
-              <div>
-                <Input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-10"
-                  placeholder="Senha"
-                  autoComplete="current-password"
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Senha"
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 h-10"
+                          autoComplete="current-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-200" />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full bg-teal-400 hover:bg-teal-500 text-white"
-                disabled={isLoading}
-              >
-                {isLoading ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-teal-400 hover:bg-teal-500 text-white"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Entrando..." : "Entrar"}
+                </Button>
+              </form>
+            </Form>
             
             <div className="mt-6 pt-4 border-t border-white/10">
               <p className="text-center text-xs text-white/50">
-                Para fins de demonstração: <code className="bg-white/10 px-1 rounded">admin / senha</code>
+                Para fins de demonstração: <code className="bg-white/10 px-1 rounded">admin@example.com / senha123</code>
               </p>
             </div>
           </div>
