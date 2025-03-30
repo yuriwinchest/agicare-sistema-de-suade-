@@ -50,9 +50,9 @@ const NursingAssessment = () => {
     };
   }, []);
   
-  const handleSaveVitalSigns = (vitalSignsData: any) => {
+  const handleSaveVitalSigns = async (vitalSignsData: any) => {
     if (id) {
-      const success = saveVitalSigns(vitalSignsData);
+      const success = await saveVitalSigns(vitalSignsData);
       
       if (success) {
         notification.success("Sinais vitais salvos", {
@@ -66,9 +66,9 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleSaveAnamnesis = (anamnesisData: any) => {
+  const handleSaveAnamnesis = async (anamnesisData: any) => {
     if (id) {
-      const success = saveAnamnesis(anamnesisData);
+      const success = await saveAnamnesis(anamnesisData);
       
       if (success) {
         notification.success("Anamnese salva", {
@@ -82,9 +82,9 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleSavePhysicalExam = (data: any) => {
+  const handleSavePhysicalExam = async (data: any) => {
     if (id) {
-      const success = savePhysicalExam(data);
+      const success = await savePhysicalExam(data);
       if (success) {
         notification.success("Exame físico salvo", {
           description: "Os dados do exame físico foram salvos com sucesso!"
@@ -99,9 +99,9 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleSaveHydricBalance = (data: any) => {
+  const handleSaveHydricBalance = async (data: any) => {
     if (id) {
-      const success = saveHydricBalance(data);
+      const success = await saveHydricBalance(data);
       if (success) {
         notification.success("Balanço hídrico salvo", {
           description: "Os dados do balanço hídrico foram salvos com sucesso!"
@@ -116,9 +116,9 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleSaveNursingEvolution = (data: any) => {
+  const handleSaveNursingEvolution = async (data: any) => {
     if (id) {
-      const success = saveNursingEvolution(data);
+      const success = await saveNursingEvolution(data);
       if (success) {
         notification.success("Evolução salva", {
           description: "A evolução de enfermagem foi salva com sucesso!"
@@ -133,9 +133,9 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleSaveProcedures = (data: any) => {
+  const handleSaveProcedures = async (data: any) => {
     if (id) {
-      const success = saveProcedures(data);
+      const success = await saveProcedures(data);
       if (success) {
         notification.success("Procedimentos salvos", {
           description: "Os procedimentos foram salvos com sucesso!"
@@ -150,9 +150,9 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleSaveMedications = (data: any) => {
+  const handleSaveMedications = async (data: any) => {
     if (id) {
-      const success = saveMedications(data);
+      const success = await saveMedications(data);
       if (success) {
         notification.success("Medicações salvas", {
           description: "As medicações foram salvas com sucesso!"
@@ -165,7 +165,7 @@ const NursingAssessment = () => {
     }
   };
   
-  const handleFinishAssessment = () => {
+  const handleFinishAssessment = async () => {
     if (id) {
       // Tenta sincronizar os dados antes de finalizar
       if (!isOnline) {
@@ -175,7 +175,7 @@ const NursingAssessment = () => {
         });
       } else {
         // Sincroniza os dados
-        syncData();
+        await syncData();
       }
       
       notification.success("Avaliação concluída", {

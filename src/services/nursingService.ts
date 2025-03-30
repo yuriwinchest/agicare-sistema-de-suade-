@@ -102,7 +102,7 @@ interface NursingAssessmentData {
 }
 
 // Salvar sinais vitais para um paciente
-export const saveVitalSigns = (patientId: string, vitalSigns: VitalSigns): boolean => {
+export const saveVitalSigns = async (patientId: string, vitalSigns: VitalSigns): Promise<boolean> => {
   try {
     // Sanitizar dados
     Object.keys(vitalSigns).forEach(key => {
@@ -114,7 +114,7 @@ export const saveVitalSigns = (patientId: string, vitalSigns: VitalSigns): boole
     });
     
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -123,7 +123,7 @@ export const saveVitalSigns = (patientId: string, vitalSigns: VitalSigns): boole
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -136,7 +136,7 @@ export const saveVitalSigns = (patientId: string, vitalSigns: VitalSigns): boole
 };
 
 // Salvar anamnese para um paciente
-export const saveAnamnesis = (patientId: string, anamnesis: AnamnesisData): boolean => {
+export const saveAnamnesis = async (patientId: string, anamnesis: AnamnesisData): Promise<boolean> => {
   try {
     // Sanitizar dados
     Object.keys(anamnesis).forEach(key => {
@@ -148,7 +148,7 @@ export const saveAnamnesis = (patientId: string, anamnesis: AnamnesisData): bool
     });
     
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -157,7 +157,7 @@ export const saveAnamnesis = (patientId: string, anamnesis: AnamnesisData): bool
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -170,7 +170,7 @@ export const saveAnamnesis = (patientId: string, anamnesis: AnamnesisData): bool
 };
 
 // Salvar exame físico para um paciente
-export const savePhysicalExam = (patientId: string, physicalExam: PhysicalExamData): boolean => {
+export const savePhysicalExam = async (patientId: string, physicalExam: PhysicalExamData): Promise<boolean> => {
   try {
     // Sanitizar dados
     Object.keys(physicalExam).forEach(key => {
@@ -181,7 +181,7 @@ export const savePhysicalExam = (patientId: string, physicalExam: PhysicalExamDa
     });
     
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -190,7 +190,7 @@ export const savePhysicalExam = (patientId: string, physicalExam: PhysicalExamDa
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -203,10 +203,10 @@ export const savePhysicalExam = (patientId: string, physicalExam: PhysicalExamDa
 };
 
 // Salvar balanço hídrico para um paciente
-export const saveHydricBalance = (patientId: string, hydricBalance: HydricBalanceData): boolean => {
+export const saveHydricBalance = async (patientId: string, hydricBalance: HydricBalanceData): Promise<boolean> => {
   try {
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -215,7 +215,7 @@ export const saveHydricBalance = (patientId: string, hydricBalance: HydricBalanc
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -228,7 +228,7 @@ export const saveHydricBalance = (patientId: string, hydricBalance: HydricBalanc
 };
 
 // Salvar evolução de enfermagem para um paciente
-export const saveNursingEvolution = (patientId: string, evolution: NursingEvolutionData): boolean => {
+export const saveNursingEvolution = async (patientId: string, evolution: NursingEvolutionData): Promise<boolean> => {
   try {
     // Sanitizar dados
     if (typeof evolution.evolution === 'string') {
@@ -236,7 +236,7 @@ export const saveNursingEvolution = (patientId: string, evolution: NursingEvolut
     }
     
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -259,7 +259,7 @@ export const saveNursingEvolution = (patientId: string, evolution: NursingEvolut
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -272,10 +272,10 @@ export const saveNursingEvolution = (patientId: string, evolution: NursingEvolut
 };
 
 // Salvar procedimentos para um paciente
-export const saveProcedures = (patientId: string, procedures: ProcedureData): boolean => {
+export const saveProcedures = async (patientId: string, procedures: ProcedureData): Promise<boolean> => {
   try {
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -284,7 +284,7 @@ export const saveProcedures = (patientId: string, procedures: ProcedureData): bo
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -297,10 +297,10 @@ export const saveProcedures = (patientId: string, procedures: ProcedureData): bo
 };
 
 // Salvar medicações para um paciente
-export const saveMedications = (patientId: string, medication: MedicationData): boolean => {
+export const saveMedications = async (patientId: string, medication: MedicationData): Promise<boolean> => {
   try {
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -309,7 +309,7 @@ export const saveMedications = (patientId: string, medication: MedicationData): 
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });
@@ -322,10 +322,10 @@ export const saveMedications = (patientId: string, medication: MedicationData): 
 };
 
 // Completar avaliação de enfermagem
-export const completeNursingAssessment = (patientId: string, nurseData: {name: string}): boolean => {
+export const completeNursingAssessment = async (patientId: string, nurseData: {name: string}): Promise<boolean> => {
   try {
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -334,7 +334,7 @@ export const completeNursingAssessment = (patientId: string, nurseData: {name: s
     nursingData.lastUpdate = new Date().toISOString();
     
     // Atualizar status do paciente
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData,
       status: "Avaliado" // Status após completar a avaliação de enfermagem
@@ -348,9 +348,9 @@ export const completeNursingAssessment = (patientId: string, nurseData: {name: s
 };
 
 // Obter dados da enfermagem para um paciente
-export const getNursingAssessment = (patientId: string): NursingAssessmentData | null => {
+export const getNursingAssessment = async (patientId: string): Promise<NursingAssessmentData | null> => {
   try {
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return null;
     
     return patient.nursingData || {};
@@ -361,10 +361,10 @@ export const getNursingAssessment = (patientId: string): NursingAssessmentData |
 };
 
 // Serviço genérico para salvar qualquer tipo de dado de enfermagem
-export const saveNursingData = (patientId: string, dataType: string, data: any): boolean => {
+export const saveNursingData = async (patientId: string, dataType: string, data: any): Promise<boolean> => {
   try {
     // Buscar paciente atual
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     if (!patient) return false;
     
     // Atualizar dados de enfermagem
@@ -373,7 +373,7 @@ export const saveNursingData = (patientId: string, dataType: string, data: any):
     nursingData.lastUpdate = new Date().toISOString();
     
     // Salvar paciente atualizado
-    savePatient({
+    await savePatient({
       ...patient,
       nursingData
     });

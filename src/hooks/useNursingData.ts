@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNotification } from './useNotification';
-import { saveNursingData, syncOfflineData, NursingDataType } from '@/services/nursingDataService';
+import { saveNursingData, syncOfflineData } from '@/services/nursingDataService';
 import { supabase } from '@/services/supabaseClient';
 
 export const useNursingData = (patientId: string) => {
