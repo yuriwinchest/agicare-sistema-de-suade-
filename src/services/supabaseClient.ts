@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Fornecendo URLs reais para desenvolvimento quando as variáveis de ambiente não estiverem definidas
@@ -104,3 +103,247 @@ export type OfflineSyncItem = {
   synced: boolean;
   created_at?: string;
 };
+
+// Função para inicializar o banco de dados
+export const initializeDatabase = async (): Promise<boolean> => {
+  try {
+    console.log("Verificando e inicializando banco de dados...");
+    
+    // Verifica se a tabela de pacientes existe
+    const { error: patientsCheckError } = await supabase
+      .from('patients')
+      .select('id')
+      .limit(1);
+    
+    // Se a tabela não existir, cria
+    if (patientsCheckError && patientsCheckError.code === '42P01') { // código para "relação não existe"
+      console.log("Criando tabela de pacientes...");
+      
+      const { error: createTableError } = await supabase.rpc('create_patients_table', {});
+      
+      if (createTableError) {
+        console.error("Erro ao criar tabela de pacientes:", createTableError);
+        
+        // Tenta criar a tabela diretamente com SQL
+        const { error: sqlError } = await supabase.rpc('run_sql', {
+          sql: `
+            CREATE TABLE IF NOT EXISTS patients (
+              id TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              cpf TEXT,
+              phone TEXT,
+              date TEXT,
+              time TEXT,
+              status TEXT,
+              reception TEXT,
+              specialty TEXT,
+              professional TEXT,
+              observations TEXT,
+              redirected BOOLEAN DEFAULT FALSE,
+              redirection_time TEXT,
+              allergies TEXT[],
+              nursing_data JSONB
+            );
+          `
+        });
+        
+        if (sqlError) {
+          console.error("Erro ao criar tabela de pacientes com SQL:", sqlError);
+          return false;
+        }
+      }
+    }
+    
+    // Verifica e cria tabela de sinais vitais
+    const { error: vitalSignsCheckError } = await supabase
+      .from('vital_signs')
+      .select('id')
+      .limit(1);
+    
+    if (vitalSignsCheckError && vitalSignsCheckError.code === '42P01') {
+      console.log("Criando tabela de sinais vitais...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS vital_signs (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            temperature TEXT,
+            pressure TEXT,
+            pulse TEXT,
+            respiratory TEXT,
+            oxygen TEXT,
+            pain_scale TEXT,
+            weight TEXT,
+            height TEXT,
+            bmi TEXT,
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de sinais vitais:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de evolução de enfermagem
+    const { error: evolutionCheckError } = await supabase
+      .from('nursing_evolution')
+      .select('id')
+      .limit(1);
+    
+    if (evolutionCheckError && evolutionCheckError.code === '42P01') {
+      console.log("Criando tabela de evolução de enfermagem...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS nursing_evolution (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            evolution TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de evolução de enfermagem:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de balanço hídrico
+    const { error: hydricBalanceCheckError } = await supabase
+      .from('hydric_balance_records')
+      .select('id')
+      .limit(1);
+    
+    if (hydricBalanceCheckError && hydricBalanceCheckError.code === '42P01') {
+      console.log("Criando tabela de balanço hídrico...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS hydric_balance_records (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            type TEXT NOT NULL,
+            record_type TEXT NOT NULL,
+            volume TEXT NOT NULL,
+            time TEXT NOT NULL,
+            date TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de balanço hídrico:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de procedimentos
+    const { error: proceduresCheckError } = await supabase
+      .from('procedures')
+      .select('id')
+      .limit(1);
+    
+    if (proceduresCheckError && proceduresCheckError.code === '42P01') {
+      console.log("Criando tabela de procedimentos...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS procedures (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            procedure TEXT NOT NULL,
+            notes TEXT,
+            status TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de procedimentos:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de medicações
+    const { error: medicationsCheckError } = await supabase
+      .from('medications')
+      .select('id')
+      .limit(1);
+    
+    if (medicationsCheckError && medicationsCheckError.code === '42P01') {
+      console.log("Criando tabela de medicações...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS medications (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            name TEXT NOT NULL,
+            dosage TEXT NOT NULL,
+            route TEXT NOT NULL,
+            time TEXT NOT NULL,
+            status TEXT NOT NULL,
+            administered_by TEXT,
+            administered_at TIMESTAMP WITH TIME ZONE,
+            notes TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de medicações:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela para sincronização offline
+    const { error: offlineSyncCheckError } = await supabase
+      .from('offline_sync_queue')
+      .select('id')
+      .limit(1);
+    
+    if (offlineSyncCheckError && offlineSyncCheckError.code === '42P01') {
+      console.log("Criando tabela de fila de sincronização offline...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS offline_sync_queue (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL,
+            data_type TEXT NOT NULL,
+            data JSONB NOT NULL,
+            timestamp BIGINT NOT NULL,
+            synced BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de fila de sincronização offline:", sqlError);
+      }
+    }
+    
+    console.log("Inicialização do banco de dados concluída");
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao inicializar banco de dados:", error);
+    return false;
+  }
+};
+
+// Inicializar o banco de dados quando o arquivo for carregado
+initializeDatabase().catch(error => 
+  console.error("Erro ao inicializar banco de dados durante carregamento:", error)
+);
