@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Fornecendo URLs reais para desenvolvimento quando as variáveis de ambiente não estiverem definidas
@@ -101,6 +102,69 @@ export type OfflineSyncItem = {
   data: any;
   timestamp: number;
   synced: boolean;
+  created_at?: string;
+};
+
+// Tipo para consultas médicas
+export type MedicalConsultation = {
+  id?: string;
+  patient_id: string;
+  professional_id: string;
+  date: string;
+  time: string;
+  specialty: string;
+  main_complaint: string;
+  diagnosis: string;
+  prescription: string;
+  recommendations: string;
+  status: 'agendada' | 'em_andamento' | 'concluida' | 'cancelada';
+  created_at?: string;
+};
+
+// Tipo para definir os profissionais de saúde
+export type HealthProfessional = {
+  id?: string;
+  name: string;
+  specialty: string;
+  license_number: string;
+  email: string;
+  phone: string;
+  active: boolean;
+  created_at?: string;
+};
+
+// Tipo para agenda dos profissionais
+export type Schedule = {
+  id?: string;
+  professional_id: string;
+  day_of_week: number; // 0-6 (domingo-sábado)
+  start_time: string;
+  end_time: string;
+  break_start?: string;
+  break_end?: string;
+  appointment_duration: number; // duração em minutos
+  created_at?: string;
+};
+
+// Tipo para agendamentos
+export type Appointment = {
+  id?: string;
+  patient_id: string;
+  professional_id: string;
+  date: string;
+  time: string;
+  duration: number;
+  status: 'agendado' | 'confirmado' | 'aguardando' | 'atendido' | 'cancelado';
+  notes?: string;
+  created_at?: string;
+};
+
+// Tipo para unidades de atendimento
+export type HealthcareUnit = {
+  id?: string;
+  name: string;
+  address: string;
+  phone: string;
   created_at?: string;
 };
 
@@ -331,6 +395,154 @@ export const initializeDatabase = async (): Promise<boolean> => {
       
       if (sqlError) {
         console.error("Erro ao criar tabela de fila de sincronização offline:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de consultas médicas
+    const { error: consultationsCheckError } = await supabase
+      .from('medical_consultations')
+      .select('id')
+      .limit(1);
+    
+    if (consultationsCheckError && consultationsCheckError.code === '42P01') {
+      console.log("Criando tabela de consultas médicas...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS medical_consultations (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            professional_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            specialty TEXT NOT NULL,
+            main_complaint TEXT,
+            diagnosis TEXT,
+            prescription TEXT,
+            recommendations TEXT,
+            status TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de consultas médicas:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de profissionais de saúde
+    const { error: professionalsCheckError } = await supabase
+      .from('health_professionals')
+      .select('id')
+      .limit(1);
+    
+    if (professionalsCheckError && professionalsCheckError.code === '42P01') {
+      console.log("Criando tabela de profissionais de saúde...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS health_professionals (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            name TEXT NOT NULL,
+            specialty TEXT NOT NULL,
+            license_number TEXT NOT NULL,
+            email TEXT,
+            phone TEXT,
+            active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de profissionais de saúde:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de agenda dos profissionais
+    const { error: scheduleCheckError } = await supabase
+      .from('schedules')
+      .select('id')
+      .limit(1);
+    
+    if (scheduleCheckError && scheduleCheckError.code === '42P01') {
+      console.log("Criando tabela de agenda dos profissionais...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS schedules (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            professional_id TEXT NOT NULL,
+            day_of_week INTEGER NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL,
+            break_start TEXT,
+            break_end TEXT,
+            appointment_duration INTEGER NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de agenda dos profissionais:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de agendamentos
+    const { error: appointmentsCheckError } = await supabase
+      .from('appointments')
+      .select('id')
+      .limit(1);
+    
+    if (appointmentsCheckError && appointmentsCheckError.code === '42P01') {
+      console.log("Criando tabela de agendamentos...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS appointments (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            patient_id TEXT NOT NULL REFERENCES patients(id),
+            professional_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
+            duration INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            notes TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de agendamentos:", sqlError);
+      }
+    }
+    
+    // Verifica e cria tabela de unidades de atendimento
+    const { error: unitsCheckError } = await supabase
+      .from('healthcare_units')
+      .select('id')
+      .limit(1);
+    
+    if (unitsCheckError && unitsCheckError.code === '42P01') {
+      console.log("Criando tabela de unidades de atendimento...");
+      
+      const { error: sqlError } = await supabase.rpc('run_sql', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS healthcare_units (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            name TEXT NOT NULL,
+            address TEXT NOT NULL,
+            phone TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+      
+      if (sqlError) {
+        console.error("Erro ao criar tabela de unidades de atendimento:", sqlError);
       }
     }
     

@@ -1,3 +1,4 @@
+
 import { supabase, Patient } from './supabaseClient';
 
 // Função para iniciar a migração de dados do localStorage para o Supabase, se necessário
@@ -54,7 +55,8 @@ export const getPatients = async (): Promise<Patient[]> => {
     // Primeiro tenta buscar do Supabase
     const { data, error } = await supabase
       .from('patients')
-      .select('*');
+      .select('*')
+      .order('created_at', { ascending: false });
       
     if (error) {
       throw error;
@@ -81,6 +83,33 @@ export const getPatients = async (): Promise<Patient[]> => {
     }
     
     return [];
+  }
+};
+
+// Get active appointments - versão assíncrona
+export const getActiveAppointmentsAsync = async () => {
+  try {
+    // Busca pacientes ativos do Supabase
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .or('status.neq.Atendido,status.neq.Medicação,status.neq.Observação,status.neq.Alta,status.neq.Internação')
+      .eq('redirected', false)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data.map(patient => ({
+      ...patient,
+      nursingData: patient.nursing_data ? JSON.parse(patient.nursing_data) : {},
+      redirectionTime: patient.redirection_time,
+      allergies: patient.allergies || []
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar consultas ativas:", error);
+    return getActiveAppointments(); // Fallback para versão síncrona
   }
 };
 
@@ -180,29 +209,51 @@ export const getPatientByIdAsync = async (id: string): Promise<Patient | null> =
 };
 
 // Generate a unique ID
-const generateUniqueId = (): string => {
-  // Fallback para geração local
-  const storedPatients = localStorage.getItem('patients');
-  if (storedPatients) {
-    const patients = JSON.parse(storedPatients);
-    if (patients.length === 0) {
-      return "001";
+const generateUniqueId = async (): Promise<string> => {
+  try {
+    // Tenta obter o maior ID do Supabase
+    const { data, error } = await supabase
+      .from('patients')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+      
+    if (error) {
+      throw error;
     }
-    const highestId = Math.max(...patients.map((p: any) => parseInt(p.id)));
-    return (highestId + 1).toString().padStart(3, '0');
+    
+    if (data && data.length > 0) {
+      const highestId = parseInt(data[0].id);
+      return (highestId + 1).toString().padStart(3, '0');
+    }
+    
+    return "001"; // Primeiro ID se não houver pacientes
+  } catch (error) {
+    console.error("Erro ao gerar ID único:", error);
+    
+    // Fallback para geração local
+    const storedPatients = localStorage.getItem('patients');
+    if (storedPatients) {
+      const patients = JSON.parse(storedPatients);
+      if (patients.length === 0) {
+        return "001";
+      }
+      const highestId = Math.max(...patients.map((p: any) => parseInt(p.id)));
+      return (highestId + 1).toString().padStart(3, '0');
+    }
+    
+    return "001";
   }
-  
-  return "001";
 };
 
 // Save new patient or update existing one
-export const savePatient = (patient: any): Patient => {
+export const savePatient = async (patient: any): Promise<Patient> => {
   try {
     let patientToSave = { ...patient };
     
     // Se não houver ID, gerar um novo
     if (!patientToSave.id) {
-      patientToSave.id = generateUniqueId();
+      patientToSave.id = await generateUniqueId();
       
       // Adicionar campos de recepção e data para novos pacientes
       const now = new Date();
@@ -211,20 +262,19 @@ export const savePatient = (patient: any): Patient => {
       
       patientToSave = {
         ...patientToSave,
-        reception: "RECEPÇÃO CENTRAL",
+        reception: patientToSave.reception || "RECEPÇÃO CENTRAL",
         date,
         time,
-        status: patientToSave.status || "Agendado"
+        status: patientToSave.status || "Agendado",
+        created_at: now.toISOString()
       };
     }
 
     // Backup no localStorage e persistência assíncrona no Supabase
     const savedPatient = saveToLocalStorage(patientToSave);
     
-    // Atualizar no Supabase de forma assíncrona
-    savePatientToSupabase(savedPatient).catch(err => 
-      console.error("Erro ao salvar paciente no Supabase:", err)
-    );
+    // Atualizar no Supabase
+    await savePatientToSupabase(savedPatient);
     
     return savedPatient;
   } catch (error) {
@@ -356,10 +406,10 @@ export const clearDraftPatient = () => {
 };
 
 // Update patient status and send to ambulatory
-export const confirmPatientAppointment = (patientId: string, appointmentData: any) => {
+export const confirmPatientAppointment = async (patientId: string, appointmentData: any) => {
   try {
     // Buscar paciente
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     
     if (!patient) {
       console.error("Paciente não encontrado:", patientId);
@@ -374,7 +424,7 @@ export const confirmPatientAppointment = (patientId: string, appointmentData: an
     };
     
     // Salvar paciente atualizado
-    const savedPatient = savePatient(updatedPatient);
+    const savedPatient = await savePatient(updatedPatient);
     
     if (!savedPatient) {
       console.error("Falha ao salvar paciente:", patientId);
@@ -382,7 +432,7 @@ export const confirmPatientAppointment = (patientId: string, appointmentData: an
     }
     
     // Atualizar lista ambulatorial (simulando relação com o banco de dados)
-    updateAmbulatoryPatient(savedPatient);
+    await updateAmbulatoryPatient(savedPatient);
     
     return savedPatient;
   } catch (error) {
@@ -391,73 +441,89 @@ export const confirmPatientAppointment = (patientId: string, appointmentData: an
   }
 };
 
-// Mock ambulatory patients storage
-let ambulatoryPatients: any[] = [
-  { id: "001", name: "Carlos Ferreira", priority: "Urgente", time: "09:15", triage: { temp: "38.5°C", pressure: "130/85", symptoms: "Febre, dor abdominal" } },
-  { id: "002", name: "Mariana Costa", priority: "Normal", time: "09:30", triage: { temp: "36.8°C", pressure: "120/80", symptoms: "Dor de cabeça" } },
-];
-
-// Initialize ambulatory patients from localStorage if available
-const initAmbulatoryFromLocalStorage = () => {
-  try {
-    const storedPatients = localStorage.getItem('ambulatoryPatients');
-    if (storedPatients) {
-      ambulatoryPatients = JSON.parse(storedPatients);
-    }
-  } catch (error) {
-    console.error("Error loading ambulatory patients from localStorage:", error);
-  }
-};
-
-// Save ambulatory patients to localStorage
-const saveAmbulatoryToLocalStorage = () => {
-  try {
-    localStorage.setItem('ambulatoryPatients', JSON.stringify(ambulatoryPatients));
-  } catch (error) {
-    console.error("Error saving ambulatory patients to localStorage:", error);
-  }
-};
-
-// Initialize on service load
-initAmbulatoryFromLocalStorage();
-
 // Get all ambulatory patients
-export const getAmbulatoryPatients = () => {
-  // Always refresh from localStorage
-  initAmbulatoryFromLocalStorage();
-  return ambulatoryPatients;
-};
-
-// Update or add patient to ambulatory
-export const updateAmbulatoryPatient = (patient: any) => {
+export const getAmbulatoryPatients = async () => {
   try {
-    // Buscar lista ambulatorial atual
-    const ambulatoryPatients = getAmbulatoryPatients();
+    // Buscar pacientes ambulatoriais do Supabase
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .or('status.eq.Aguardando,status.eq.Medicação,status.eq.Observação')
+      .order('time', { ascending: true });
+      
+    if (error) {
+      throw error;
+    }
     
-    const existingIndex = ambulatoryPatients.findIndex(p => p.id === patient.id);
-    
-    if (existingIndex >= 0) {
-      // Atualizar paciente existente
-      ambulatoryPatients[existingIndex] = { ...ambulatoryPatients[existingIndex], ...patient };
-    } else {
-      // Converter paciente da recepção para o formato ambulatorial
-      ambulatoryPatients.unshift({
-        id: patient.id,
-        name: patient.name,
-        priority: "Normal",
-        time: patient.time,
-        specialty: patient.specialty,
-        professional: patient.professional,
-        triage: { 
+    // Converter para o formato esperado pela UI
+    return data.map(patient => ({
+      id: patient.id,
+      name: patient.name,
+      priority: patient.priority || "Normal",
+      time: patient.time,
+      specialty: patient.specialty,
+      professional: patient.professional,
+      triage: patient.nursing_data ? 
+        JSON.parse(patient.nursing_data).vitalSigns || { 
+          temp: "36.5°C", 
+          pressure: "120/80", 
+          symptoms: patient.observations || "Sem sintomas relatados" 
+        } 
+        : { 
           temp: "36.5°C", 
           pressure: "120/80", 
           symptoms: patient.observations || "Sem sintomas relatados" 
         }
-      });
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar pacientes ambulatoriais:", error);
+    
+    // Fallback para localStorage
+    const storedPatients = localStorage.getItem('ambulatoryPatients');
+    if (storedPatients) {
+      return JSON.parse(storedPatients);
     }
     
-    // Salvar lista ambulatorial atualizada
-    saveAmbulatoryToLocalStorage();
+    return [];
+  }
+};
+
+// Update or add patient to ambulatory
+export const updateAmbulatoryPatient = async (patient: any) => {
+  try {
+    // Converter paciente da recepção para o formato ambulatorial
+    const ambulatoryPatient = {
+      id: patient.id,
+      name: patient.name,
+      priority: patient.priority || "Normal",
+      time: patient.time,
+      specialty: patient.specialty,
+      professional: patient.professional,
+      triage: { 
+        temp: "36.5°C", 
+        pressure: "120/80", 
+        symptoms: patient.observations || "Sem sintomas relatados" 
+      }
+    };
+    
+    // Salvar no localStorage como fallback
+    let ambulatoryPatients = [];
+    const storedPatients = localStorage.getItem('ambulatoryPatients');
+    
+    if (storedPatients) {
+      ambulatoryPatients = JSON.parse(storedPatients);
+      const existingIndex = ambulatoryPatients.findIndex((p: any) => p.id === patient.id);
+      
+      if (existingIndex >= 0) {
+        ambulatoryPatients[existingIndex] = ambulatoryPatient;
+      } else {
+        ambulatoryPatients.unshift(ambulatoryPatient);
+      }
+    } else {
+      ambulatoryPatients = [ambulatoryPatient];
+    }
+    
+    localStorage.setItem('ambulatoryPatients', JSON.stringify(ambulatoryPatients));
     
     return patient;
   } catch (error) {
@@ -467,10 +533,10 @@ export const updateAmbulatoryPatient = (patient: any) => {
 };
 
 // Update patient status when redirected from doctor
-export const updatePatientRedirection = (patientId: string, destination: string) => {
+export const updatePatientRedirection = async (patientId: string, destination: string) => {
   try {
     // Buscar paciente
-    const patient = getPatientById(patientId);
+    const patient = await getPatientById(patientId);
     
     if (!patient) {
       console.error("Paciente não encontrado:", patientId);
@@ -486,11 +552,80 @@ export const updatePatientRedirection = (patientId: string, destination: string)
     };
     
     // Salvar paciente atualizado
-    const savedPatient = savePatient(updatedPatient);
+    const savedPatient = await savePatient(updatedPatient);
     
     return savedPatient;
   } catch (error) {
     console.error("Erro ao atualizar redirecionamento do paciente:", error);
     return null;
+  }
+};
+
+// Buscar profissionais de saúde
+export const getHealthProfessionals = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('health_professionals')
+      .select('*')
+      .eq('active', true)
+      .order('name', { ascending: true });
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar profissionais de saúde:", error);
+    
+    // Dados de fallback
+    return [
+      { id: '1', name: 'Dr. João Silva', specialty: 'Clínico Geral', license_number: 'CRM 12345' },
+      { id: '2', name: 'Dra. Maria Oliveira', specialty: 'Pediatria', license_number: 'CRM 23456' },
+      { id: '3', name: 'Dr. Carlos Santos', specialty: 'Ortopedia', license_number: 'CRM 34567' }
+    ];
+  }
+};
+
+// Buscar agenda de um profissional
+export const getProfessionalSchedule = async (professionalId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('schedules')
+      .select('*')
+      .eq('professional_id', professionalId)
+      .order('day_of_week', { ascending: true });
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar agenda do profissional:", error);
+    return [];
+  }
+};
+
+// Buscar agendamentos para um dia específico
+export const getAppointmentsForDate = async (date: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select(`
+        *,
+        patients:patient_id (name, phone)
+      `)
+      .eq('date', date)
+      .order('time', { ascending: true });
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar agendamentos para a data:", error);
+    return [];
   }
 };
