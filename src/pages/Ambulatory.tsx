@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
@@ -33,26 +34,41 @@ const Ambulatory = () => {
   });
   
   useEffect(() => {
-    const ambulatoryPatients = getAmbulatoryPatients();
+    const fetchAmbulatoryPatients = async () => {
+      try {
+        const ambulatoryPatients = await getAmbulatoryPatients();
+        
+        const waiting = ambulatoryPatients.filter(p => !p.status || p.status === "Aguardando");
+        
+        setPatientData({
+          waiting,
+          today: [
+            ...waiting,
+            { id: "005", name: "Antônio Silva", status: "Em Atendimento", time: "08:30" },
+            { id: "006", name: "Fernanda Lima", status: "Finalizado", time: "08:00" },
+          ],
+          return: [
+            { id: "007", name: "Paulo Oliveira", reason: "Retorno Ortopedia", time: "11:00" },
+            { id: "008", name: "Camila Nunes", reason: "Retorno Cardiologia", time: "13:30" },
+          ],
+          observation: [
+            { id: "009", name: "Luciana Martins", reason: "Monitoramento pressão", time: "08:45", duration: "2h" },
+            { id: "010", name: "Rafael Gomes", reason: "Medicação IV", time: "09:00", duration: "1h" },
+          ]
+        });
+      } catch (error) {
+        console.error("Erro ao buscar pacientes ambulatoriais:", error);
+        // Fallback to empty data if there's an error
+        setPatientData({
+          waiting: [],
+          today: [],
+          return: [],
+          observation: []
+        });
+      }
+    };
     
-    const waiting = ambulatoryPatients.filter(p => !p.status || p.status === "Aguardando");
-    
-    setPatientData({
-      waiting,
-      today: [
-        ...waiting,
-        { id: "005", name: "Antônio Silva", status: "Em Atendimento", time: "08:30" },
-        { id: "006", name: "Fernanda Lima", status: "Finalizado", time: "08:00" },
-      ],
-      return: [
-        { id: "007", name: "Paulo Oliveira", reason: "Retorno Ortopedia", time: "11:00" },
-        { id: "008", name: "Camila Nunes", reason: "Retorno Cardiologia", time: "13:30" },
-      ],
-      observation: [
-        { id: "009", name: "Luciana Martins", reason: "Monitoramento pressão", time: "08:45", duration: "2h" },
-        { id: "010", name: "Rafael Gomes", reason: "Medicação IV", time: "09:00", duration: "1h" },
-      ]
-    });
+    fetchAmbulatoryPatients();
   }, []);
   
   const getFilteredPatients = () => {
