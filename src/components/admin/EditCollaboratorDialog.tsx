@@ -28,30 +28,33 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from '@/integrations/supabase/client';
 
 const collaboratorSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   role: z.enum(["doctor", "nurse", "receptionist"] as const),
-  imageUrl: z.string().optional(),
+  image_url: z.string().optional(),
 });
 
 type CollaboratorFormValues = z.infer<typeof collaboratorSchema>;
 
 interface EditCollaboratorDialogProps {
   collaborator: {
-    id: string;
+    id?: string;
     name: string;
     role: string;
-    imageUrl?: string;
+    image_url?: string;
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCollaboratorUpdate: () => void;
 }
 
 export function EditCollaboratorDialog({
   collaborator,
   open,
   onOpenChange,
+  onCollaboratorUpdate,
 }: EditCollaboratorDialogProps) {
   const { toast } = useToast();
   const form = useForm<CollaboratorFormValues>({
@@ -59,17 +62,28 @@ export function EditCollaboratorDialog({
     defaultValues: {
       name: collaborator.name,
       role: collaborator.role as "doctor" | "nurse" | "receptionist",
-      imageUrl: collaborator.imageUrl,
+      image_url: collaborator.image_url,
     },
   });
 
   const onSubmit = async (data: CollaboratorFormValues) => {
     try {
+      const { error } = await supabase
+        .from('collaborators')
+        .upsert({
+          id: collaborator.id,
+          ...data,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Colaborador atualizado com sucesso",
         description: `${data.name} foi atualizado`,
       });
       onOpenChange(false);
+      onCollaboratorUpdate();
     } catch (error) {
       toast({
         title: "Erro ao atualizar colaborador",
@@ -84,7 +98,7 @@ export function EditCollaboratorDialog({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        form.setValue("imageUrl", reader.result as string);
+        form.setValue("image_url", reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -101,7 +115,7 @@ export function EditCollaboratorDialog({
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={form.watch("imageUrl")} alt={collaborator.name} />
+                  <AvatarImage src={form.watch("image_url")} alt={collaborator.name} />
                   <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <Input

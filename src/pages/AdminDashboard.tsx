@@ -37,6 +37,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { CollaboratorGrid } from "@/components/admin/CollaboratorGrid";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = "doctor" | "nurse" | "receptionist";
 
@@ -81,6 +82,16 @@ const RegisterUserDialog = () => {
 
   const onSubmit = async (data: UserFormValues) => {
     try {
+      const { error: collaboratorError } = await supabase
+        .from('collaborators')
+        .insert({
+          name: data.name,
+          role: data.role,
+          image_url: data.imageUrl // Add imageUrl if uploaded
+        });
+
+      if (collaboratorError) throw collaboratorError;
+
       toast({
         title: "Usuário registrado com sucesso",
         description: `${data.name} foi registrado como ${data.role}`,

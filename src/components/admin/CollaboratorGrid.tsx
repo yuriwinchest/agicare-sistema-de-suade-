@@ -1,36 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { EditCollaboratorDialog } from './EditCollaboratorDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from "@/hooks/use-toast";
 
 type Collaborator = {
-  id: string;
+  id?: string;
   name: string;
   role: string;
-  imageUrl?: string;
+  image_url?: string;
 };
-
-const collaborators: Collaborator[] = [
-  {
-    id: '1',
-    name: 'Dr. Ana Silva',
-    role: 'doctor',
-    imageUrl: '/placeholder.svg'
-  },
-  {
-    id: '2',
-    name: 'Enf. João Santos',
-    role: 'nurse',
-    imageUrl: '/placeholder.svg'
-  },
-  {
-    id: '3',
-    name: 'Maria Oliveira',
-    role: 'receptionist',
-    imageUrl: '/placeholder.svg'
-  }
-];
 
 const roleTranslations = {
   doctor: 'Médico(a)',
@@ -39,8 +20,34 @@ const roleTranslations = {
 };
 
 export const CollaboratorGrid = () => {
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [selectedCollaborator, setSelectedCollaborator] = useState<Collaborator | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchCollaborators();
+  }, []);
+
+  const fetchCollaborators = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collaborators')
+        .select('*');
+
+      if (error) {
+        throw error;
+      }
+
+      setCollaborators(data || []);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar colaboradores",
+        description: "Não foi possível carregar a lista de colaboradores",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <>
@@ -56,7 +63,7 @@ export const CollaboratorGrid = () => {
           >
             <CardHeader className="flex flex-row items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={collaborator.imageUrl} alt={collaborator.name} />
+                <AvatarImage src={collaborator.image_url} alt={collaborator.name} />
                 <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
@@ -75,6 +82,7 @@ export const CollaboratorGrid = () => {
           collaborator={selectedCollaborator}
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
+          onCollaboratorUpdate={fetchCollaborators}
         />
       )}
     </>
