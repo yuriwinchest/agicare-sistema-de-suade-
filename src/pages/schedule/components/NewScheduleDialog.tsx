@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { scheduleFormSchema } from "../schemas/scheduleFormSchema";
 import ScheduleHoursTab from "./ScheduleHoursTab";
+import BlockScheduleTab from "./BlockScheduleTab";
 import { ScheduleHour } from "../types/scheduleTypes";
 
 type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
@@ -317,30 +317,19 @@ const NewScheduleDialog: React.FC<NewScheduleDialogProps> = ({ isOpen, setIsOpen
           </TabsContent>
           
           <TabsContent value="hours">
-            <ScheduleHoursTab scheduleHours={scheduleHours} setScheduleHours={setScheduleHours} />
+            <ScheduleHoursTab 
+              scheduleHours={scheduleHours} 
+              setScheduleHours={setScheduleHours} 
+              onNext={() => setActiveTab("block-hours")}
+              onBack={() => setActiveTab("main-data")}
+            />
           </TabsContent>
           
           <TabsContent value="block-hours">
-            <div className="p-4 text-center text-gray-500">
-              <p>Funcionalidade de bloqueio de horários a ser implementada.</p>
-              <div className="flex justify-end mt-6 space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setActiveTab("hours")}
-                  className="border-teal-600 text-teal-600"
-                >
-                  Voltar
-                </Button>
-                <Button
-                  type="button"
-                  className="bg-teal-600 hover:bg-teal-700"
-                  onClick={() => form.handleSubmit(onSubmitNewSchedule)()}
-                >
-                  Salvar
-                </Button>
-              </div>
-            </div>
+            <BlockScheduleTab
+              onSave={() => form.handleSubmit(onSubmitNewSchedule)()}
+              onBack={() => setActiveTab("hours")}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
