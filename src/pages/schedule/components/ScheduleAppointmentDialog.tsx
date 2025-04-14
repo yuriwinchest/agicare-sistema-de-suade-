@@ -26,13 +26,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, Save, XCircle, CheckCircle2, UserPlus, Search } from "lucide-react";
+import { 
+  Calendar, 
+  Clock, 
+  Save, 
+  XCircle, 
+  CheckCircle2, 
+  UserPlus, 
+  Search, 
+  FileText, 
+  Plus, 
+  Trash2 
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import PatientRegistrationForm from "@/pages/schedule/components/PatientRegistrationForm";
+import ExamsList from "@/pages/schedule/components/ExamsList";
 
 const appointmentFormSchema = z.object({
   date: z.string().min(1, "Data é obrigatória"),
@@ -44,6 +56,12 @@ const appointmentFormSchema = z.object({
   appointmentType: z.string().min(1, "Tipo de agendamento é obrigatório"),
   observations: z.string().optional(),
   emergency: z.boolean().default(false),
+  exams: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    laterality: z.string().optional(),
+    quantity: z.number().default(1)
+  })).default([]),
 });
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
@@ -79,6 +97,7 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
       appointmentType: "",
       observations: "",
       emergency: false,
+      exams: [],
     },
   });
 
@@ -101,6 +120,16 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
     });
   };
 
+  const addNewExam = (exam: { id: string; name: string; laterality?: string; quantity: number }) => {
+    const currentExams = form.getValues("exams") || [];
+    form.setValue("exams", [...currentExams, exam]);
+  };
+
+  const removeExam = (examId: string) => {
+    const currentExams = form.getValues("exams") || [];
+    form.setValue("exams", currentExams.filter(exam => exam.id !== examId));
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -118,6 +147,9 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
               </TabsTrigger>
               <TabsTrigger value="schedule-type" className="px-4">
                 Tipo de Agenda
+              </TabsTrigger>
+              <TabsTrigger value="exams" className="px-4">
+                Exames
               </TabsTrigger>
             </TabsList>
 
@@ -354,6 +386,104 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
                   </p>
                 </div>
               </div>
+              <DialogFooter className="sm:justify-between flex flex-col-reverse sm:flex-row gap-3 pt-4 mt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full sm:w-auto"
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Cancelar
+                </Button>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("general-data")}
+                    variant="outline"
+                    className="w-full sm:w-auto border-teal-600 text-teal-600"
+                  >
+                    Voltar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => form.handleSubmit(onSubmit)()}
+                    className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar
+                  </Button>
+                </div>
+              </DialogFooter>
+            </TabsContent>
+
+            <TabsContent value="exams">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Exame</label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="raio-x">RAIO-X</SelectItem>
+                        <SelectItem value="tomografia">TOMOGRAFIA</SelectItem>
+                        <SelectItem value="ressonancia">RESSONÂNCIA MAGNÉTICA</SelectItem>
+                        <SelectItem value="ultrassom">ULTRASSOM</SelectItem>
+                        <SelectItem value="eletrocardiograma">ELETROCARDIOGRAMA</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Lateralidade</label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="direito">DIREITO</SelectItem>
+                        <SelectItem value="esquerdo">ESQUERDO</SelectItem>
+                        <SelectItem value="bilateral">BILATERAL</SelectItem>
+                        <SelectItem value="nao-aplicavel">NÃO APLICÁVEL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                    <Input type="number" min="1" defaultValue="1" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button 
+                    type="button"
+                    className="bg-teal-600 hover:bg-teal-700"
+                    onClick={() => addNewExam({ 
+                      id: Math.random().toString(36).substring(2, 9),
+                      name: "RAIO-X", 
+                      laterality: "BILATERAL", 
+                      quantity: 1 
+                    })}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Adicionar
+                  </Button>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="font-medium mb-2 flex items-center">
+                    <FileText className="mr-2 h-4 w-4 text-teal-500" />
+                    Exames Solicitados
+                  </h3>
+                  
+                  <ExamsList 
+                    exams={form.watch("exams")} 
+                    onRemove={removeExam} 
+                  />
+                </div>
+              </div>
+              
               <DialogFooter className="sm:justify-between flex flex-col-reverse sm:flex-row gap-3 pt-4 mt-4">
                 <Button
                   type="button"
