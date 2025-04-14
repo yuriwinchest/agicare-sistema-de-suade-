@@ -67,15 +67,22 @@ const Login = () => {
       
       <div className="relative z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-8">
-            <svg viewBox="0 0 120 40" className="w-full h-full">
-              <path d="M10,30 C20,10 40,10 50,30 M70,30 C80,10 100,10 110,30" 
+          <div className="w-24 h-24 mb-4">
+            <svg viewBox="0 0 120 120" className="w-full h-full">
+              <path d="M30,90 C50,30 70,30 90,90" 
                     fill="none" 
                     stroke="#a3e6e0" 
-                    strokeWidth="4" 
+                    strokeWidth="6" 
                     strokeLinecap="round" />
+              <circle cx="60" cy="60" r="50" 
+                      fill="none" 
+                      stroke="#a3e6e0" 
+                      strokeWidth="6" 
+                      strokeDasharray="10 10" />
             </svg>
           </div>
+          <h1 className="text-3xl font-bold text-white mb-2">Agicare Sistemas</h1>
+          <p className="text-sm text-white/70">Prontuário Eletrônico</p>
         </div>
         
         <div className="backdrop-blur-sm bg-white/10 rounded-lg border border-white/20 p-6 w-full">
@@ -143,3 +150,4 @@ const Login = () => {
 };
 
 export default Login;
+
