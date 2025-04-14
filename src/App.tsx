@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 
 // Pages
 import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
 import Dashboard from "./pages/Dashboard";
 import MainMenu from "./pages/MainMenu";
 import Ambulatory from "./pages/Ambulatory";
@@ -51,6 +51,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 
                 <Route element={<RequireAuth />}>
+                  <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/" element={<Index />} />
                   <Route path="/menu" element={<MainMenu />} />
                   <Route path="/dashboard" element={<Dashboard />} />

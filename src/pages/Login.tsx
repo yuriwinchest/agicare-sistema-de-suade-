@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -27,11 +26,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff } from "lucide-react";
 
-// Schema para o formulário de registro
-const registerSchema = loginSchema.extend({
-  fullName: z.string().min(1, "Nome completo é obrigatório"),
-});
-
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -48,26 +42,27 @@ const Login = () => {
     },
   });
 
-  const registerForm = useForm({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      fullName: "",
-    },
-  });
-
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
     
     try {
       // Verificar se é o login do administrador
       if (values.email === "admin@example.com" && values.password === "senha123") {
-        setIsAdminMode(true);
-        toast({
-          title: "Login administrativo",
-          description: "Bem-vindo ao ambiente administrativo Agicare",
-        });
+        const success = await signin(values.email, values.password);
+        
+        if (success) {
+          toast({
+            title: "Login administrativo",
+            description: "Bem-vindo ao ambiente administrativo Agicare",
+          });
+          navigate('/admin');  // Redireciona para página de admin
+        } else {
+          toast({
+            title: "Erro de Login",
+            description: "Não foi possível fazer login administrativo",
+            variant: "destructive",
+          });
+        }
         return;
       }
       
@@ -97,41 +92,6 @@ const Login = () => {
     }
   };
 
-  const handleRegister = async (values: z.infer<typeof registerSchema>) => {
-    setIsLoading(true);
-    
-    try {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            full_name: values.fullName,
-            role: "user",
-          },
-        },
-      });
-
-      if (signUpError) throw signUpError;
-
-      toast({
-        title: "Usuário registrado com sucesso",
-        description: "O novo usuário foi cadastrado no sistema.",
-      });
-
-      registerForm.reset();
-      
-    } catch (error) {
-      toast({
-        title: "Erro no registro",
-        description: "Ocorreu um erro ao criar a conta. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-4">
       <div className="absolute inset-0 bg-[url('/lovable-uploads/cda3aca0-da8b-449c-999e-d0de18cac3af.png')] bg-cover bg-center opacity-40" />
@@ -159,212 +119,62 @@ const Login = () => {
         </CardHeader>
         
         <CardContent>
-          {isAdminMode ? (
-            // Admin Mode - Mostra abas de login e registro
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Registro</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="login">
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              type="email" 
-                              placeholder="Email"
-                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                              autoComplete="email"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-200" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Input 
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Senha"
-                                className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
-                                autoComplete="current-password"
-                                {...field}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-                              >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                              </button>
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-red-200" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-teal-400 hover:bg-teal-500 text-white"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Entrando..." : "Entrar"}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-
-              <TabsContent value="register">
-                <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
-                    <FormField
-                      control={registerForm.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder="Nome completo"
-                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-200" />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={registerForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              type="email" 
-                              placeholder="Email"
-                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-200" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="relative">
-                              <Input 
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Senha"
-                                className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
-                                {...field}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-                              >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                              </button>
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-red-200" />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-teal-400 hover:bg-teal-500 text-white"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Registrando..." : "Registrar Usuário"}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            // User Mode - Mostra apenas o formulário de login
-            <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
+          <Form {...loginForm}>
+            <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+              <FormField
+                control={loginForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input 
+                        type="email" 
+                        placeholder="Email"
+                        className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-200" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={loginForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
                         <Input 
-                          type="email" 
-                          placeholder="Email"
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                          autoComplete="email"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Senha"
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage className="text-red-200" />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="relative">
-                          <Input 
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Senha"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
-                            autoComplete="current-password"
-                            {...field}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-                          >
-                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-red-200" />
-                    </FormItem>
-                  )}
-                />
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-teal-400 hover:bg-teal-500 text-white"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Entrando..." : "Entrar"}
-                </Button>
-              </form>
-            </Form>
-          )}
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-red-200" />
+                  </FormItem>
+                )}
+              />
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-teal-400 hover:bg-teal-500 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
