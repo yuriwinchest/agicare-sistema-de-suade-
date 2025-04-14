@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { loginSchema } from "@/schemas/loginSchema";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Form,
   FormControl,
@@ -23,12 +22,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { signin } = useAuth();
   const { toast } = useToast();
@@ -46,7 +43,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Verificar se é o login do administrador
+      // Check for admin login
       if (values.email === "admin@example.com" && values.password === "senha123") {
         const success = await signin(values.email, values.password);
         
@@ -55,7 +52,8 @@ const Login = () => {
             title: "Login administrativo",
             description: "Bem-vindo ao ambiente administrativo Agicare",
           });
-          navigate('/admin');  // Redireciona para página de admin
+          navigate('/admin');  // Navigate directly to admin dashboard
+          return;
         } else {
           toast({
             title: "Erro de Login",
@@ -63,9 +61,9 @@ const Login = () => {
             variant: "destructive",
           });
         }
-        return;
       }
       
+      // Regular user login
       const success = await signin(values.email, values.password);
       
       if (success) {
