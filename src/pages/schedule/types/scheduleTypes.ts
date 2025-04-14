@@ -25,3 +25,10 @@ export interface Exam {
   laterality?: string;
   quantity: number;
 }
+
+export interface PatientResult {
+  id: string;
+  name: string;
+  phone: string;
+  document: string;
+}

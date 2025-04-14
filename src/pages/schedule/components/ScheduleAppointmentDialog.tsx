@@ -1,17 +1,14 @@
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import PatientRegistrationForm from "./PatientRegistrationForm";
 import ExamsList from "./ExamsList";
-import { Exam } from "../types/scheduleTypes";
+import { Exam, PatientResult } from "../types/scheduleTypes";
+import PatientSearch from "./PatientSearch";
+import AppointmentDetails from "./AppointmentDetails";
+import SchedulingActions from "./SchedulingActions";
 
 interface ScheduleAppointmentDialogProps {
   isOpen: boolean;
@@ -48,13 +45,13 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
   });
 
   // Mock patient search results
-  const patientResults = [
+  const patientResults: PatientResult[] = [
     { id: "1", name: "João Silva", phone: "(11) 99999-8888", document: "123.456.789-01" },
     { id: "2", name: "Maria Oliveira", phone: "(11) 97777-6666", document: "987.654.321-01" },
     { id: "3", name: "Carlos Santos", phone: "(11) 95555-4444", document: "456.789.123-01" },
   ];
 
-  const handlePatientSelect = (patient: any) => {
+  const handlePatientSelect = (patient: PatientResult) => {
     setSelectedPatient(patient.id);
   };
 
@@ -140,150 +137,33 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
           
           <TabsContent value="appointment">
             <div className="space-y-6">
-              <div className="bg-gray-100 p-4 rounded-md space-y-4">
-                <h3 className="font-medium">Buscar Paciente</h3>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="CPF, nome ou telefone do paciente" 
-                    value={patientSearch}
-                    onChange={(e) => setPatientSearch(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button type="button" className="bg-teal-600 hover:bg-teal-700">
-                    Buscar
-                  </Button>
-                </div>
-                
-                {patientSearch && (
-                  <div className="border rounded-md divide-y">
-                    {patientResults.map((patient) => (
-                      <div 
-                        key={patient.id}
-                        className={`p-3 cursor-pointer hover:bg-gray-50 ${selectedPatient === patient.id ? 'bg-gray-100' : ''}`}
-                        onClick={() => handlePatientSelect(patient)}
-                      >
-                        <div className="font-medium">{patient.name}</div>
-                        <div className="text-sm text-gray-500 flex gap-3">
-                          <span>CPF: {patient.document}</span>
-                          <span>Tel: {patient.phone}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <PatientSearch
+                patientSearch={patientSearch}
+                setPatientSearch={setPatientSearch}
+                selectedPatient={selectedPatient}
+                handlePatientSelect={handlePatientSelect}
+                patientResults={patientResults}
+              />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="appointmentType">Tipo de Atendimento</Label>
-                  <RadioGroup 
-                    id="appointmentType" 
-                    value={appointmentType} 
-                    onValueChange={setAppointmentType}
-                    className="mt-2 space-y-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="consultation" id="consultation" />
-                      <Label htmlFor="consultation" className="font-normal">Consulta</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="return" id="return" />
-                      <Label htmlFor="return" className="font-normal">Retorno</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="procedure" id="procedure" />
-                      <Label htmlFor="procedure" className="font-normal">Procedimento</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <div>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="isFirstAppointment" 
-                        checked={isFirstAppointment}
-                        onCheckedChange={(checked) => 
-                          setIsFirstAppointment(checked === true)
-                        }
-                      />
-                      <Label htmlFor="isFirstAppointment" className="font-normal">
-                        Primeira Consulta
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="requiresPreparation" 
-                        checked={requiresPreparation}
-                        onCheckedChange={(checked) => 
-                          setRequiresPreparation(checked === true)
-                        }
-                      />
-                      <Label htmlFor="requiresPreparation" className="font-normal">
-                        Exige Preparo
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <AppointmentDetails
+                appointmentType={appointmentType}
+                setAppointmentType={setAppointmentType}
+                isFirstAppointment={isFirstAppointment}
+                setIsFirstAppointment={setIsFirstAppointment}
+                requiresPreparation={requiresPreparation}
+                setRequiresPreparation={setRequiresPreparation}
+                specialCare={specialCare}
+                setSpecialCare={setSpecialCare}
+                observations={observations}
+                setObservations={setObservations}
+              />
               
-              <div>
-                <Label htmlFor="specialCare">Cuidados Especiais</Label>
-                <Select 
-                  value={specialCare} 
-                  onValueChange={setSpecialCare}
-                >
-                  <SelectTrigger id="specialCare" className="mt-1">
-                    <SelectValue placeholder="Selecione se necessário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhum</SelectItem>
-                    <SelectItem value="wheelchair">Cadeirante</SelectItem>
-                    <SelectItem value="visual">Deficiência Visual</SelectItem>
-                    <SelectItem value="hearing">Deficiência Auditiva</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="observations">Observações</Label>
-                <Input 
-                  id="observations" 
-                  value={observations}
-                  onChange={(e) => setObservations(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              
-              <DialogFooter className="pt-4 flex items-center justify-between flex-col md:flex-row">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsOpen(false)}
-                  className="mb-3 md:mb-0 w-full md:w-auto"
-                >
-                  Cancelar
-                </Button>
-                <div className="flex gap-2 w-full md:w-auto">
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    className="flex-1 md:flex-none border-teal-600 text-teal-600"
-                    onClick={() => setActiveTab("patient")}
-                  >
-                    Próximo
-                  </Button>
-                  <Button 
-                    type="button" 
-                    onClick={handleScheduleAppointment}
-                    className="flex-1 md:flex-none bg-teal-600 hover:bg-teal-700"
-                    disabled={!selectedPatient}
-                  >
-                    Agendar
-                  </Button>
-                </div>
-              </DialogFooter>
+              <SchedulingActions
+                onCancel={() => setIsOpen(false)}
+                onNext={() => setActiveTab("patient")}
+                onSchedule={handleScheduleAppointment}
+                disableSchedule={!selectedPatient}
+              />
             </div>
           </TabsContent>
           
