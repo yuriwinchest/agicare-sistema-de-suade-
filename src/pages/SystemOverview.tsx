@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -205,7 +204,7 @@ const SystemOverview = () => {
               Visão Geral do Sistema
             </h1>
             <p className="text-muted-foreground">
-              Descrição completa de todas as telas e funcionalidades do Salutem EMR
+              Descrição completa de todas as telas e funcionalidades do Agicare Sistemas
             </p>
           </div>
           
@@ -223,7 +222,7 @@ const SystemOverview = () => {
           <CardHeader className="bg-teal-50/50 dark:bg-teal-950/20">
             <CardTitle className="flex items-center text-teal-700 dark:text-teal-400">
               <Info className="h-5 w-5 mr-2" />
-              Sobre o Salutem EMR
+              Sobre o Agicare Sistemas
             </CardTitle>
             <CardDescription>
               Sistema de Prontuário Eletrônico e Gestão Hospitalar
@@ -231,14 +230,14 @@ const SystemOverview = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <p className="mb-4">
-              O Salutem EMR é um sistema completo de prontuário eletrônico e gestão hospitalar 
+              O Agicare Sistemas é um sistema completo de prontuário eletrônico e gestão hospitalar 
               projetado para otimizar os processos administrativos e clínicos em instituições de saúde.
               Com interface intuitiva e recursos avançados, o sistema oferece suporte a todos os setores 
               do ambiente hospitalar, desde a recepção até o atendimento clínico especializado.
             </p>
             <p>
               Desenvolvido com tecnologias modernas e seguindo as melhores práticas de usabilidade,
-              o Salutem EMR proporciona uma experiência fluida tanto para profissionais de saúde quanto
+              o Agicare Sistemas proporciona uma experiência fluida tanto para profissionais de saúde quanto
               para a equipe administrativa, resultando em maior eficiência operacional e melhor qualidade
               no atendimento ao paciente.
             </p>

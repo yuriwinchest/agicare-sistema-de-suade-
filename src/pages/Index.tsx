@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
@@ -43,7 +42,7 @@ const Index = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 section-fade">
           <Card className="col-span-full bg-white dark:bg-slate-800/70 shadow-md border border-teal-500/10 dark:border-teal-500/20">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-teal-600 dark:text-teal-400">Bem-vindo ao Salutem EMR</CardTitle>
+              <CardTitle className="text-2xl font-bold text-teal-600 dark:text-teal-400">Bem-vindo ao Agicare Sistemas</CardTitle>
               <CardDescription>
                 Sistema de prontuário eletrônico completo para gerenciamento hospitalar
               </CardDescription>

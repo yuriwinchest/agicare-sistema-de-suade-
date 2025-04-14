@@ -44,7 +44,6 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-// Define the navigation items
 const navItems = [
   { path: '/menu', icon: LayoutGrid, label: 'Menu Principal' },
   { path: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -95,9 +94,9 @@ const Sidebar = () => {
           <div className="p-4 border-b border-white/10 flex items-center justify-between h-16">
             <Link to="/dashboard" className="flex items-center">
               <div className="w-8 h-8 rounded-md bg-white flex items-center justify-center">
-                <span className="text-teal-500 font-bold">S</span>
+                <span className="text-teal-500 font-bold">A</span>
               </div>
-              {isOpen && <span className="ml-2 font-semibold text-lg text-white">Salutem</span>}
+              {isOpen && <span className="ml-2 font-semibold text-lg text-white">Agicare</span>}
             </Link>
             <button 
               onClick={toggle}

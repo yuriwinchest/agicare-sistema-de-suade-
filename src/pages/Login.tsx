@@ -40,7 +40,7 @@ const Login = () => {
       if (success) {
         toast({
           title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema Salutem EMR",
+          description: "Bem-vindo ao sistema Agicare Sistemas",
         });
       } else {
         toast({
