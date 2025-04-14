@@ -33,7 +33,13 @@ export const useProfile = (userId?: string) => {
         return null;
       }
 
-      return data;
+      // Parse the JSONB settings field to ensure it's an object
+      return {
+        ...data,
+        settings: typeof data.settings === 'string' 
+          ? JSON.parse(data.settings) 
+          : (data.settings || {})
+      };
     },
     enabled: !!userId,
   });

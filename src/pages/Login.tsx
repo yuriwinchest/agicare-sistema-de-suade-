@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { loginSchema } from "@/schemas/loginSchema";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Form,
   FormControl,
