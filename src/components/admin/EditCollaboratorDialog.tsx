@@ -58,6 +58,7 @@ export function EditCollaboratorDialog({
   onCollaboratorUpdate,
 }: EditCollaboratorDialogProps) {
   const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
   const form = useForm<CollaboratorFormValues>({
     resolver: zodResolver(collaboratorSchema),
     defaultValues: {
@@ -88,6 +89,7 @@ export function EditCollaboratorDialog({
       onOpenChange(false);
       onCollaboratorUpdate();
     } catch (error) {
+      console.error("Erro ao atualizar colaborador:", error);
       toast({
         title: "Erro ao atualizar colaborador",
         description: "Ocorreu um erro ao tentar atualizar o colaborador",
@@ -98,37 +100,51 @@ export function EditCollaboratorDialog({
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `${fileName}`;
+    if (!file) return;
+    
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = fileName;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('collaborator_photos')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('collaborator_photos')
-          .getPublicUrl(filePath);
-
-        form.setValue("image_url", urlData.publicUrl);
-
-        toast({
-          title: "Imagem carregada com sucesso",
-          description: "A foto do colaborador foi atualizada",
+      console.log("Iniciando upload para:", filePath);
+      
+      const { data, error } = await supabase.storage
+        .from('collaborator_photos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
         });
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar imagem",
-          description: "Não foi possível carregar a imagem",
-          variant: "destructive",
-        });
+
+      if (error) {
+        console.error("Erro no upload:", error);
+        throw error;
       }
+
+      console.log("Upload concluído:", data);
+
+      const { data: urlData } = supabase.storage
+        .from('collaborator_photos')
+        .getPublicUrl(filePath);
+
+      console.log("URL gerada:", urlData.publicUrl);
+      
+      form.setValue("image_url", urlData.publicUrl);
+
+      toast({
+        title: "Imagem carregada com sucesso",
+        description: "A foto do colaborador foi atualizada",
+      });
+    } catch (error) {
+      console.error("Erro detalhado:", error);
+      toast({
+        title: "Erro ao carregar imagem",
+        description: "Não foi possível carregar a imagem",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -152,6 +168,7 @@ export function EditCollaboratorDialog({
                   className="hidden"
                   id="photo-upload"
                   onChange={handleImageUpload}
+                  disabled={uploading}
                 />
                 <Button
                   type="button"
@@ -159,8 +176,9 @@ export function EditCollaboratorDialog({
                   size="sm"
                   className="absolute bottom-0 right-0"
                   onClick={() => document.getElementById("photo-upload")?.click()}
+                  disabled={uploading}
                 >
-                  Alterar
+                  {uploading ? "Enviando..." : "Alterar"}
                 </Button>
               </div>
             </div>
@@ -202,7 +220,7 @@ export function EditCollaboratorDialog({
               )}
             />
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={uploading}>
               Salvar Alterações
             </Button>
           </form>

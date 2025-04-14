@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from "@/components/layout/Layout";
 import { 
@@ -36,7 +37,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { CollaboratorGrid } from "@/components/admin/CollaboratorGrid";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -72,6 +73,7 @@ const AdminTile = ({
 
 const RegisterUserDialog = () => {
   const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -85,37 +87,58 @@ const RegisterUserDialog = () => {
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `${fileName}`;
+    if (!file) return;
+    
+    try {
+      setUploading(true);
+      console.log("Iniciando upload do novo usuário");
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = fileName;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('collaborator_photos')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('collaborator_photos')
-          .getPublicUrl(filePath);
-
-        form.setValue("imageUrl", urlData.publicUrl);
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar imagem",
-          description: "Não foi possível carregar a imagem",
-          variant: "destructive",
+      const { data, error } = await supabase.storage
+        .from('collaborator_photos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
         });
+
+      if (error) {
+        console.error("Erro no upload:", error);
+        throw error;
       }
+
+      console.log("Upload completo:", data);
+
+      const { data: urlData } = supabase.storage
+        .from('collaborator_photos')
+        .getPublicUrl(filePath);
+
+      console.log("URL gerada:", urlData.publicUrl);
+      
+      form.setValue("imageUrl", urlData.publicUrl);
+      
+      toast({
+        title: "Imagem carregada com sucesso",
+        description: "A foto do colaborador foi adicionada",
+      });
+    } catch (error) {
+      console.error("Erro detalhado:", error);
+      toast({
+        title: "Erro ao carregar imagem",
+        description: "Não foi possível carregar a imagem",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
   const onSubmit = async (data: UserFormValues) => {
     try {
+      console.log("Registrando colaborador:", data);
+      
       const { error: collaboratorError } = await supabase
         .from('collaborators')
         .insert({
@@ -124,7 +147,10 @@ const RegisterUserDialog = () => {
           image_url: data.imageUrl
         });
 
-      if (collaboratorError) throw collaboratorError;
+      if (collaboratorError) {
+        console.error("Erro ao criar colaborador:", collaboratorError);
+        throw collaboratorError;
+      }
 
       toast({
         title: "Usuário registrado com sucesso",
@@ -132,6 +158,7 @@ const RegisterUserDialog = () => {
       });
       form.reset();
     } catch (error) {
+      console.error("Erro ao registrar usuário:", error);
       toast({
         title: "Erro ao registrar usuário",
         description: "Ocorreu um erro ao tentar registrar o usuário",
@@ -157,7 +184,11 @@ const RegisterUserDialog = () => {
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <Avatar className="h-24 w-24">
-                  <AvatarFallback>Foto</AvatarFallback>
+                  {form.watch("imageUrl") ? (
+                    <AvatarImage src={form.watch("imageUrl")} alt="Foto do perfil" />
+                  ) : (
+                    <AvatarFallback>Foto</AvatarFallback>
+                  )}
                 </Avatar>
                 <Input
                   type="file"
@@ -165,6 +196,7 @@ const RegisterUserDialog = () => {
                   className="hidden"
                   id="new-photo-upload"
                   onChange={handleImageUpload}
+                  disabled={uploading}
                 />
                 <Button
                   type="button"
@@ -172,8 +204,9 @@ const RegisterUserDialog = () => {
                   size="sm"
                   className="absolute bottom-0 right-0"
                   onClick={() => document.getElementById("new-photo-upload")?.click()}
+                  disabled={uploading}
                 >
-                  Adicionar
+                  {uploading ? "Enviando..." : "Adicionar"}
                 </Button>
               </div>
             </div>
@@ -239,7 +272,7 @@ const RegisterUserDialog = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={uploading}>
               Registrar Usuário
             </Button>
           </form>
