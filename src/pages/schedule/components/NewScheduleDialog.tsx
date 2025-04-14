@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,21 +60,21 @@ const NewScheduleDialog: React.FC<NewScheduleDialogProps> = ({ isOpen, setIsOpen
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[800px] w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Escala de Horários</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="main-data" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 w-full justify-start overflow-x-auto">
             <TabsTrigger value="main-data" className="px-4">Dados Principais</TabsTrigger>
             <TabsTrigger value="hours" className="px-4">Horários</TabsTrigger>
             <TabsTrigger value="block-hours" className="px-4">Bloquear Horários</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="main-data">
+          <TabsContent value="main-data" className="max-h-[60vh] overflow-y-auto">
             <Form {...form}>
-              <form className="space-y-6">
+              <form className="space-y-4">
                 <div className="bg-gray-100 p-3 rounded-md mb-4">
                   <h3 className="font-medium text-gray-700 mb-2">Dados Principais</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -198,7 +199,7 @@ const NewScheduleDialog: React.FC<NewScheduleDialogProps> = ({ isOpen, setIsOpen
                               <SelectValue placeholder="Selecione um profissional" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent position="popper" className="max-h-[200px]">
                             <SelectItem value="153 - JAIME DE SOUZA ROCHA">153 - JAIME DE SOUZA ROCHA</SelectItem>
                             <SelectItem value="538 - RONALDO RICARDO ALTEMARIS">538 - RONALDO RICARDO ALTEMARIS</SelectItem>
                             <SelectItem value="388 - LUCY GISMOND DOS SANTOS">388 - LUCY GISMOND DOS SANTOS</SelectItem>
@@ -291,7 +292,7 @@ const NewScheduleDialog: React.FC<NewScheduleDialogProps> = ({ isOpen, setIsOpen
                   />
                 </div>
 
-                <DialogFooter className="sm:justify-between flex flex-col-reverse sm:flex-row gap-3">
+                <DialogFooter className="sm:justify-between flex flex-col-reverse sm:flex-row gap-3 pt-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -316,7 +317,7 @@ const NewScheduleDialog: React.FC<NewScheduleDialogProps> = ({ isOpen, setIsOpen
             </Form>
           </TabsContent>
           
-          <TabsContent value="hours">
+          <TabsContent value="hours" className="max-h-[60vh] overflow-y-auto">
             <ScheduleHoursTab 
               scheduleHours={scheduleHours} 
               setScheduleHours={setScheduleHours} 
@@ -325,7 +326,7 @@ const NewScheduleDialog: React.FC<NewScheduleDialogProps> = ({ isOpen, setIsOpen
             />
           </TabsContent>
           
-          <TabsContent value="block-hours">
+          <TabsContent value="block-hours" className="max-h-[60vh] overflow-y-auto">
             <BlockScheduleTab
               onSave={() => form.handleSubmit(onSubmitNewSchedule)()}
               onBack={() => setActiveTab("hours")}
