@@ -37,12 +37,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 
+// Define the role type to match exactly what we need
+type UserRole = "doctor" | "nurse" | "receptionist";
+
 const userSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  role: z.enum(["doctor", "nurse", "receptionist"]),
+  role: z.enum(["doctor", "nurse", "receptionist"] as const),
 });
+
+// Create a type from the schema for use throughout the component
+type UserFormValues = z.infer<typeof userSchema>;
 
 const AdminTile = ({ 
   icon: Icon, 
@@ -64,7 +70,7 @@ const AdminTile = ({
 
 const RegisterUserDialog = () => {
   const { toast } = useToast();
-  const form = useForm({
+  const form = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       email: "",
@@ -74,7 +80,7 @@ const RegisterUserDialog = () => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof userSchema>) => {
+  const onSubmit = async (data: UserFormValues) => {
     try {
       // Here we'll add the actual user registration logic later
       toast({
@@ -150,7 +156,7 @@ const RegisterUserDialog = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Função</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange as (value: string) => void} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a função" />
