@@ -44,7 +44,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import PatientRegistrationForm from "@/pages/schedule/components/PatientRegistrationForm";
-import ExamsList from "@/pages/schedule/components/ExamsList";
+import ExamsList, { Exam } from "@/pages/schedule/components/ExamsList";
 
 const appointmentFormSchema = z.object({
   date: z.string().min(1, "Data é obrigatória"),
@@ -84,6 +84,9 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("general-data");
   const [isNewPatientOpen, setIsNewPatientOpen] = useState(false);
+  const [examName, setExamName] = useState("");
+  const [examLaterality, setExamLaterality] = useState("");
+  const [examQuantity, setExamQuantity] = useState(1);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -120,9 +123,30 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
     });
   };
 
-  const addNewExam = (exam: { id: string; name: string; laterality?: string; quantity: number }) => {
+  const addNewExam = () => {
+    if (!examName) {
+      toast({
+        title: "Erro ao adicionar exame",
+        description: "O nome do exame é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newExam: Exam = {
+      id: Math.random().toString(36).substring(2, 9),
+      name: examName,
+      laterality: examLaterality || undefined,
+      quantity: examQuantity
+    };
+
     const currentExams = form.getValues("exams") || [];
-    form.setValue("exams", [...currentExams, exam]);
+    form.setValue("exams", [...currentExams, newExam]);
+    
+    // Reset exam form
+    setExamName("");
+    setExamLaterality("");
+    setExamQuantity(1);
   };
 
   const removeExam = (examId: string) => {
@@ -422,36 +446,42 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Exame</label>
-                    <Select>
+                    <Select value={examName} onValueChange={setExamName}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="raio-x">RAIO-X</SelectItem>
-                        <SelectItem value="tomografia">TOMOGRAFIA</SelectItem>
-                        <SelectItem value="ressonancia">RESSONÂNCIA MAGNÉTICA</SelectItem>
-                        <SelectItem value="ultrassom">ULTRASSOM</SelectItem>
-                        <SelectItem value="eletrocardiograma">ELETROCARDIOGRAMA</SelectItem>
+                        <SelectItem value="RAIO-X">RAIO-X</SelectItem>
+                        <SelectItem value="TOMOGRAFIA">TOMOGRAFIA</SelectItem>
+                        <SelectItem value="RESSONÂNCIA MAGNÉTICA">RESSONÂNCIA MAGNÉTICA</SelectItem>
+                        <SelectItem value="ULTRASSOM">ULTRASSOM</SelectItem>
+                        <SelectItem value="ELETROCARDIOGRAMA">ELETROCARDIOGRAMA</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Lateralidade</label>
-                    <Select>
+                    <Select value={examLaterality} onValueChange={setExamLaterality}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="direito">DIREITO</SelectItem>
-                        <SelectItem value="esquerdo">ESQUERDO</SelectItem>
-                        <SelectItem value="bilateral">BILATERAL</SelectItem>
-                        <SelectItem value="nao-aplicavel">NÃO APLICÁVEL</SelectItem>
+                        <SelectItem value="DIREITO">DIREITO</SelectItem>
+                        <SelectItem value="ESQUERDO">ESQUERDO</SelectItem>
+                        <SelectItem value="BILATERAL">BILATERAL</SelectItem>
+                        <SelectItem value="NÃO APLICÁVEL">NÃO APLICÁVEL</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
-                    <Input type="number" min="1" defaultValue="1" className="border-teal-500/30 focus-visible:ring-teal-500/30" />
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      value={examQuantity}
+                      onChange={(e) => setExamQuantity(parseInt(e.target.value) || 1)}
+                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+                    />
                   </div>
                 </div>
 
@@ -459,12 +489,7 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
                   <Button 
                     type="button"
                     className="bg-teal-600 hover:bg-teal-700"
-                    onClick={() => addNewExam({ 
-                      id: Math.random().toString(36).substring(2, 9),
-                      name: "RAIO-X", 
-                      laterality: "BILATERAL", 
-                      quantity: 1 
-                    })}
+                    onClick={addNewExam}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Adicionar

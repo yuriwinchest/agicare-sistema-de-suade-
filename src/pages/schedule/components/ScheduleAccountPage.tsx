@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +46,6 @@ const ScheduleAccountPage: React.FC = () => {
   const itemsPerPage = 10;
   
   const filteredData = scheduleData.filter((item) => {
-    // Apply filters as needed
     return true;
   });
   
@@ -66,8 +64,8 @@ const ScheduleAccountPage: React.FC = () => {
   const handleRowClick = (item: any) => {
     setSelectedSchedule({
       title: item.description,
-      date: "13/03/2023", // Example date
-      time: "12:00", // Example time
+      date: "13/03/2023",
+      time: "12:00",
     });
     setIsAppointmentDialogOpen(true);
   };
@@ -101,7 +99,6 @@ const ScheduleAccountPage: React.FC = () => {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Consulta da Agenda</h1>
       
-      {/* Search Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
@@ -228,7 +225,6 @@ const ScheduleAccountPage: React.FC = () => {
         </div>
       </div>
       
-      {/* Results Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
@@ -264,7 +260,7 @@ const ScheduleAccountPage: React.FC = () => {
                     className="text-teal-600 hover:text-teal-800 hover:underline font-medium"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handlePatientClick(item.id % 2 === 0 ? "João da Silva" : "Maria Oliveira", item.code);
+                      handlePatientClick(item.id % 2 === 0 ? "João da Silva" : "Maria Oliveira", item.code.toString());
                     }}
                   >
                     {item.id % 2 === 0 ? "João da Silva" : "Maria Oliveira"}
@@ -288,7 +284,6 @@ const ScheduleAccountPage: React.FC = () => {
         )}
       </div>
 
-      {/* Dialogs */}
       {selectedSchedule && (
         <ScheduleAppointmentDialog 
           isOpen={isAppointmentDialogOpen} 
