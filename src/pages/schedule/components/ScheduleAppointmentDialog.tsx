@@ -1,5 +1,4 @@
 
-// First, let's import the necessary components and types
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,19 +37,6 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
   const [specialCare, setSpecialCare] = useState("");
   const [observations, setObservations] = useState("");
   const [selectedPatient, setSelectedPatient] = useState("");
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    document: "",
-    gender: "",
-    birthDate: "",
-    address: "",
-    city: "",
-    state: "",
-    insurance: "",
-    insuranceNumber: "",
-  });
   
   // Initialize exams with proper type
   const [exams, setExams] = useState<Exam[]>([]);
@@ -68,32 +54,12 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
     { id: "3", name: "Carlos Santos", phone: "(11) 95555-4444", document: "456.789.123-01" },
   ];
 
-  const handleFormChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
   const handlePatientSelect = (patient: any) => {
     setSelectedPatient(patient.id);
-    setFormData({
-      name: patient.name,
-      phone: patient.phone,
-      email: "email@example.com",
-      document: patient.document,
-      gender: "M",
-      birthDate: "01/01/1980",
-      address: "Rua Exemplo, 123",
-      city: "São Paulo",
-      state: "SP",
-      insurance: "UNIMED",
-      insuranceNumber: "12345678",
-    });
   };
 
   const handleScheduleAppointment = () => {
-    console.log("Appointment scheduled with:", formData);
+    console.log("Appointment scheduled with patient ID:", selectedPatient);
     console.log("Appointment type:", appointmentType);
     console.log("Is first appointment:", isFirstAppointment);
     console.log("Requires preparation:", requiresPreparation);
@@ -103,25 +69,12 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
     
     toast({
       title: "Agendamento realizado com sucesso",
-      description: `Paciente ${formData.name} agendado para ${scheduleDate} às ${scheduleTime}.`,
+      description: `Paciente agendado para ${scheduleDate} às ${scheduleTime}.`,
     });
     
     setIsOpen(false);
     // Reset form values
     setActiveTab("appointment");
-    setFormData({
-      name: "",
-      phone: "",
-      email: "",
-      document: "",
-      gender: "",
-      birthDate: "",
-      address: "",
-      city: "",
-      state: "",
-      insurance: "",
-      insuranceNumber: "",
-    });
     setPatientSearch("");
     setSelectedPatient("");
     setAppointmentType("consultation");
@@ -136,15 +89,7 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
   const addNewExam = () => {
     // Validate exam before adding
     if (currentExam.id && currentExam.name) {
-      // Create a new exam with required fields
-      const newExam: Exam = {
-        id: currentExam.id,
-        name: currentExam.name,
-        laterality: currentExam.laterality || "",
-        quantity: currentExam.quantity || 1
-      };
-      
-      setExams([...exams, newExam]);
+      setExams([...exams, {...currentExam}]);
       
       // Reset current exam
       setCurrentExam({
@@ -152,6 +97,12 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
         name: "",
         laterality: "",
         quantity: 1
+      });
+    } else {
+      toast({
+        title: "Dados incompletos",
+        description: "Por favor, preencha pelo menos o ID e nome do exame.",
+        variant: "destructive"
       });
     }
   };
@@ -338,20 +289,23 @@ const ScheduleAppointmentDialog: React.FC<ScheduleAppointmentDialogProps> = ({
           
           <TabsContent value="patient">
             <PatientRegistrationForm 
-              formData={formData}
-              onChange={handleFormChange}
-              onBack={() => setActiveTab("appointment")}
-              onNext={() => setActiveTab("exams")}
+              onSuccess={(patientName) => {
+                toast({
+                  title: "Paciente registrado",
+                  description: `${patientName} registrado com sucesso!`
+                });
+                setActiveTab("exams");
+              }}
             />
           </TabsContent>
           
           <TabsContent value="exams">
             <ExamsList 
               exams={exams}
+              onRemove={removeExam}
               currentExam={currentExam}
               updateCurrentExam={updateCurrentExam}
               addExam={addNewExam}
-              removeExam={removeExam}
               onBack={() => setActiveTab("patient")}
               onComplete={handleScheduleAppointment}
             />

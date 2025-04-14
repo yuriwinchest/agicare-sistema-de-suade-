@@ -18,3 +18,10 @@ export interface ScheduleHour {
   startHour: string;
   endHour: string;
 }
+
+export interface Exam {
+  id: string;
+  name: string;
+  laterality?: string;
+  quantity: number;
+}
