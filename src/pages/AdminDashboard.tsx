@@ -38,6 +38,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CollaboratorGrid } from "@/components/admin/CollaboratorGrid";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 type UserRole = "doctor" | "nurse" | "receptionist";
 
@@ -80,6 +81,40 @@ const RegisterUserDialog = () => {
     },
   });
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${uuidv4()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        // Upload file to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('collaborator_photos')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL for the uploaded image
+        const { data: urlData } = supabase.storage
+          .from('collaborator_photos')
+          .getPublicUrl(filePath);
+
+        // Add imageUrl to the form data
+        form.setValue("imageUrl", urlData.publicUrl);
+      } catch (error) {
+        toast({
+          title: "Erro ao carregar imagem",
+          description: "Não foi possível carregar a imagem",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const onSubmit = async (data: UserFormValues) => {
     try {
       const { error: collaboratorError } = await supabase
@@ -87,7 +122,7 @@ const RegisterUserDialog = () => {
         .insert({
           name: data.name,
           role: data.role,
-          image_url: data.imageUrl // Add imageUrl if uploaded
+          image_url: form.getValues("imageUrl")
         });
 
       if (collaboratorError) throw collaboratorError;
@@ -103,17 +138,6 @@ const RegisterUserDialog = () => {
         description: "Ocorreu um erro ao tentar registrar o usuário",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        console.log('Image uploaded:', reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
