@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from "@/components/layout/Layout";
 import { 
@@ -36,8 +35,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { CollaboratorGrid } from "@/components/admin/CollaboratorGrid";
 
-// Define the role type to match exactly what we need
 type UserRole = "doctor" | "nurse" | "receptionist";
 
 const userSchema = z.object({
@@ -47,7 +46,6 @@ const userSchema = z.object({
   role: z.enum(["doctor", "nurse", "receptionist"] as const),
 });
 
-// Create a type from the schema for use throughout the component
 type UserFormValues = z.infer<typeof userSchema>;
 
 const AdminTile = ({ 
@@ -82,7 +80,6 @@ const RegisterUserDialog = () => {
 
   const onSubmit = async (data: UserFormValues) => {
     try {
-      // Here we'll add the actual user registration logic later
       toast({
         title: "Usuário registrado com sucesso",
         description: `${data.name} foi registrado como ${data.role}`,
@@ -210,6 +207,11 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white/10 border border-white/20 rounded-lg p-6 mb-8">
             <h2 className="text-xl font-semibold text-white mb-4">Registro de Usuários</h2>
             <RegisterUserDialog />
+          </div>
+
+          <div className="bg-white/10 border border-white/20 rounded-lg p-6 mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Colaboradores</h2>
+            <CollaboratorGrid />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
