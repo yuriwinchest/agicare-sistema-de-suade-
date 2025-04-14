@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import SystemSummary from "./pages/SystemSummary";
 import SystemOverview from "./pages/SystemOverview";
+import ScheduleConsultation from "./pages/ScheduleConsultation";
 
 // Auth Provider - Now importing from the refactored structure
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
@@ -64,6 +65,7 @@ const App = () => (
                   <Route path="/nursing/assessment/:id" element={<NursingAssessment />} />
                   <Route path="/system-summary" element={<SystemSummary />} />
                   <Route path="/system-overview" element={<SystemOverview />} />
+                  <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />

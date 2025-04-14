@@ -15,7 +15,8 @@ import {
   ImagePlus,
   UserSearch,
   ClipboardCheck,
-  BookOpen
+  BookOpen,
+  Clock
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -162,6 +163,13 @@ const MainMenu = () => {
       path: "/system-overview",
       color: "text-teal-500",
       bgColor: "bg-teal-50/30"
+    },
+    { 
+      icon: Clock, 
+      title: "Consulta de Escala de Horários", 
+      path: "/schedule-consultation",
+      color: "text-blue-500",
+      bgColor: "bg-blue-50/30"
     },
   ];
 
