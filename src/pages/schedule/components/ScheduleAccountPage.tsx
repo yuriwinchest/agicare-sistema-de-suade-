@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, FileDown, RefreshCw, Calendar } from "lucide-react";
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import SchedulePagination from "./SchedulePagination";
 import ScheduleAppointmentDialog from "./ScheduleAppointmentDialog";
+import PrintOptionsDialog from "./PrintOptionsDialog";
+import OpenScheduleDialog from "./OpenScheduleDialog";
 import { scheduleData } from "../data/scheduleData";
 
 const ScheduleAccountPage: React.FC = () => {
@@ -30,10 +32,16 @@ const ScheduleAccountPage: React.FC = () => {
   const [searchUnit, setSearchUnit] = useState("");
   const [searchSpecialty, setSearchSpecialty] = useState("");
   const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
+  const [isPrintOptionsDialogOpen, setIsPrintOptionsDialogOpen] = useState(false);
+  const [isOpenScheduleDialogOpen, setIsOpenScheduleDialogOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<{
     title: string;
     date: string;
     time: string;
+  } | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<{
+    name: string;
+    scheduleId: string;
   } | null>(null);
   
   const itemsPerPage = 10;
@@ -63,6 +71,31 @@ const ScheduleAccountPage: React.FC = () => {
     });
     setIsAppointmentDialogOpen(true);
   };
+
+  const handlePatientClick = (patient: string, scheduleId: string) => {
+    setSelectedPatient({
+      name: patient,
+      scheduleId: scheduleId,
+    });
+    setIsOpenScheduleDialogOpen(true);
+  };
+
+  useEffect(() => {
+    const handlePrintOptionsEvent = (event: CustomEvent) => {
+      const { patientName, scheduleId } = event.detail;
+      setSelectedPatient({
+        name: patientName,
+        scheduleId: scheduleId,
+      });
+      setIsPrintOptionsDialogOpen(true);
+    };
+
+    window.addEventListener("open-print-options", handlePrintOptionsEvent as EventListener);
+
+    return () => {
+      window.removeEventListener("open-print-options", handlePrintOptionsEvent as EventListener);
+    };
+  }, []);
 
   return (
     <div className="container mx-auto p-6">
@@ -227,7 +260,15 @@ const ScheduleAccountPage: React.FC = () => {
                   <TableCell>{item.description}</TableCell>
                   <TableCell>RECEPÇÃO CENTRAL</TableCell>
                   <TableCell>RECEPÇÃO CENTRAL</TableCell>
-                  <TableCell>-</TableCell>
+                  <TableCell 
+                    className="text-teal-600 hover:text-teal-800 hover:underline font-medium"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePatientClick(item.id % 2 === 0 ? "João da Silva" : "Maria Oliveira", item.code);
+                    }}
+                  >
+                    {item.id % 2 === 0 ? "João da Silva" : "Maria Oliveira"}
+                  </TableCell>
                   <TableCell>{item.professional}</TableCell>
                   <TableCell>{item.position.split(" - ")[1]}</TableCell>
                 </TableRow>
@@ -247,7 +288,7 @@ const ScheduleAccountPage: React.FC = () => {
         )}
       </div>
 
-      {/* Schedule Appointment Dialog */}
+      {/* Dialogs */}
       {selectedSchedule && (
         <ScheduleAppointmentDialog 
           isOpen={isAppointmentDialogOpen} 
@@ -256,6 +297,24 @@ const ScheduleAccountPage: React.FC = () => {
           scheduleDate={selectedSchedule.date}
           scheduleTime={selectedSchedule.time}
         />
+      )}
+      
+      {selectedPatient && (
+        <>
+          <OpenScheduleDialog
+            isOpen={isOpenScheduleDialogOpen}
+            setIsOpen={setIsOpenScheduleDialogOpen}
+            patientName={selectedPatient.name}
+            scheduleId={selectedPatient.scheduleId}
+          />
+          
+          <PrintOptionsDialog
+            isOpen={isPrintOptionsDialogOpen}
+            setIsOpen={setIsPrintOptionsDialogOpen}
+            patientName={selectedPatient.name}
+            scheduleDate="13/04/2023"
+          />
+        </>
       )}
     </div>
   );

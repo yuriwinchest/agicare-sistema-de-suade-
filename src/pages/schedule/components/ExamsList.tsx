@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface Exam {
+export interface Exam {
   id: string;
   name: string;
   laterality?: string;

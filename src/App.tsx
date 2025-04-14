@@ -28,6 +28,7 @@ import SystemSummary from "./pages/SystemSummary";
 import SystemOverview from "./pages/SystemOverview";
 import ScheduleConsultation from "./pages/ScheduleConsultation";
 import ScheduleAccountPage from "./pages/ScheduleAccountPage";
+import ScheduleDetailPage from "./pages/ScheduleDetailPage";
 
 // Auth Provider - Now importing from the refactored structure
 import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
@@ -68,6 +69,7 @@ const App = () => (
                   <Route path="/system-overview" element={<SystemOverview />} />
                   <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
                   <Route path="/schedule-account" element={<ScheduleAccountPage />} />
+                  <Route path="/schedule-detail/:id?" element={<ScheduleDetailPage />} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />
