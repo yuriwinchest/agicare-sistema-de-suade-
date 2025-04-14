@@ -14,3 +14,11 @@ export const scheduleFormSchema = z.object({
   calendarConfig: z.string().optional(),
   serviceConfig: z.string().optional(),
 });
+
+export const scheduleHourSchema = z.object({
+  day: z.string().min(1, "Dia é obrigatório"),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  startHour: z.string().min(1, "Hora inicial é obrigatória"),
+  endHour: z.string().min(1, "Hora final é obrigatória"),
+});

@@ -1,14 +1,7 @@
 
 import React from "react";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface SchedulePaginationProps {
   currentPage: number;
@@ -21,54 +14,66 @@ const SchedulePagination: React.FC<SchedulePaginationProps> = ({
   setCurrentPage,
   totalPages,
 }) => {
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow && startPage > 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <Button
+          key={i}
+          variant={i === currentPage ? "default" : "outline"}
+          size="sm"
+          className={`w-9 h-9 ${i === currentPage ? "bg-teal-600 hover:bg-teal-700" : ""}`}
+          onClick={() => setCurrentPage(i)}
+        >
+          {i}
+        </Button>
+      );
+    }
+    return pageNumbers;
+  };
+
   return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-          />
-        </PaginationItem>
-        
-        {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-          let pageNum;
-          if (totalPages <= 5) {
-            pageNum = index + 1;
-          } else if (currentPage <= 3) {
-            pageNum = index + 1;
-          } else if (currentPage >= totalPages - 2) {
-            pageNum = totalPages - 4 + index;
-          } else {
-            pageNum = currentPage - 2 + index;
-          }
-
-          return (
-            <PaginationItem key={pageNum}>
-              <PaginationLink
-                isActive={currentPage === pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-              >
-                {pageNum}
-              </PaginationLink>
-            </PaginationItem>
-          );
-        })}
-
-        {totalPages > 5 && currentPage < totalPages - 2 && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-        )}
-
-        <PaginationItem>
-          <PaginationNext 
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            className={currentPage === totalPages || totalPages === 0 ? "pointer-events-none opacity-50" : ""}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+    <div className="flex items-center space-x-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handlePrevPage}
+        disabled={currentPage === 1}
+        className="w-9 h-9 p-0"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      {renderPageNumbers()}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+        className="w-9 h-9 p-0"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
   );
 };
 

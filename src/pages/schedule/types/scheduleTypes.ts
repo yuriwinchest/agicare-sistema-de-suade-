@@ -9,3 +9,12 @@ export interface ScheduleItem {
   position: string;
   unit: string;
 }
+
+export interface ScheduleHour {
+  id: number;
+  day: string;
+  startDate: string;
+  endDate: string;
+  startHour: string;
+  endHour: string;
+}
