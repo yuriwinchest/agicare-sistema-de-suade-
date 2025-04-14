@@ -47,6 +47,7 @@ const userSchema = z.object({
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   role: z.enum(["doctor", "nurse", "receptionist"] as const),
+  imageUrl: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -78,6 +79,7 @@ const RegisterUserDialog = () => {
       password: "",
       name: "",
       role: "doctor",
+      imageUrl: "",
     },
   });
 
@@ -89,7 +91,6 @@ const RegisterUserDialog = () => {
         const fileName = `${uuidv4()}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        // Upload file to Supabase storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('collaborator_photos')
           .upload(filePath, file);
@@ -98,12 +99,10 @@ const RegisterUserDialog = () => {
           throw uploadError;
         }
 
-        // Get public URL for the uploaded image
         const { data: urlData } = supabase.storage
           .from('collaborator_photos')
           .getPublicUrl(filePath);
 
-        // Add imageUrl to the form data
         form.setValue("imageUrl", urlData.publicUrl);
       } catch (error) {
         toast({
@@ -122,7 +121,7 @@ const RegisterUserDialog = () => {
         .insert({
           name: data.name,
           role: data.role,
-          image_url: form.getValues("imageUrl")
+          image_url: data.imageUrl
         });
 
       if (collaboratorError) throw collaboratorError;

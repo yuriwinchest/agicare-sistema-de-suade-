@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -72,7 +73,9 @@ export function EditCollaboratorDialog({
         .from('collaborators')
         .upsert({
           id: collaborator.id,
-          ...data,
+          name: data.name,
+          role: data.role,
+          image_url: data.image_url,
           updated_at: new Date().toISOString(),
         });
 
