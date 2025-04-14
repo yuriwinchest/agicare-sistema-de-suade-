@@ -6,16 +6,23 @@ import ScheduleFilters from "./components/ScheduleFilters";
 import ScheduleTable from "./components/ScheduleTable";
 import SchedulePagination from "./components/SchedulePagination";
 import NewScheduleDialog from "./components/NewScheduleDialog";
+import ScheduleAppointmentDialog from "./components/ScheduleAppointmentDialog";
 import { scheduleData } from "./data/scheduleData";
 import { ScheduleItem } from "./types/scheduleTypes";
 
 const ScheduleConsultation: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchCode, setSearchCode] = useState("");
   const [searchDescription, setSearchDescription] = useState("");
   const [searchProfessional, setSearchProfessional] = useState("");
   const [selectedScheduleType, setSelectedScheduleType] = useState("");
+  const [selectedSchedule, setSelectedSchedule] = useState<{
+    title: string;
+    date: string;
+    time: string;
+  } | null>(null);
   
   const itemsPerPage = 10;
   
@@ -52,6 +59,15 @@ const ScheduleConsultation: React.FC = () => {
     setCurrentPage(1);
   };
   
+  const handleScheduleSelection = (schedule: ScheduleItem) => {
+    setSelectedSchedule({
+      title: schedule.description,
+      date: "13/03/2023", // Example fixed date for demonstration
+      time: "12:00", // Example fixed time for demonstration
+    });
+    setIsAppointmentDialogOpen(true);
+  };
+  
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -84,7 +100,10 @@ const ScheduleConsultation: React.FC = () => {
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <ScheduleTable currentItems={paginatedData} />
+        <ScheduleTable 
+          currentItems={paginatedData} 
+          onScheduleSelect={handleScheduleSelection}
+        />
         
         {totalPages > 1 && (
           <div className="p-4 border-t border-gray-200 flex justify-center">
@@ -98,6 +117,16 @@ const ScheduleConsultation: React.FC = () => {
       </div>
       
       <NewScheduleDialog isOpen={isDialogOpen} setIsOpen={setIsDialogOpen} />
+      
+      {selectedSchedule && (
+        <ScheduleAppointmentDialog 
+          isOpen={isAppointmentDialogOpen} 
+          setIsOpen={setIsAppointmentDialogOpen}
+          scheduleTitle={selectedSchedule.title}
+          scheduleDate={selectedSchedule.date}
+          scheduleTime={selectedSchedule.time}
+        />
+      )}
     </div>
   );
 };

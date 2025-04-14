@@ -19,6 +19,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import SchedulePagination from "./SchedulePagination";
+import ScheduleAppointmentDialog from "./ScheduleAppointmentDialog";
 import { scheduleData } from "../data/scheduleData";
 
 const ScheduleAccountPage: React.FC = () => {
@@ -28,6 +29,12 @@ const ScheduleAccountPage: React.FC = () => {
   const [searchProfessional, setSearchProfessional] = useState("");
   const [searchUnit, setSearchUnit] = useState("");
   const [searchSpecialty, setSearchSpecialty] = useState("");
+  const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<{
+    title: string;
+    date: string;
+    time: string;
+  } | null>(null);
   
   const itemsPerPage = 10;
   
@@ -46,6 +53,15 @@ const ScheduleAccountPage: React.FC = () => {
     setSearchProfessional("");
     setSearchUnit("");
     setSearchSpecialty("");
+  };
+
+  const handleRowClick = (item: any) => {
+    setSelectedSchedule({
+      title: item.description,
+      date: "13/03/2023", // Example date
+      time: "12:00", // Example time
+    });
+    setIsAppointmentDialogOpen(true);
   };
 
   return (
@@ -198,7 +214,11 @@ const ScheduleAccountPage: React.FC = () => {
             </TableHeader>
             <TableBody>
               {paginatedData.map((item) => (
-                <TableRow key={item.id} className="hover:bg-gray-50">
+                <TableRow 
+                  key={item.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(item)}
+                >
                   <TableCell className="p-2">
                     <input type="checkbox" className="rounded border-gray-300" />
                   </TableCell>
@@ -226,6 +246,17 @@ const ScheduleAccountPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Schedule Appointment Dialog */}
+      {selectedSchedule && (
+        <ScheduleAppointmentDialog 
+          isOpen={isAppointmentDialogOpen} 
+          setIsOpen={setIsAppointmentDialogOpen}
+          scheduleTitle={selectedSchedule.title}
+          scheduleDate={selectedSchedule.date}
+          scheduleTime={selectedSchedule.time}
+        />
+      )}
     </div>
   );
 };
