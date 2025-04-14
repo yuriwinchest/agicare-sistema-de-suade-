@@ -36,6 +36,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { CollaboratorGrid } from "@/components/admin/CollaboratorGrid";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type UserRole = "doctor" | "nurse" | "receptionist";
 
@@ -94,6 +95,17 @@ const RegisterUserDialog = () => {
     }
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        console.log('Image uploaded:', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -108,6 +120,30 @@ const RegisterUserDialog = () => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="flex justify-center mb-4">
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  <AvatarFallback>Foto</AvatarFallback>
+                </Avatar>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="new-photo-upload"
+                  onChange={handleImageUpload}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="absolute bottom-0 right-0"
+                  onClick={() => document.getElementById("new-photo-upload")?.click()}
+                >
+                  Adicionar
+                </Button>
+              </div>
+            </div>
+
             <FormField
               control={form.control}
               name="name"
