@@ -12,43 +12,44 @@ import { ScheduleItem } from "./types/scheduleTypes";
 const ScheduleConsultation: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchFilters, setSearchFilters] = useState({
-    code: "",
-    description: "",
-    professional: "",
-  });
+  const [searchCode, setSearchCode] = useState("");
+  const [searchDescription, setSearchDescription] = useState("");
+  const [searchProfessional, setSearchProfessional] = useState("");
+  const [selectedScheduleType, setSelectedScheduleType] = useState("");
   
   const itemsPerPage = 10;
   
   // Apply filters and pagination
   const filteredData = scheduleData.filter((item) => {
-    const codeMatch = !searchFilters.code || 
-      item.code.toString().includes(searchFilters.code);
+    const codeMatch = !searchCode || 
+      item.code.toString().includes(searchCode);
     
-    const descriptionMatch = !searchFilters.description || 
-      item.description.toLowerCase().includes(searchFilters.description.toLowerCase());
+    const descriptionMatch = !searchDescription || 
+      item.description.toLowerCase().includes(searchDescription.toLowerCase());
     
-    const professionalMatch = !searchFilters.professional || 
-      item.professional.toLowerCase().includes(searchFilters.professional.toLowerCase());
+    const professionalMatch = !searchProfessional || 
+      item.professional.toLowerCase().includes(searchProfessional.toLowerCase());
     
-    return codeMatch && descriptionMatch && professionalMatch;
+    const scheduleTypeMatch = !selectedScheduleType || 
+      item.scheduleType.toLowerCase() === selectedScheduleType.toLowerCase();
+    
+    return codeMatch && descriptionMatch && professionalMatch && scheduleTypeMatch;
   });
   
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSearch = (filters: {
-    code: string;
-    description: string;
-    professional: string;
-  }) => {
-    setSearchFilters(filters);
-    setCurrentPage(1);
-  };
-
   const handleCreateSchedule = () => {
     setIsDialogOpen(true);
+  };
+  
+  const clearFilters = () => {
+    setSearchCode("");
+    setSearchDescription("");
+    setSearchProfessional("");
+    setSelectedScheduleType("");
+    setCurrentPage(1);
   };
   
   return (
@@ -68,11 +69,22 @@ const ScheduleConsultation: React.FC = () => {
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-        <ScheduleFilters onSearch={handleSearch} />
+        <ScheduleFilters 
+          searchCode={searchCode}
+          setSearchCode={setSearchCode}
+          searchDescription={searchDescription}
+          setSearchDescription={setSearchDescription}
+          searchProfessional={searchProfessional}
+          setSearchProfessional={setSearchProfessional}
+          selectedScheduleType={selectedScheduleType}
+          setSelectedScheduleType={setSelectedScheduleType}
+          clearFilters={clearFilters}
+          setIsNewScheduleOpen={setIsDialogOpen}
+        />
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <ScheduleTable data={paginatedData} />
+        <ScheduleTable currentItems={paginatedData} />
         
         {totalPages > 1 && (
           <div className="p-4 border-t border-gray-200 flex justify-center">

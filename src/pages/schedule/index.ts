@@ -1,2 +1,3 @@
 
-export { default } from "./ScheduleConsultation";
+import ScheduleConsultation from "./ScheduleConsultation";
+export default ScheduleConsultation;
