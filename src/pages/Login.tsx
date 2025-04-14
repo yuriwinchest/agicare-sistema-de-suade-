@@ -43,7 +43,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Check for admin login
+      // Specifically handle admin login
       if (values.email === "admin@example.com" && values.password === "senha123") {
         const success = await signin(values.email, values.password);
         
@@ -52,7 +52,7 @@ const Login = () => {
             title: "Login administrativo",
             description: "Bem-vindo ao ambiente administrativo Agicare",
           });
-          navigate('/admin');  // Navigate directly to admin dashboard
+          navigate('/admin');  // Redirect directly to admin dashboard
           return;
         } else {
           toast({
@@ -63,7 +63,7 @@ const Login = () => {
         }
       }
       
-      // Regular user login
+      // Regular user login logic remains the same
       const success = await signin(values.email, values.password);
       
       if (success) {
