@@ -25,19 +25,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, EyeOff } from "lucide-react";
 
 // Schema para o formulário de registro
 const registerSchema = loginSchema.extend({
   fullName: z.string().min(1, "Nome completo é obrigatório"),
-  confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
 });
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { signin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -55,11 +53,10 @@ const Login = () => {
     defaultValues: {
       email: "",
       password: "",
-      confirmPassword: "",
       fullName: "",
     },
   });
-  
+
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
     
@@ -68,9 +65,10 @@ const Login = () => {
       if (values.email === "admin@example.com" && values.password === "senha123") {
         setIsAdminMode(true);
         toast({
-          title: "Login administrativo realizado",
+          title: "Login administrativo",
           description: "Bem-vindo ao ambiente administrativo Agicare",
         });
+        return;
       }
       
       const success = await signin(values.email, values.password);
@@ -109,7 +107,7 @@ const Login = () => {
         options: {
           data: {
             full_name: values.fullName,
-            role: "user", // Os usuários registrados pelo admin terão função de usuário padrão
+            role: "user",
           },
         },
       });
@@ -121,8 +119,6 @@ const Login = () => {
         description: "O novo usuário foi cadastrado no sistema.",
       });
 
-      // Limpar formulários após o registro bem-sucedido
-      loginForm.reset();
       registerForm.reset();
       
     } catch (error) {
@@ -133,16 +129,6 @@ const Login = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Verificar se o usuário já tentou fazer login como admin
-  const checkAdminMode = () => {
-    const emailValue = loginForm.getValues("email");
-    const passwordValue = loginForm.getValues("password");
-    
-    if (emailValue === "admin@example.com" && passwordValue === "senha123") {
-      setIsAdminMode(true);
     }
   };
   
@@ -209,13 +195,22 @@ const Login = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Senha"
-                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                              autoComplete="current-password"
-                              {...field}
-                            />
+                            <div className="relative">
+                              <Input 
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Senha"
+                                className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
+                                autoComplete="current-password"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                              >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                              </button>
+                            </div>
                           </FormControl>
                           <FormMessage className="text-red-200" />
                         </FormItem>
@@ -277,30 +272,21 @@ const Login = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Senha"
-                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-red-200" />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={registerForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Confirme a senha"
-                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                              {...field}
-                            />
+                            <div className="relative">
+                              <Input 
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Senha"
+                                className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                              >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                              </button>
+                            </div>
                           </FormControl>
                           <FormMessage className="text-red-200" />
                         </FormItem>
@@ -333,7 +319,6 @@ const Login = () => {
                           placeholder="Email"
                           className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                           autoComplete="email"
-                          onBlur={() => checkAdminMode()}
                           {...field}
                         />
                       </FormControl>
@@ -348,14 +333,22 @@ const Login = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Senha"
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                          autoComplete="current-password"
-                          onBlur={() => checkAdminMode()}
-                          {...field}
-                        />
+                        <div className="relative">
+                          <Input 
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Senha"
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
+                            autoComplete="current-password"
+                            {...field}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage className="text-red-200" />
                     </FormItem>
@@ -372,12 +365,6 @@ const Login = () => {
               </form>
             </Form>
           )}
-
-          <div className="mt-6 pt-4 border-t border-white/10">
-            <p className="text-center text-xs text-white/50">
-              Login administrativo: <code className="bg-white/10 px-1 rounded">admin@example.com / senha123</code>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
