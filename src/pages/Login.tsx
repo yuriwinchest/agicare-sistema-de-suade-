@@ -37,6 +37,7 @@ const registerSchema = loginSchema.extend({
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const { signin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -63,6 +64,15 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // Verificar se é o login do administrador
+      if (values.email === "admin@example.com" && values.password === "senha123") {
+        setIsAdminMode(true);
+        toast({
+          title: "Login administrativo realizado",
+          description: "Bem-vindo ao ambiente administrativo Agicare",
+        });
+      }
+      
       const success = await signin(values.email, values.password);
       
       if (success) {
@@ -99,6 +109,7 @@ const Login = () => {
         options: {
           data: {
             full_name: values.fullName,
+            role: "user", // Os usuários registrados pelo admin terão função de usuário padrão
           },
         },
       });
@@ -106,22 +117,32 @@ const Login = () => {
       if (signUpError) throw signUpError;
 
       toast({
-        title: "Registro realizado com sucesso",
-        description: "Por favor, verifique seu email para confirmar o cadastro.",
+        title: "Usuário registrado com sucesso",
+        description: "O novo usuário foi cadastrado no sistema.",
       });
 
-      // Redirecionar para a página de login após o registro
+      // Limpar formulários após o registro bem-sucedido
       loginForm.reset();
       registerForm.reset();
       
     } catch (error) {
       toast({
         title: "Erro no registro",
-        description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+        description: "Ocorreu um erro ao criar a conta. Tente novamente.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Verificar se o usuário já tentou fazer login como admin
+  const checkAdminMode = () => {
+    const emailValue = loginForm.getValues("email");
+    const passwordValue = loginForm.getValues("password");
+    
+    if (emailValue === "admin@example.com" && passwordValue === "senha123") {
+      setIsAdminMode(true);
     }
   };
   
@@ -152,153 +173,209 @@ const Login = () => {
         </CardHeader>
         
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Registro</TabsTrigger>
-            </TabsList>
+          {isAdminMode ? (
+            // Admin Mode - Mostra abas de login e registro
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Registro</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="login">
-              <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                  <FormField
-                    control={loginForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="Email"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            autoComplete="email"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-200" />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Senha"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            autoComplete="current-password"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-200" />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-teal-400 hover:bg-teal-500 text-white"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Entrando..." : "Entrar"}
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
+              <TabsContent value="login">
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              type="email" 
+                              placeholder="Email"
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              autoComplete="email"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              type="password" 
+                              placeholder="Senha"
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              autoComplete="current-password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-teal-400 hover:bg-teal-500 text-white"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Entrando..." : "Entrar"}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
 
-            <TabsContent value="register">
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
-                  <FormField
-                    control={registerForm.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            placeholder="Nome completo"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-200" />
-                      </FormItem>
-                    )}
-                  />
+              <TabsContent value="register">
+                <Form {...registerForm}>
+                  <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Nome completo"
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={registerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="Email"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-200" />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Senha"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-200" />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={registerForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              type="email" 
+                              placeholder="Email"
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              type="password" 
+                              placeholder="Senha"
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={registerForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Confirme a senha"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-red-200" />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-teal-400 hover:bg-teal-500 text-white"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Registrando..." : "Registrar"}
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-          </Tabs>
+                    <FormField
+                      control={registerForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              type="password" 
+                              placeholder="Confirme a senha"
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-200" />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-teal-400 hover:bg-teal-500 text-white"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Registrando..." : "Registrar Usuário"}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            // User Mode - Mostra apenas o formulário de login
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="Email"
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          autoComplete="email"
+                          onBlur={() => checkAdminMode()}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-200" />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Senha"
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          autoComplete="current-password"
+                          onBlur={() => checkAdminMode()}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-200" />
+                    </FormItem>
+                  )}
+                />
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-teal-400 hover:bg-teal-500 text-white"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Entrando..." : "Entrar"}
+                </Button>
+              </form>
+            </Form>
+          )}
 
           <div className="mt-6 pt-4 border-t border-white/10">
             <p className="text-center text-xs text-white/50">
-              Para fins de demonstração: <code className="bg-white/10 px-1 rounded">admin@example.com / senha123</code>
+              Login administrativo: <code className="bg-white/10 px-1 rounded">admin@example.com / senha123</code>
             </p>
           </div>
         </CardContent>
