@@ -73,6 +73,9 @@ const AdminTile = ({
 const RegisterUserDialog = () => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -137,40 +140,49 @@ const RegisterUserDialog = () => {
 
   const onSubmit = async (data: UserFormValues) => {
     try {
+      setIsSubmitting(true);
       console.log("Registrando colaborador:", data);
       
-      const { error: collaboratorError } = await supabase
+      const { data: collaborator, error: collaboratorError } = await supabase
         .from('collaborators')
         .insert({
           name: data.name,
           role: data.role,
           image_url: data.imageUrl
-        });
+        })
+        .select()
+        .single();
 
       if (collaboratorError) {
         console.error("Erro ao criar colaborador:", collaboratorError);
         throw collaboratorError;
       }
 
+      console.log("Colaborador registrado com sucesso:", collaborator);
+
       toast({
         title: "Usuário registrado com sucesso",
         description: `${data.name} foi registrado como ${data.role}`,
       });
+      
       form.reset();
-    } catch (error) {
+      setIsOpen(false);
+    } catch (error: any) {
       console.error("Erro ao registrar usuário:", error);
       toast({
         title: "Erro ao registrar usuário",
-        description: "Ocorreu um erro ao tentar registrar o usuário",
+        description: error.message || "Ocorreu um erro ao tentar registrar o usuário",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full" variant="outline">
+        <Button className="w-full" variant="outline" onClick={() => setIsOpen(true)}>
           <UserPlus className="mr-2" size={16} />
           Registrar Novo Usuário
         </Button>
@@ -272,8 +284,12 @@ const RegisterUserDialog = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={uploading}>
-              Registrar Usuário
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={uploading || isSubmitting}
+            >
+              {isSubmitting ? "Registrando..." : "Registrar Usuário"}
             </Button>
           </form>
         </Form>
