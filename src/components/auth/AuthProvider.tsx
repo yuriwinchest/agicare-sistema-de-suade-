@@ -86,12 +86,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             id: "1",
             name: email === "admin@example.com" ? "Dr. Ana Silva" : email.split('@')[0],
             email: email,
-            role: "doctor",
+            role: email === "admin@example.com" ? "admin" : "doctor",
           };
 
           setUser(mockUser);
           setIsAuthenticated(true);
-          setShowDestinationModal(true);
+          // Evitar mostrar o modal para o usuário admin
+          setShowDestinationModal(email !== "admin@example.com");
           localStorage.setItem("user", JSON.stringify(mockUser));
           return true;
         }
@@ -109,7 +110,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         setUser(user);
         setIsAuthenticated(true);
-        setShowDestinationModal(true);
+        // Evitar mostrar o modal para o usuário admin
+        setShowDestinationModal(user.email !== "admin@example.com");
         localStorage.setItem("user", JSON.stringify(user));
         return true;
       }

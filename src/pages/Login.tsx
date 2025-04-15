@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -71,7 +72,7 @@ const Login = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema Agicare",
         });
-        navigate('/dashboard');
+        navigate('/menu');  // Alterado de '/dashboard' para '/menu'
       } else {
         toast({
           title: "Erro ao fazer login",
