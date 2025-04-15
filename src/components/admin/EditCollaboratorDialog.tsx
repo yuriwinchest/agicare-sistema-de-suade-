@@ -106,13 +106,13 @@ export function EditCollaboratorDialog({
       setUploading(true);
       const fileExt = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = fileName;
-
-      console.log("Iniciando upload para:", filePath);
       
+      console.log("Iniciando upload para:", fileName);
+      
+      // Upload diretamente com o nome do arquivo, sem caminho adicional
       const { data, error } = await supabase.storage
         .from('collaborator_photos')
-        .upload(filePath, file, {
+        .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true
         });
@@ -124,9 +124,10 @@ export function EditCollaboratorDialog({
 
       console.log("Upload concluído:", data);
 
+      // Obter a URL pública da imagem
       const { data: urlData } = supabase.storage
         .from('collaborator_photos')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       console.log("URL gerada:", urlData.publicUrl);
       

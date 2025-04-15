@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from "@/components/layout/Layout";
 import { 
@@ -95,11 +94,12 @@ const RegisterUserDialog = () => {
       
       const fileExt = file.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = fileName;
-
+      
+      console.log("Enviando arquivo:", fileName);
+      
       const { data, error } = await supabase.storage
         .from('collaborator_photos')
-        .upload(filePath, file, {
+        .upload(fileName, file, {
           cacheControl: '3600',
           upsert: true
         });
@@ -113,7 +113,7 @@ const RegisterUserDialog = () => {
 
       const { data: urlData } = supabase.storage
         .from('collaborator_photos')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       console.log("URL gerada:", urlData.publicUrl);
       
