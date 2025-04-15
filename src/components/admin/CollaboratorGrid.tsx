@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { EditCollaboratorDialog } from './EditCollaboratorDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 type Collaborator = {
   id?: string;
@@ -23,31 +24,71 @@ export const CollaboratorGrid = () => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [selectedCollaborator, setSelectedCollaborator] = useState<Collaborator | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCollaborators();
+    
+    // Configurar um canal em tempo real para ouvir mudanças na tabela collaborators
+    const channel = supabase
+      .channel('collaborator-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'collaborators' 
+      }, () => {
+        fetchCollaborators();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchCollaborators = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('collaborators')
-        .select('*');
+        .select('*')
+        .order('name', { ascending: true });
 
       if (error) {
         throw error;
       }
 
+      console.log("Colaboradores carregados:", data);
       setCollaborators(data || []);
     } catch (error) {
+      console.error("Erro ao carregar colaboradores:", error);
       toast({
         title: "Erro ao carregar colaboradores",
         description: "Não foi possível carregar a lista de colaboradores",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+        <span className="ml-2 text-white">Carregando colaboradores...</span>
+      </div>
+    );
+  }
+
+  if (collaborators.length === 0) {
+    return (
+      <div className="bg-white/10 border border-white/20 rounded-lg p-8 text-center">
+        <p className="text-white">Nenhum colaborador cadastrado ainda.</p>
+      </div>
+    );
+  }
 
   return (
     <>
