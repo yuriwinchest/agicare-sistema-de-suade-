@@ -36,9 +36,23 @@ export const registerCollaboratorAccount = async (email: string, password: strin
       
       // If there's an error, check if it's because the user exists but password is wrong
       if (userCheckError) {
+        console.error("Erro ao verificar usuário:", userCheckError.message);
+        
+        // Check if the error is about invalid credentials
         if (userCheckError.message.includes("Invalid login credentials")) {
-          console.error("Senha incorreta para usuário existente:", email);
-          throw new Error("Este email já possui uma conta, mas a senha fornecida está incorreta");
+          // Verify if the user actually exists by checking with a dummy password
+          const { data: userExists } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              shouldCreateUser: false
+            }
+          });
+          
+          // If we could send an OTP, it means the user exists
+          if (userExists) {
+            console.error("Senha incorreta para usuário existente:", email);
+            throw new Error("Este email já possui uma conta, mas a senha fornecida está incorreta");
+          }
         }
       }
       
@@ -57,7 +71,7 @@ export const registerCollaboratorAccount = async (email: string, password: strin
       
       if (error) {
         // Handle specific error for already registered users
-        if (error.message.includes("already registered")) {
+        if (error.message.includes("already registered") || error.message.includes("User already registered")) {
           throw new Error("Este email já está registrado. Use a função de recuperação de senha se esqueceu sua senha.");
         }
         handleAuthError(error);
@@ -92,7 +106,9 @@ const handleAuthError = (error: any) => {
     throw new Error("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
   }
   
-  if (error.message.includes("already registered") || error.message.includes("já possui uma conta")) {
+  if (error.message.includes("already registered") || 
+      error.message.includes("já possui uma conta") || 
+      error.message.includes("User already registered")) {
     throw error;
   }
   

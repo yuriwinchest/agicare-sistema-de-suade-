@@ -12,11 +12,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { useDestinationModal } from "@/components/auth/DestinationModalContext";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginAttempt, setLoginAttempt] = useState(0);
+  const [email, setEmail] = useState("");
   const { signin, user } = useAuth();
   const { setShowDestinationModal } = useDestinationModal();
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ const Login = () => {
     setIsLoading(true);
     setLoginError(null);
     setLoginAttempt(prev => prev + 1);
+    setEmail(values.email); // Save email for password reset
     
     try {
       const result = await signin(values.email, values.password);
@@ -86,6 +89,46 @@ const Login = () => {
     handleLogin({ email, password: 'senha123' });
   };
 
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email necessário",
+        description: "Digite seu email no formulário de login antes de solicitar redefinição de senha.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+
+      if (error) {
+        toast({
+          title: "Erro ao solicitar redefinição",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Email enviado",
+          description: "Verifique sua caixa de entrada para instruções de redefinição de senha.",
+          duration: 5000
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao solicitar redefinição de senha",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-4">
       <Card className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
@@ -119,9 +162,9 @@ const Login = () => {
             </AlertDescription>
           </Alert>
           
-          <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
+          <LoginForm onSubmit={handleLogin} isLoading={isLoading} onEmailChange={setEmail} />
           <div className="mt-4 space-y-4">
-            {loginError && <LoginError error={loginError} />}
+            {loginError && <LoginError error={loginError} onResetPassword={handleResetPassword} />}
             <DemoAccounts onDemoLogin={handleDemoLogin} />
           </div>
         </CardContent>

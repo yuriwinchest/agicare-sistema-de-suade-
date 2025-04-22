@@ -1,15 +1,16 @@
 
 import React from "react";
-import { AlertCircle, HelpCircle, ArrowRight } from "lucide-react";
+import { AlertCircle, HelpCircle, ArrowRight, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 interface LoginErrorProps {
   error: string;
+  onResetPassword?: () => void;
 }
 
-export const LoginError = ({ error }: LoginErrorProps) => {
+export const LoginError = ({ error, onResetPassword }: LoginErrorProps) => {
   const navigate = useNavigate();
 
   if (!error) return null;
@@ -64,18 +65,31 @@ export const LoginError = ({ error }: LoginErrorProps) => {
         )}
         
         {error.includes("senha fornecida está incorreta") && (
-          <div className="flex items-center gap-1 text-xs text-red-200/80">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger className="flex items-center">
-                  <HelpCircle size={12} className="mr-1" /> O que fazer?
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p>Você digitou a senha incorreta para uma conta existente. 
-                     Verifique se não está com o Caps Lock ativado ou tente recuperar sua senha.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="space-y-2">
+            <div className="flex items-center gap-1 text-xs text-red-200/80">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center">
+                    <HelpCircle size={12} className="mr-1" /> O que fazer?
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>Você digitou a senha incorreta para uma conta existente. 
+                       Verifique se não está com o Caps Lock ativado ou tente recuperar sua senha.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            
+            {onResetPassword && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full bg-white/10 hover:bg-white/20 text-white text-xs"
+                onClick={onResetPassword}
+              >
+                <RefreshCw size={12} className="mr-1" /> Recuperar senha
+              </Button>
+            )}
           </div>
         )}
         

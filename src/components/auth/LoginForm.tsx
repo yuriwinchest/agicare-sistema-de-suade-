@@ -17,10 +17,11 @@ import { Eye, EyeOff } from "lucide-react";
 
 interface LoginFormProps {
   onSubmit: (values: z.infer<typeof loginSchema>) => Promise<void>;
+  onEmailChange?: (email: string) => void;
   isLoading: boolean;
 }
 
-export const LoginForm = ({ onSubmit, isLoading }: LoginFormProps) => {
+export const LoginForm = ({ onSubmit, onEmailChange, isLoading }: LoginFormProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
   
   const loginForm = useForm({
@@ -30,6 +31,12 @@ export const LoginForm = ({ onSubmit, isLoading }: LoginFormProps) => {
       password: "",
     },
   });
+
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (onEmailChange) {
+      onEmailChange(event.target.value);
+    }
+  };
 
   return (
     <Form {...loginForm}>
@@ -45,6 +52,10 @@ export const LoginForm = ({ onSubmit, isLoading }: LoginFormProps) => {
                   placeholder="Email"
                   className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleEmailChange(e);
+                  }}
                 />
               </FormControl>
               <FormMessage className="text-red-200" />
