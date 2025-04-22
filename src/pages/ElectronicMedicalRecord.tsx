@@ -1,3 +1,5 @@
+
+// Update the getPatients import
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -17,7 +19,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getPatients } from "@/services/patientService";
+import { getAllPatients } from "@/services/patientService";
 import PatientActionsDialog from "@/components/electronic-record/PatientActionsDialog";
 
 const ElectronicMedicalRecord = () => {

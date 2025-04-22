@@ -1,8 +1,8 @@
-
 import { supabase } from './supabaseClient';
 import { getPatientById, savePatient } from './patientService';
+import { Patient } from './patients/types';
 
-// Interfaces para tipagem dos dados
+// Interfaces for data typing
 export interface VitalSigns {
   temperature: string;
   pressure: string;
@@ -74,32 +74,32 @@ export interface OfflineSyncItem {
   synced: boolean;
 }
 
-// Adiciona ou atualiza os sinais vitais de um paciente
+// Add or update a patient's vital signs
 export const saveNursingData = async (patientId: string, dataType: NursingDataType, data: any): Promise<boolean> => {
   try {
-    // Busca o paciente atual
-    const patient = await getPatientById(patientId);
+    // Get the current patient
+    const patient = await getPatientById(patientId) as Patient & { nursingData?: any };
     
     if (!patient) {
-      console.error("Paciente não encontrado:", patientId);
+      console.error("Patient not found:", patientId);
       return false;
     }
     
-    // Inicializa objeto nursingData se não existir
+    // Initialize nursingData object if it doesn't exist
     if (!patient.nursingData) {
       patient.nursingData = {};
     }
     
-    // Atualiza o tipo de dado específico
+    // Update the specific data type
     patient.nursingData[dataType] = data;
     
-    // Para evolução, mantém o histórico de evoluções anteriores
+    // For evolution, maintain history of previous evolutions
     if (dataType === 'evolution' && data.evolution) {
       if (!patient.nursingData.evolution.previousEvolutions) {
         patient.nursingData.evolution.previousEvolutions = [];
       }
       
-      // Adiciona evolução atual ao histórico
+      // Add current evolution to history
       patient.nursingData.evolution.previousEvolutions = [
         {
           id: Date.now().toString(),
@@ -111,15 +111,15 @@ export const saveNursingData = async (patientId: string, dataType: NursingDataTy
       ];
     }
     
-    // Salva o paciente atualizado
+    // Save the updated patient
     await savePatient(patient);
     
-    // Adiciona à fila de sincronização offline
+    // Add to offline synchronization queue
     await addToOfflineQueue(patientId, dataType, data);
     
     return true;
   } catch (error) {
-    console.error("Erro ao salvar dados de enfermagem:", error);
+    console.error("Error saving nursing data:", error);
     return false;
   }
 };
@@ -159,7 +159,7 @@ const addToOfflineQueue = async (patientId: string, dataType: NursingDataType, d
     
     localStorage.setItem(OFFLINE_SYNC_QUEUE_KEY, JSON.stringify(queue));
   } catch (error) {
-    console.error("Erro ao adicionar à fila de sincronização offline:", error);
+    console.error("Error adding to offline synchronization queue:", error);
     
     // Fallback para localStorage
     const queue = getOfflineQueueFromLocalStorage();
@@ -181,7 +181,7 @@ const getOfflineQueueFromLocalStorage = (): OfflineSyncItem[] => {
     const queue = localStorage.getItem(OFFLINE_SYNC_QUEUE_KEY);
     return queue ? JSON.parse(queue) : [];
   } catch (error) {
-    console.error("Erro ao obter fila de sincronização offline do localStorage:", error);
+    console.error("Error getting offline synchronization queue from localStorage:", error);
     return [];
   }
 };
@@ -207,7 +207,7 @@ export const getOfflineQueue = async (): Promise<OfflineSyncItem[]> => {
       synced: item.synced
     }));
   } catch (error) {
-    console.error("Erro ao obter fila de sincronização offline do Supabase:", error);
+    console.error("Error getting offline synchronization queue from Supabase:", error);
     
     // Fallback para localStorage
     return getOfflineQueueFromLocalStorage();
@@ -242,7 +242,7 @@ export const syncOfflineData = async (): Promise<boolean> => {
         .eq('timestamp', item.timestamp);
         
       if (error) {
-        console.error("Erro ao atualizar status de sincronização:", error);
+        console.error("Error updating synchronization status:", error);
       }
     }
     
@@ -257,7 +257,7 @@ export const syncOfflineData = async (): Promise<boolean> => {
     
     return true;
   } catch (error) {
-    console.error("Erro durante sincronização offline:", error);
+    console.error("Error during offline synchronization:", error);
     return false;
   }
 };
@@ -266,13 +266,13 @@ export const syncOfflineData = async (): Promise<boolean> => {
 export const setupOfflineSyncListeners = (): void => {
   // Tenta sincronizar quando a conexão for restaurada
   window.addEventListener('online', () => {
-    console.log("Conexão restaurada. Iniciando sincronização...");
+    console.log("Connection restored. Starting synchronization...");
     syncOfflineData();
   });
   
   // Registra quando ficar offline
   window.addEventListener('offline', () => {
-    console.log("Dispositivo offline. Os dados serão sincronizados quando a conexão for restaurada.");
+    console.log("Device offline. The data will be synchronized when the connection is restored.");
   });
 };
 

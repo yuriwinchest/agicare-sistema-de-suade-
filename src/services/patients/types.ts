@@ -5,12 +5,22 @@ export interface Patient {
   cpf: string;
   phone: string;
   email: string;
-  address: string;
+  address: string | object;
   birth_date: string;
   status: string;
   created_at?: string;
   updated_at?: string;
   allergies?: string[];
+  nursingData?: {
+    vitalSigns?: any;
+    evolution?: any;
+    procedures?: any;
+    anamnesis?: any;
+    hydricBalance?: any;
+    medication?: any;
+    physicalExam?: any;
+    previousEvolutions?: any[];
+  };
 }
 
 export interface PatientDraft {
@@ -19,7 +29,16 @@ export interface PatientDraft {
   cpf?: string;
   phone?: string;
   email?: string;
-  address?: any; // Using any to accommodate complex address structure
+  address?: string | object;
+  addressDetails?: {
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  };
   birth_date?: string;
   birthDate?: string; // Alternative field used in UI
   gender?: string;

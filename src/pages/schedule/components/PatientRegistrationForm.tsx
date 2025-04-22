@@ -25,6 +25,15 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     phone: "",
     email: "",
     address: "",
+    addressDetails: {
+      street: "",
+      number: "",
+      complement: "",
+      neighborhood: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
     birth_date: "",
     birthDate: "",
     gender: "",
@@ -40,7 +49,7 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       setPatientData({
         ...patientData,
         [parent]: {
-          ...patientData[parent as keyof typeof patientData] as object,
+          ...((patientData[parent as keyof typeof patientData] as Record<string, any>) || {}),
           [child]: value
         }
       });
@@ -65,14 +74,14 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     const patientToSave: Patient = {
       id: patientData.id,
       name: patientData.name,
-      cpf: patientData.cpf,
-      phone: patientData.phone,
+      cpf: patientData.cpf || "",
+      phone: patientData.phone || "",
       email: patientData.email || "",
-      address: typeof patientData.address === 'object' 
-        ? JSON.stringify(patientData.address) 
+      address: typeof patientData.addressDetails === 'object' 
+        ? JSON.stringify(patientData.addressDetails) 
         : patientData.address || "",
       birth_date: patientData.birth_date || patientData.birthDate || "",
-      status: patientData.status
+      status: patientData.status || "Agendado"
     };
     
     savePatient(patientToSave);
@@ -86,6 +95,15 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       onSuccess(patientData.name);
     }
   };
+
+  const renderAddressField = (field: string, placeholder: string) => (
+    <Input 
+      placeholder={placeholder} 
+      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+      value={patientData.addressDetails?.[field as keyof typeof patientData.addressDetails] || ""}
+      onChange={(e) => handleChange(`addressDetails.${field}`, e.target.value)}
+    />
+  );
 
   return (
     <div className="p-6 pt-0">
@@ -201,8 +219,8 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
               <Input 
                 placeholder="00000-000" 
                 className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                value={patientData.address.zipCode}
-                onChange={(e) => handleChange("address.zipCode", e.target.value)}
+                value={patientData.addressDetails.zipCode}
+                onChange={(e) => handleChange("addressDetails.zipCode", e.target.value)}
               />
             </div>
             <div className="md:col-span-2">
@@ -210,8 +228,8 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
               <Input 
                 placeholder="Digite o endereço" 
                 className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                value={patientData.address.street}
-                onChange={(e) => handleChange("address.street", e.target.value)}
+                value={patientData.addressDetails.street}
+                onChange={(e) => handleChange("addressDetails.street", e.target.value)}
               />
             </div>
           </div>

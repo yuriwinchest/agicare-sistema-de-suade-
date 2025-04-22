@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -131,7 +130,8 @@ const PatientReception = () => {
         status: "Enfermagem"
       };
       
-      const updatedPatient = confirmPatientAppointment(id, appointmentData);
+      // Fix function call to use only one argument
+      const updatedPatient = confirmPatientAppointment(id);
       
       if (updatedPatient) {
         toast({

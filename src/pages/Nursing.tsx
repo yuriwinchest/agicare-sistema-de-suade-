@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -21,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getPatients } from "@/services/patientService";
+import { getAllPatients } from "@/services/patientService";
 
 // Função para sanitizar input de busca
 const sanitizeSearchInput = (input: string): string => {
@@ -40,7 +39,7 @@ const Nursing = () => {
     // Load patients
     const loadPatients = async () => {
       try {
-        const result = await getPatients();
+        const result = await getAllPatients();
         setPatients(result);
       } catch (error) {
         console.error("Erro ao carregar pacientes:", error);

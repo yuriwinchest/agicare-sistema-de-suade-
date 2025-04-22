@@ -1,23 +1,25 @@
 
-import { Json } from "@/integrations/supabase/types";
+// Remove duplicate Json type
+// Ensure VitalSigns is properly defined
 
 export interface VitalSigns {
-  temperature: number;
-  systolicPressure: number;
-  diastolicPressure: number;
-  heartRate: number;
-  respiratoryRate: number;
-  oxygenSaturation: number;
-  painScale: number;
-  bloodGlucose: number;
+  temperature: string;
+  pressure: string;
+  pulse: string;
+  respiratory: string;
+  oxygen: string;
+  painScale?: string;
+  weight?: string;
+  height?: string;
+  bmi?: string;
   date?: string;
   time?: string;
 }
 
 export interface NursingAssessment {
-  id: string;
+  id?: string;
   patient_id: string;
-  nurse_id: string;
+  nurse_id?: string;
   procedures?: string[];
   observations?: string;
   vital_signs?: VitalSigns;
@@ -25,9 +27,10 @@ export interface NursingAssessment {
   updated_at?: string;
 }
 
-// Make sure the Json type extends VitalSigns for Supabase compatibility
-declare module "@/integrations/supabase/types" {
-  interface Json {
-    [key: string]: any;
-  }
-}
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];

@@ -10,7 +10,7 @@ import { ChevronLeft, Save } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { savePatient, saveDraftPatient, loadDraftPatient, clearDraftPatient } from "@/services/patientService";
+import { savePatient, saveDraftPatient, loadDraftPatient, clearDraftPatient, PatientDraft } from "@/services/patientService";
 import { Patient } from "@/services/patients/types";
 
 const PatientRegistration = () => {
@@ -48,13 +48,18 @@ const PatientRegistration = () => {
   useEffect(() => {
     const draftData = loadDraftPatient();
     if (draftData) {
-      setPatientData(draftData);
+      // Make sure we have addressDetails even if it's not in the draft
+      const updatedData = {
+        ...defaultPatientData,
+        ...draftData,
+        addressDetails: {
+          ...defaultPatientData.addressDetails,
+          ...(draftData.addressDetails || {})
+        }
+      };
+      setPatientData(updatedData);
     }
   }, []);
-  
-  useEffect(() => {
-    saveDraftPatient(patientData);
-  }, [patientData, activeTab]);
   
   const handleChange = (field: string, value: any) => {
     if (field.includes(".")) {
@@ -62,7 +67,7 @@ const PatientRegistration = () => {
       setPatientData({
         ...patientData,
         [parent]: {
-          ...patientData[parent as keyof typeof patientData] as object,
+          ...((patientData[parent as keyof typeof patientData] as Record<string, any>) || {}),
           [child]: value
         }
       });
@@ -91,14 +96,12 @@ const PatientRegistration = () => {
     const patientToSave: Patient = {
       id: patientData.id,
       name: patientData.name,
-      cpf: patientData.cpf,
-      phone: patientData.phone,
+      cpf: patientData.cpf || "",
+      phone: patientData.phone || "",
       email: patientData.email || "",
-      address: patientData.addressDetails 
-        ? JSON.stringify(patientData.addressDetails) 
-        : patientData.address || "",
+      address: patientData.addressDetails || patientData.address || "",
       birth_date: patientData.birth_date || patientData.birthDate || "",
-      status: patientData.status
+      status: patientData.status || "Agendado"
     };
     
     savePatient(patientToSave);
@@ -111,6 +114,15 @@ const PatientRegistration = () => {
     
     navigate("/reception");
   };
+
+  const renderAddressField = (field: string, placeholder: string) => (
+    <Input 
+      placeholder={placeholder} 
+      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
+      value={patientData.addressDetails?.[field as keyof typeof patientData.addressDetails] || ""}
+      onChange={(e) => handleChange(`addressDetails.${field}`, e.target.value)}
+    />
+  );
 
   return (
     <Layout>
@@ -260,69 +272,39 @@ const PatientRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                    <Input 
-                      placeholder="00000-000" 
-                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.address.zipCode}
-                      onChange={(e) => handleChange("address.zipCode", e.target.value)}
-                    />
+                    {renderAddressField("zipCode", "00000-000")}
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
-                    <Input 
-                      placeholder="Digite o endereço" 
-                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.address.street}
-                      onChange={(e) => handleChange("address.street", e.target.value)}
-                    />
+                    {renderAddressField("street", "Digite o endereço")}
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
-                    <Input 
-                      placeholder="Número" 
-                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.address.number}
-                      onChange={(e) => handleChange("address.number", e.target.value)}
-                    />
+                    {renderAddressField("number", "Número")}
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
-                    <Input 
-                      placeholder="Complemento" 
-                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.address.complement}
-                      onChange={(e) => handleChange("address.complement", e.target.value)}
-                    />
+                    {renderAddressField("complement", "Complemento")}
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
-                    <Input 
-                      placeholder="Bairro" 
-                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.address.neighborhood}
-                      onChange={(e) => handleChange("address.neighborhood", e.target.value)}
-                    />
+                    {renderAddressField("neighborhood", "Bairro")}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-                    <Input 
-                      placeholder="Cidade" 
-                      className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.address.city}
-                      onChange={(e) => handleChange("address.city", e.target.value)}
-                    />
+                    {renderAddressField("city", "Cidade")}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Estado/UF</label>
                     <Select 
-                      value={patientData.address.state}
-                      onValueChange={(value) => handleChange("address.state", value)}
+                      value={patientData.addressDetails?.state}
+                      onValueChange={(value) => handleChange("addressDetails.state", value)}
                     >
                       <SelectTrigger className="border-teal-500/30">
                         <SelectValue placeholder="UF" />
