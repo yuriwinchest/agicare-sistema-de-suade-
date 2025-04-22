@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Patient, PatientDraft } from "./types";
+import { Patient, PatientDraft } from "@/services/patients/types";
 import { 
   savePatientAdditionalData, 
   savePatientDocument, 
   savePatientAllergy, 
   savePatientNote,
   addPatientLog
-} from "./patientAdditionalDataService";
+} from "@/services/patients/patientAdditionalDataService";
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
