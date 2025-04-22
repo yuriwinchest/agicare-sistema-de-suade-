@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
@@ -7,73 +6,40 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, User, Stethoscope, CalendarClock, MapPin, Clock } from "lucide-react";
-
-// Mock hospitalized patients data
-const hospitalizedPatientsData = [
-  { 
-    id: "201", 
-    name: "Gabriel Fernandes", 
-    age: 45, 
-    admissionDate: "15/05/2023", 
-    unit: "Enfermaria", 
-    bed: "E101", 
-    doctor: "Dr. Paulo Menezes", 
-    diagnosis: "Pneumonia" 
-  },
-  { 
-    id: "202", 
-    name: "Beatriz Almeida", 
-    age: 32, 
-    admissionDate: "17/05/2023", 
-    unit: "UTI", 
-    bed: "UTI03", 
-    doctor: "Dra. Juliana Santos", 
-    diagnosis: "Insuficiência Cardíaca" 
-  },
-  { 
-    id: "203", 
-    name: "Rodrigo Oliveira", 
-    age: 58, 
-    admissionDate: "14/05/2023", 
-    unit: "Enfermaria", 
-    bed: "E105", 
-    doctor: "Dr. Carlos Silva", 
-    diagnosis: "Diabete Descompensada" 
-  },
-  { 
-    id: "204", 
-    name: "Mariana Souza", 
-    age: 28, 
-    admissionDate: "18/05/2023", 
-    unit: "UTI", 
-    bed: "UTI07", 
-    doctor: "Dr. Lucas Ferreira", 
-    diagnosis: "Trauma Abdominal" 
-  },
-  { 
-    id: "205", 
-    name: "Pedro Lima", 
-    age: 67, 
-    admissionDate: "13/05/2023", 
-    unit: "Enfermaria", 
-    bed: "E110", 
-    doctor: "Dra. Fernanda Costa", 
-    diagnosis: "AVC Isquêmico" 
-  },
-];
+import { Search, User, Stethoscope, CalendarClock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Hospitalization = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [unitFilter, setUnitFilter] = useState("all");
+
+  const { data: hospitalizedPatients = [], isLoading } = useQuery({
+    queryKey: ["hospitalizedPatients"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("patients")
+        .select(`
+          *,
+          medical_records (
+            doctor:doctor_id (name),
+            diagnosis
+          )
+        `)
+        .eq("status", "Internado");
+
+      if (error) throw error;
+      return data;
+    },
+  });
   
-  const filteredPatients = hospitalizedPatientsData.filter((patient) => {
+  const filteredPatients = hospitalizedPatients.filter((patient) => {
     const matchesSearch = 
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.id.includes(searchTerm) ||
-      patient.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
+      (patient.medical_records?.[0]?.doctor?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (patient.medical_records?.[0]?.diagnosis || "").toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesUnit = unitFilter === "all" || patient.unit === unitFilter;
     
@@ -83,6 +49,18 @@ const Hospitalization = () => {
   const handleViewPatient = (patient: any) => {
     navigate(`/patient/${patient.id}`);
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="page-container">
+          <div className="flex items-center justify-center h-[60vh]">
+            <p>Carregando...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
