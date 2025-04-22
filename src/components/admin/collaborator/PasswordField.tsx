@@ -16,15 +16,21 @@ interface PasswordFieldProps {
 }
 
 export function PasswordField({ form }: PasswordFieldProps) {
+  const isEditing = !!form.getValues().id;
+  
   return (
     <FormField
       control={form.control}
       name="password"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Senha</FormLabel>
+          <FormLabel>{isEditing ? "Nova Senha (opcional)" : "Senha"}</FormLabel>
           <FormControl>
-            <Input type="password" placeholder="Digite a senha" {...field} />
+            <Input 
+              type="password" 
+              placeholder={isEditing ? "Digite para alterar a senha" : "Digite a senha"} 
+              {...field} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

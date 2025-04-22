@@ -16,6 +16,7 @@ import { PersonalInfoFields } from './collaborator/PersonalInfoFields';
 import { ContactFields } from './collaborator/ContactFields';
 import { ProfessionalFields } from './collaborator/ProfessionalFields';
 import { StatusToggle } from './collaborator/StatusToggle';
+import { PasswordField } from './collaborator/PasswordField';
 
 interface EditCollaboratorDialogProps {
   collaborator: {
@@ -65,7 +66,10 @@ export function EditCollaboratorDialog({
                   name={collaborator.name}
                 />
               </div>
-              <PersonalInfoFields form={form} />
+              <div className="w-full md:w-2/3 space-y-4">
+                <PersonalInfoFields form={form} />
+                <PasswordField form={form} />
+              </div>
             </div>
 
             <ContactFields form={form} />
