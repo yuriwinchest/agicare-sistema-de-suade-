@@ -60,6 +60,21 @@ export const LoginError = ({ error }: LoginErrorProps) => {
             </TooltipProvider>
           </div>
         )}
+        {error.includes("Conta criada com sucesso") && (
+          <div className="flex items-center gap-1 text-xs text-red-200/80">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center">
+                  <HelpCircle size={12} className="mr-1" /> O que fazer?
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Sua conta foi criada com sucesso, mas o login automático falhou.
+                     Por favor, aguarde um momento e tente fazer login novamente com suas credenciais.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
     </div>
   );

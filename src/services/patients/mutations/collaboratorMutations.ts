@@ -100,10 +100,41 @@ export const registerCollaboratorAccount = async (email: string, password: strin
     }
     
     try {
-      // Registrar o usuário no sistema de autenticação
+      // Check if user already exists in auth
+      const { data: existingUser, error: userCheckError } = await supabase.auth.admin.getUserByEmail(email);
+      
+      if (!userCheckError && existingUser) {
+        console.log("Usuário já existe na autenticação, tentando fazer login direto");
+        // User already exists, try to sign in
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (signInError) {
+          if (signInError.message.includes("Invalid login credentials")) {
+            throw new Error("Este email já possui uma conta, mas a senha fornecida está incorreta");
+          }
+          throw signInError;
+        }
+        
+        return {
+          success: true,
+          user: signInData.user,
+          collaborator
+        };
+      }
+      
+      // Register the user in the authentication system
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            name: collaborator.name,
+            role: collaborator.role
+          }
+        }
       });
       
       if (error) {
@@ -115,7 +146,8 @@ export const registerCollaboratorAccount = async (email: string, password: strin
         }
         
         if (error.message.includes("already registered")) {
-          // Tentar fazer login em vez de registrar
+          // Try to sign in directly instead of registering
+          console.log("Email já registrado, tentando fazer login direto");
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -138,18 +170,44 @@ export const registerCollaboratorAccount = async (email: string, password: strin
         throw error;
       }
       
-      // Aguardar um momento para garantir que o usuário foi registrado corretamente
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // If registration successful, wait a bit to ensure account is fully created
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Tentar fazer login após o registro
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      // Try to login automatically after registration
+      let loginAttempts = 0;
+      const maxAttempts = 3;
+      let signInData = null;
+      let signInError = null;
+      
+      while (loginAttempts < maxAttempts) {
+        loginAttempts++;
+        console.log(`Tentativa de login automático ${loginAttempts} após registro`);
+        
+        try {
+          const result = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          
+          signInData = result.data;
+          signInError = result.error;
+          
+          if (!signInError) {
+            // Login successful
+            break;
+          }
+          
+          // If login error, wait a bit before trying again
+          await new Promise(resolve => setTimeout(resolve, 800));
+        } catch (e) {
+          console.error("Erro durante tentativa de login:", e);
+          signInError = e;
+        }
+      }
       
       if (signInError) {
-        console.error("Erro ao fazer login após registro:", signInError);
-        throw new Error("Conta criada, mas não foi possível fazer login automaticamente");
+        console.error("Não foi possível fazer login automático após múltiplas tentativas:", signInError);
+        throw new Error("Conta criada com sucesso. Por favor, tente fazer login manualmente com suas credenciais.");
       }
       
       return {
@@ -157,11 +215,12 @@ export const registerCollaboratorAccount = async (email: string, password: strin
         user: signInData.user || data.user,
         collaborator
       };
+      
     } catch (authError: any) {
       // Check for rate limiting error in all cases
       if (authError.message && (authError.message.includes("For security purposes") || 
-                                authError.status === 429 || 
-                                authError.code === "over_email_send_rate_limit")) {
+                              authError.status === 429 || 
+                              authError.code === "over_email_send_rate_limit")) {
         console.error("Erro de limite de taxa:", authError);
         throw new Error("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
       }

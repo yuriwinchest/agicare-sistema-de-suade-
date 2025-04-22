@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
@@ -135,6 +136,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     duration: 5000
                   });
                   return { success: false, error: registerError.message };
+                }
+                
+                if (registerError.message.includes("Conta criada com sucesso")) {
+                  // Handle the case where account creation succeeded but automatic login failed
+                  notification.warning("Login Manual Necessário", {
+                    description: "Sua conta foi criada, mas o login automático falhou. Por favor, tente fazer login novamente.",
+                    duration: 6000
+                  });
+                  return { success: false, error: "Conta criada com sucesso. Por favor, tente fazer login novamente com suas credenciais." };
                 }
                 
                 notification.error("Erro ao criar conta", {
