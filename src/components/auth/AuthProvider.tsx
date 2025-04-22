@@ -12,16 +12,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: session } = await supabase.auth.getSession();
+        const { data: sessionData } = await supabase.auth.getSession();
         
-        if (session && session.session) {
+        if (sessionData && sessionData.session) {
+          console.log("Sessão encontrada:", sessionData.session);
           const { data: userData } = await supabase.auth.getUser();
           
           if (userData && userData.user) {
+            console.log("Usuário autenticado:", userData.user);
             const user: User = {
               id: userData.user.id,
               name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-              email: userData.user.email,
+              email: userData.user.email || '',
               role: userData.user.user_metadata?.role || 'doctor',
             };
             
@@ -36,8 +38,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsAuthenticated(true);
           }
         } else {
+          console.log("Nenhuma sessão ativa encontrada, verificando usuário armazenado");
           const storedUser = localStorage.getItem("user");
           if (storedUser) {
+            console.log("Usuário armazenado encontrado");
             setUser(JSON.parse(storedUser));
             setIsAuthenticated(true);
           }
@@ -50,6 +54,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkSession();
     
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Evento de autenticação:", event, session ? "Sessão presente" : "Sem sessão");
+      
       if (event === 'SIGNED_IN' && session) {
         const { data: userData } = await supabase.auth.getUser();
         
@@ -77,9 +83,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signin = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log("Tentando login com:", email);
+      
       // Handle admin login
       if (email === "admin@example.com" && password === "senha123") {
-        console.log("Admin login successful");
+        console.log("Login administrativo bem-sucedido");
         const mockUser = {
           id: "1",
           name: "Dr. Ana Silva",
@@ -96,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Demo doctor account for testing
       if (email === "doctor@example.com" && password === "senha123") {
-        console.log("Doctor demo login successful");
+        console.log("Login do médico demonstrativo bem-sucedido");
         const mockDoctor = {
           id: "2",
           name: "Dr. Carlos Mendes",
@@ -112,18 +120,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Handle Supabase authentication
-      console.log("Attempting Supabase login with:", email);
+      console.log("Tentando autenticação no Supabase com:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Erro ao fazer login:", error);
+        console.error("Erro ao fazer login no Supabase:", error);
         
         // For demo purposes: If Supabase auth fails, still allow mock login
         if (email.includes('@') && password.length >= 6) {
-          console.log("Creating mock user after Supabase auth failed");
+          console.log("Criando usuário mockado após falha na autenticação do Supabase");
           const mockUser = {
             id: Math.random().toString(36).substring(2, 11),
             name: email.split('@')[0],
@@ -142,10 +150,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (data && data.user) {
+        console.log("Login no Supabase bem-sucedido:", data.user);
         const user = {
           id: data.user.id,
           name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-          email: data.user.email,
+          email: data.user.email || '',
           role: data.user.user_metadata?.role || 'doctor',
         };
 
@@ -165,6 +174,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signout = async () => {
     try {
+      console.log("Realizando logout");
       await supabase.auth.signOut();
       
       setUser(null);

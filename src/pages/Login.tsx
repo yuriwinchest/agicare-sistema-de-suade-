@@ -23,11 +23,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Info } from "lucide-react";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const { signin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -42,8 +43,16 @@ const Login = () => {
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
+    setLoginError(null);
     
     try {
+      console.log("Tentando login com e-mail:", values.email);
+      
+      // Demo accounts hint
+      if (values.email !== "admin@example.com" && values.email !== "doctor@example.com") {
+        console.log("Dica: Use admin@example.com ou doctor@example.com com senha senha123 para demonstração");
+      }
+      
       // Specifically handle admin login
       if (values.email === "admin@example.com" && values.password === "senha123") {
         const success = await signin(values.email, values.password);
@@ -56,6 +65,7 @@ const Login = () => {
           navigate('/admin');  // Redirect directly to admin dashboard
           return;
         } else {
+          setLoginError("Não foi possível fazer login administrativo");
           toast({
             title: "Erro de Login",
             description: "Não foi possível fazer login administrativo",
@@ -74,6 +84,7 @@ const Login = () => {
         });
         navigate('/menu');  // Alterado de '/dashboard' para '/menu'
       } else {
+        setLoginError("Credenciais inválidas. Tente novamente ou use as contas de demonstração.");
         toast({
           title: "Erro ao fazer login",
           description: "Credenciais inválidas. Tente novamente.",
@@ -81,6 +92,8 @@ const Login = () => {
         });
       }
     } catch (error) {
+      console.error("Erro ao fazer login:", error);
+      setLoginError("Ocorreu um erro ao processar sua solicitação");
       toast({
         title: "Erro ao fazer login",
         description: "Ocorreu um erro ao processar sua solicitação",
@@ -164,6 +177,19 @@ const Login = () => {
                   </FormItem>
                 )}
               />
+              
+              {loginError && (
+                <div className="bg-red-500/20 p-3 rounded-md flex items-start gap-2">
+                  <Info size={16} className="text-red-200 mt-0.5 flex-shrink-0" />
+                  <p className="text-red-200 text-sm">{loginError}</p>
+                </div>
+              )}
+              
+              <div className="bg-blue-500/20 p-3 rounded-md text-sm text-blue-200">
+                <p className="font-semibold mb-1">Contas para demonstração:</p>
+                <p>- Admin: admin@example.com / senha123</p>
+                <p>- Médico: doctor@example.com / senha123</p>
+              </div>
               
               <Button 
                 type="submit" 
