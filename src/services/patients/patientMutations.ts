@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, PatientDraft } from "@/services/patients/types";
 import { 
@@ -14,8 +15,13 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     // Enhanced date formatting with robust error handling
     const formattedBirthDate = formatDateForDatabase(patient.birth_date);
     
-    console.log("Original birth_date:", patient.birth_date);
-    console.log("Formatted birth_date:", formattedBirthDate);
+    console.log("Cadastrando paciente com dados:", {
+      nome: patient.name,
+      cpf: patient.cpf,
+      dataNascimento: patient.birth_date,
+      dataFormatada: formattedBirthDate,
+      endereco: patient.address
+    });
 
     // Ensure address is a string (stringify if it's an object)
     const formattedAddress = typeof patient.address === 'object' 
@@ -30,7 +36,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       status: patient.status || 'Agendado'
     };
 
-    console.log("Preparing patient data for Supabase:", patientData);
+    console.log("Dados preparados para envio ao Supabase:", patientData);
 
     // First check if the patient exists by ID, if using an existing ID
     if (patientData.id) {
@@ -43,6 +49,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       if (checkError) {
         console.error("Erro ao verificar paciente existente:", checkError);
       }
+
+      console.log("Verificação de paciente existente:", existingPatient ? "Encontrado" : "Não encontrado");
 
       // If the patient exists, update it
       if (existingPatient) {
@@ -57,6 +65,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
           return null;
         }
 
+        console.log("Paciente atualizado com sucesso:", data[0]);
         return data[0] as Patient;
       }
     }
@@ -69,6 +78,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       
     if (error) {
       console.error("Erro ao salvar paciente:", error);
+      console.error("Detalhes do erro:", error.message, error.details, error.hint);
       
       // For demo purposes: if Supabase insert fails, return a mock patient
       if (patient.name) {
@@ -97,7 +107,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     }
     
     const savedPatient = data[0] as Patient;
-    console.log("Patient saved successfully:", savedPatient);
+    console.log("Paciente salvo com sucesso:", savedPatient);
     
     // Log the action
     try {
