@@ -100,12 +100,22 @@ export const registerCollaboratorAccount = async (email: string, password: strin
     }
     
     try {
-      // Check if user already exists in auth
-      const { data: existingUser, error: userCheckError } = await supabase.auth.admin.getUserByEmail(email);
+      // Check if user already exists in auth by trying to sign in
+      const { data: existingUserData, error: userCheckError } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'temp-password-to-check-existence' // Try a dummy password just to see if user exists
+      });
       
-      if (!userCheckError && existingUser) {
+      // If no error with incorrect password, user doesn't exist (very unlikely)
+      // If error with "Invalid login credentials", user might exist but password is wrong
+      // We'll assume user exists if we get an "Invalid login credentials" error
+      
+      const userExists = !userCheckError || 
+                         (userCheckError && userCheckError.message.includes("Invalid login credentials"));
+      
+      if (userExists) {
         console.log("Usuário já existe na autenticação, tentando fazer login direto");
-        // User already exists, try to sign in
+        // User already exists, try to sign in with provided password
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password
