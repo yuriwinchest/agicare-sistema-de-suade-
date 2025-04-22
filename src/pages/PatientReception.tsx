@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -130,22 +131,31 @@ const PatientReception = () => {
         status: "Enfermagem"
       };
       
-      // Fix function call to use only one argument
-      const updatedPatient = confirmPatientAppointment(id);
-      
-      if (updatedPatient) {
-        toast({
-          title: "Atendimento registrado",
-          description: "O paciente foi encaminhado para a enfermagem.",
+      // Fix function call to use two arguments
+      confirmPatientAppointment(id, appointmentData)
+        .then(updatedPatient => {
+          if (updatedPatient) {
+            toast({
+              title: "Atendimento registrado",
+              description: "O paciente foi encaminhado para a enfermagem.",
+            });
+            navigate("/ambulatory");
+          } else {
+            toast({
+              title: "Erro ao registrar atendimento",
+              description: "Não foi possível registrar o atendimento do paciente.",
+              variant: "destructive",
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Error confirming appointment:", error);
+          toast({
+            title: "Erro ao registrar atendimento",
+            description: "Ocorreu um erro ao processar a requisição.",
+            variant: "destructive",
+          });
         });
-        navigate("/ambulatory");
-      } else {
-        toast({
-          title: "Erro ao registrar atendimento",
-          description: "Não foi possível registrar o atendimento do paciente.",
-          variant: "destructive",
-        });
-      }
     }
   };
   

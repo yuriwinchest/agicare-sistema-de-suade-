@@ -77,9 +77,7 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       cpf: patientData.cpf || "",
       phone: patientData.phone || "",
       email: patientData.email || "",
-      address: typeof patientData.addressDetails === 'object' 
-        ? JSON.stringify(patientData.addressDetails) 
-        : patientData.address || "",
+      address: JSON.stringify(patientData.addressDetails),
       birth_date: patientData.birth_date || patientData.birthDate || "",
       status: patientData.status || "Agendado"
     };

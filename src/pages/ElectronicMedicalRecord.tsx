@@ -33,7 +33,7 @@ const ElectronicMedicalRecord = () => {
   useEffect(() => {
     const loadPatients = async () => {
       try {
-        const result = await getPatients();
+        const result = await getAllPatients();
         setPatients(result);
       } catch (error) {
         console.error("Erro ao carregar pacientes:", error);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -10,8 +11,8 @@ import { ChevronLeft, Save } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { savePatient, saveDraftPatient, loadDraftPatient, clearDraftPatient, PatientDraft } from "@/services/patientService";
-import { Patient } from "@/services/patients/types";
+import { savePatient, saveDraftPatient, loadDraftPatient, clearDraftPatient } from "@/services/patientService";
+import { Patient, PatientDraft } from "@/services/patients/types";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ const PatientRegistration = () => {
       cpf: patientData.cpf || "",
       phone: patientData.phone || "",
       email: patientData.email || "",
-      address: patientData.addressDetails || patientData.address || "",
+      address: JSON.stringify(patientData.addressDetails) || "",
       birth_date: patientData.birth_date || patientData.birthDate || "",
       status: patientData.status || "Agendado"
     };
