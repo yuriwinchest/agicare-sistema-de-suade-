@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +18,12 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
   
+  const generatePatientNumber = () => {
+    return String(Math.floor(Math.random() * 999)).padStart(3, '0');
+  };
+  
   const defaultPatientData = {
-    id: Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+    id: generatePatientNumber(),
     name: "",
     cpf: "",
     phone: "",

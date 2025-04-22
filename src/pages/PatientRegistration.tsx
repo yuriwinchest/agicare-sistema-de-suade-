@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,12 @@ const PatientRegistration = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
   
+  const generatePatientNumber = () => {
+    return String(Math.floor(Math.random() * 999)).padStart(3, '0');
+  };
+  
   const defaultPatientData = {
-    id: uuidv4(),
+    id: generatePatientNumber(),
     name: "",
     cpf: "",
     phone: "",
@@ -70,24 +74,19 @@ const PatientRegistration = () => {
   useEffect(() => {
     const draftData = loadDraftPatient();
     if (draftData) {
-      // Garantir que temos addressDetails mesmo que não esteja no rascunho
       const updatedData = {
         ...defaultPatientData,
         ...draftData,
-        // Garantir que address é uma string
         address: typeof draftData.address === 'string' ? draftData.address : JSON.stringify(draftData.address || {}),
-        // Mesclar addressDetails do rascunho ou extrair de address se for um objeto
         addressDetails: {
           ...defaultPatientData.addressDetails,
           ...(draftData.addressDetails || {}),
           ...(typeof draftData.address === 'object' ? draftData.address : {})
         },
-        // Garantir que additionalData existe
         additionalData: {
           ...defaultPatientData.additionalData,
           ...(draftData.additionalData || {})
         },
-        // Garantir que temos arrays
         documents: draftData.documents || [],
         allergies: draftData.allergies || []
       };
@@ -115,7 +114,6 @@ const PatientRegistration = () => {
       });
     }
     
-    // Salvar rascunho automático
     saveDraftPatient({...patientData, [field]: value});
   };
   
@@ -144,7 +142,6 @@ const PatientRegistration = () => {
     setPatientData({...patientData, allergies: updatedAllergies});
     setAllergyInput({ type: "", description: "" });
     
-    // Salvar rascunho automático
     saveDraftPatient({...patientData, allergies: updatedAllergies});
   };
   
@@ -154,7 +151,6 @@ const PatientRegistration = () => {
     );
     setPatientData({...patientData, allergies: updatedAllergies});
     
-    // Salvar rascunho automático
     saveDraftPatient({...patientData, allergies: updatedAllergies});
   };
   
@@ -168,7 +164,6 @@ const PatientRegistration = () => {
       return;
     }
     
-    // Preparar dados do paciente para salvar
     const patientToSave = {
       id: patientData.id,
       name: patientData.name,
