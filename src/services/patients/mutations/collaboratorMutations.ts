@@ -21,3 +21,22 @@ export const updateCollaboratorProfile = async (collaboratorId: string, updates:
     throw error;
   }
 };
+
+export const deleteCollaborator = async (collaboratorId: string) => {
+  try {
+    const { error } = await supabase
+      .from('collaborators')
+      .delete()
+      .eq('id', collaboratorId);
+
+    if (error) {
+      console.error("Erro ao excluir colaborador:", error);
+      throw error;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Erro detalhado ao excluir:", error);
+    throw error;
+  }
+};

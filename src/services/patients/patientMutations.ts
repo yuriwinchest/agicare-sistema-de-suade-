@@ -18,5 +18,6 @@ export {
 } from './mutations/completeMutations';
 
 export {
-  updateCollaboratorProfile
+  updateCollaboratorProfile,
+  deleteCollaborator
 } from './mutations/collaboratorMutations';
