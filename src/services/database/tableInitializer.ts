@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const checkTableExists = async (tableName: string): Promise<boolean> => {
+const checkTableExists = async (tableName: 'patients' | 'vital_signs' | 'health_professionals' | 'healthcare_units' | 'offline_sync_queue'): Promise<boolean> => {
   try {
     const { data, error } = await supabase
       .from(tableName)
@@ -19,8 +19,6 @@ const checkTableExists = async (tableName: string): Promise<boolean> => {
   }
 };
 
-// These functions now just check if tables exist, but don't try to create them
-// Table creation should be done through migrations in Supabase directly
 const checkPatientsTable = async () => {
   return await checkTableExists('patients');
 };
@@ -37,6 +35,10 @@ const checkHealthcareUnitsTable = async () => {
   return await checkTableExists('healthcare_units');
 };
 
+const checkOfflineSyncQueueTable = async () => {
+  return await checkTableExists('offline_sync_queue');
+};
+
 export const initializeTables = async (): Promise<boolean> => {
   try {
     console.log("Verificando tabelas do banco de dados...");
@@ -46,15 +48,17 @@ export const initializeTables = async (): Promise<boolean> => {
       checkVitalSignsTable(),
       checkHealthProfessionalsTable(),
       checkHealthcareUnitsTable(),
+      checkOfflineSyncQueueTable(),
     ]);
     
-    const [patientsExists, vitalSignsExists, professionalsExists, unitsExists] = tables;
+    const [patientsExists, vitalSignsExists, professionalsExists, unitsExists, offlineSyncQueueExists] = tables;
     
     console.log("Status das tabelas:");
     console.log("- Pacientes:", patientsExists ? "Existe" : "Não existe");
     console.log("- Sinais Vitais:", vitalSignsExists ? "Existe" : "Não existe");
     console.log("- Profissionais:", professionalsExists ? "Existe" : "Não existe");
     console.log("- Unidades:", unitsExists ? "Existe" : "Não existe");
+    console.log("- Fila de Sincronização:", offlineSyncQueueExists ? "Existe" : "Não existe");
     
     return true;
   } catch (error) {

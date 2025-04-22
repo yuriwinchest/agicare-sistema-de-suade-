@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { getPatientById } from "../patients/patientQueries";
-import { NursingAssessment } from "./types";
+import { NursingAssessment, VitalSigns } from "./types";
 
 export const getNursingAssessment = async (patientId: string): Promise<NursingAssessment | null> => {
   try {
@@ -16,14 +16,16 @@ export const getNursingAssessment = async (patientId: string): Promise<NursingAs
       
     if (error) return null;
     
-    // Map the database result to our NursingAssessment type
+    // Cast vital_signs to VitalSigns type
+    const vitalSigns = data.vital_signs as VitalSigns;
+    
     return {
       id: data.id,
       patient_id: data.patient_id,
       nurse_id: data.nurse_id,
       procedures: data.procedures,
       observations: data.observations,
-      vital_signs: data.vital_signs,
+      vital_signs: vitalSigns,
       created_at: data.created_at,
       updated_at: data.updated_at
     };

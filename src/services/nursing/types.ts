@@ -1,13 +1,12 @@
-
 // Remove duplicate Json type
 // Ensure VitalSigns is properly defined
 
 export interface VitalSigns {
-  temperature: string;
-  pressure: string;
-  pulse: string;
-  respiratory: string;
-  oxygen: string;
+  temperature?: string;
+  pressure?: string;
+  pulse?: string;
+  respiratory?: string;
+  oxygen?: string;
   painScale?: string;
   weight?: string;
   height?: string;
@@ -34,3 +33,14 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[];
+
+// Add offline sync types
+export interface OfflineSyncItem {
+  id?: string;
+  patient_id: string;
+  data_type: string;
+  data: any;
+  timestamp: number;
+  synced: boolean;
+  created_at?: string;
+}

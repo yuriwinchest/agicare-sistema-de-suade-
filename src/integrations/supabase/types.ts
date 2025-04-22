@@ -336,6 +336,44 @@ export type Database = {
           },
         ]
       }
+      offline_sync_queue: {
+        Row: {
+          created_at: string | null
+          data: Json
+          data_type: string
+          id: string
+          patient_id: string | null
+          synced: boolean | null
+          timestamp: number
+        }
+        Insert: {
+          created_at?: string | null
+          data: Json
+          data_type: string
+          id?: string
+          patient_id?: string | null
+          synced?: boolean | null
+          timestamp: number
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json
+          data_type?: string
+          id?: string
+          patient_id?: string | null
+          synced?: boolean | null
+          timestamp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offline_sync_queue_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_additional_data: {
         Row: {
           created_at: string | null

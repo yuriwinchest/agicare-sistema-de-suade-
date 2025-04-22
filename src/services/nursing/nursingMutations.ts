@@ -12,7 +12,7 @@ export const saveNursingAssessment = async (assessment: NursingAssessment): Prom
         nurse_id: assessment.nurse_id,
         procedures: assessment.procedures,
         observations: assessment.observations,
-        vital_signs: assessment.vital_signs as any, // Type assertion to accommodate JSON
+        vital_signs: assessment.vital_signs, // TypeScript will handle the conversion
         created_at: assessment.created_at,
         updated_at: new Date().toISOString()
       })
