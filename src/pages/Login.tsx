@@ -46,7 +46,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-4">
-      <div className="absolute inset-0 bg-[url('/lovable-uploads/cda3aca0-da8b-449c-999e-d0de18cac3af.png')] bg-cover bg-center opacity-40" />
+      {/* Removendo a div com a imagem de fundo que está causando o erro 404 */}
       
       <Card className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="space-y-1 flex flex-col items-center">
