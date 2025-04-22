@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/services/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
 import { User } from "./types";
 
@@ -10,35 +11,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: session } = await supabase.auth.getSession();
-      
-      if (session && session.session) {
-        const { data: userData } = await supabase.auth.getUser();
+      try {
+        const { data: session } = await supabase.auth.getSession();
         
-        if (userData && userData.user) {
-          const user: User = {
-            id: userData.user.id,
-            name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-            email: userData.user.email,
-            role: userData.user.user_metadata?.role || 'doctor',
-          };
+        if (session && session.session) {
+          const { data: userData } = await supabase.auth.getUser();
           
-          const storedPrefs = localStorage.getItem("user_prefs");
-          if (storedPrefs) {
-            const prefs = JSON.parse(storedPrefs);
-            user.unit = prefs.unit;
-            user.room = prefs.room;
+          if (userData && userData.user) {
+            const user: User = {
+              id: userData.user.id,
+              name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
+              email: userData.user.email,
+              role: userData.user.user_metadata?.role || 'doctor',
+            };
+            
+            const storedPrefs = localStorage.getItem("user_prefs");
+            if (storedPrefs) {
+              const prefs = JSON.parse(storedPrefs);
+              user.unit = prefs.unit;
+              user.room = prefs.room;
+            }
+            
+            setUser(user);
+            setIsAuthenticated(true);
           }
-          
-          setUser(user);
-          setIsAuthenticated(true);
+        } else {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            setIsAuthenticated(true);
+          }
         }
-      } else {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-          setIsAuthenticated(true);
-        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
       }
     };
     
@@ -72,7 +77,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signin = async (email: string, password: string): Promise<boolean> => {
     try {
+      // Handle admin login
       if (email === "admin@example.com" && password === "senha123") {
+        console.log("Admin login successful");
         const mockUser = {
           id: "1",
           name: "Dr. Ana Silva",
@@ -87,6 +94,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
+      // Demo doctor account for testing
+      if (email === "doctor@example.com" && password === "senha123") {
+        console.log("Doctor demo login successful");
+        const mockDoctor = {
+          id: "2",
+          name: "Dr. Carlos Mendes",
+          email: email,
+          role: "doctor",
+        };
+
+        setUser(mockDoctor);
+        setIsAuthenticated(true);
+        setShowDestinationModal(true);
+        localStorage.setItem("user", JSON.stringify(mockDoctor));
+        return true;
+      }
+
+      // Handle Supabase authentication
+      console.log("Attempting Supabase login with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -95,18 +121,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Erro ao fazer login:", error);
         
-        const mockUser = {
-          id: "2",
-          name: email.split('@')[0],
-          email: email,
-          role: "doctor",
-        };
+        // For demo purposes: If Supabase auth fails, still allow mock login
+        if (email.includes('@') && password.length >= 6) {
+          console.log("Creating mock user after Supabase auth failed");
+          const mockUser = {
+            id: Math.random().toString(36).substring(2, 11),
+            name: email.split('@')[0],
+            email: email,
+            role: "doctor",
+          };
 
-        setUser(mockUser);
-        setIsAuthenticated(true);
-        setShowDestinationModal(true);
-        localStorage.setItem("user", JSON.stringify(mockUser));
-        return true;
+          setUser(mockUser);
+          setIsAuthenticated(true);
+          setShowDestinationModal(true);
+          localStorage.setItem("user", JSON.stringify(mockUser));
+          return true;
+        }
+        
+        return false;
       }
 
       if (data && data.user) {
@@ -119,7 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(user);
         setIsAuthenticated(true);
-        setShowDestinationModal(user.email !== "admin@example.com");
+        setShowDestinationModal(user.role !== "admin");
         localStorage.setItem("user", JSON.stringify(user));
         return true;
       }
