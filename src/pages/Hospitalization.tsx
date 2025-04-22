@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
@@ -6,9 +7,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, User, Stethoscope, CalendarClock } from "lucide-react";
+import { Search, User, Stethoscope, CalendarClock, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+// Interface para os dados do paciente
+interface HospitalizedPatient {
+  id: string;
+  name: string;
+  status: string;
+  medical_records?: {
+    doctor?: {
+      name?: string;
+    };
+    diagnosis?: string;
+  }[];
+  // Dados adicionais para internação
+  unit_info?: {
+    unit: string;
+    bed: string;
+    doctor: string;
+    diagnosis: string;
+    admissionDate: string;
+  };
+}
 
 const Hospitalization = () => {
   const navigate = useNavigate();
@@ -30,7 +52,18 @@ const Hospitalization = () => {
         .eq("status", "Internado");
 
       if (error) throw error;
-      return data;
+      
+      // Transformando os dados para adicionar informações de internação (simuladas)
+      return data.map((patient): HospitalizedPatient => ({
+        ...patient,
+        unit_info: {
+          unit: patient.id.startsWith("0") ? "UTI" : "Enfermaria",
+          bed: `${Math.floor(Math.random() * 10) + 1}`,
+          doctor: patient.medical_records?.[0]?.doctor?.name || "Dr. Não atribuído",
+          diagnosis: patient.medical_records?.[0]?.diagnosis || "Sem diagnóstico",
+          admissionDate: new Date(patient.created_at).toLocaleDateString('pt-BR')
+        }
+      }));
     },
   });
   
@@ -38,10 +71,10 @@ const Hospitalization = () => {
     const matchesSearch = 
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.id.includes(searchTerm) ||
-      (patient.medical_records?.[0]?.doctor?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (patient.medical_records?.[0]?.diagnosis || "").toLowerCase().includes(searchTerm.toLowerCase());
+      (patient.unit_info?.doctor || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (patient.unit_info?.diagnosis || "").toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesUnit = unitFilter === "all" || patient.unit === unitFilter;
+    const matchesUnit = unitFilter === "all" || patient.unit_info?.unit === unitFilter;
     
     return matchesSearch && matchesUnit;
   });
@@ -116,18 +149,18 @@ const Hospitalization = () => {
                           <h3 className="font-medium">{patient.name}</h3>
                           <div className="flex flex-wrap gap-2 mt-1">
                             <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
-                            <p className="text-sm text-muted-foreground">Idade: {patient.age} anos</p>
+                            <p className="text-sm text-muted-foreground">Idade: {calculateAge(patient.birth_date)} anos</p>
                           </div>
                         </div>
                       </div>
                       
                       <div className="flex items-center">
                         <Badge variant="outline" className={
-                          patient.unit === "UTI" 
+                          patient.unit_info?.unit === "UTI" 
                             ? "bg-red-100 text-red-800 hover:bg-red-100" 
                             : "bg-blue-100 text-blue-800 hover:bg-blue-100"
                         }>
-                          {patient.unit} - {patient.bed}
+                          {patient.unit_info?.unit} - {patient.unit_info?.bed}
                         </Badge>
                       </div>
                     </div>
@@ -135,17 +168,17 @@ const Hospitalization = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-medgray-100 p-3 rounded-md mb-4">
                       <div>
                         <p className="text-xs text-muted-foreground">Médico Responsável</p>
-                        <p className="text-sm font-medium">{patient.doctor}</p>
+                        <p className="text-sm font-medium">{patient.unit_info?.doctor}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Diagnóstico</p>
-                        <p className="text-sm font-medium">{patient.diagnosis}</p>
+                        <p className="text-sm font-medium">{patient.unit_info?.diagnosis}</p>
                       </div>
                       <div className="flex items-center">
                         <CalendarClock className="h-4 w-4 mr-1 text-muted-foreground" />
                         <div>
                           <p className="text-xs text-muted-foreground">Internado desde</p>
-                          <p className="text-sm font-medium">{patient.admissionDate}</p>
+                          <p className="text-sm font-medium">{patient.unit_info?.admissionDate}</p>
                         </div>
                       </div>
                     </div>
@@ -173,6 +206,22 @@ const Hospitalization = () => {
       </div>
     </Layout>
   );
+};
+
+// Função para calcular idade a partir da data de nascimento
+const calculateAge = (birthDate: string | null | undefined): number => {
+  if (!birthDate) return 0;
+  
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
 };
 
 export default Hospitalization;

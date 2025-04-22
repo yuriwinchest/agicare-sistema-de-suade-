@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getActiveAppointments } from "@/services/patientService";
+import { getActiveAppointmentsAsync } from "@/services/patientService";
 
 const Appointment = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Appointment = () => {
   
   useEffect(() => {
     const loadAppointments = () => {
-      const activeAppointments = getActiveAppointments();
+      const activeAppointments = getActiveAppointmentsAsync();
       setPatients(activeAppointments);
     };
     

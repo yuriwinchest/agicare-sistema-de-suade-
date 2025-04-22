@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useNotification } from './useNotification';
 import { saveNursingData, syncOfflineData } from '@/services/nursingDataService';
 import { supabase } from '@/services/supabaseClient';
-import { getPatientByIdAsync } from '@/services/patientService';
+import { getPatientById } from '@/services/patientService';
 
 export const useNursingData = (patientId: string) => {
   const [isSyncing, setIsSyncing] = useState(false);
