@@ -53,6 +53,11 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const formatDateForDB = (dateStr: string): string | null => {
     if (!dateStr) return null;
     
+    // Verifica se a data já está no formato ISO (YYYY-MM-DD)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+    
     const parts = dateStr.split('/');
     if (parts.length === 3) {
       // Create YYYY-MM-DD format
@@ -116,6 +121,13 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       };
       
       console.log("Saving patient with data:", patientToSave);
+      console.log("Formatted birth date:", formattedBirthDate);
+      
+      // Garantir que a data está no formato correto antes de enviar
+      if (patientToSave.birth_date && patientToSave.birth_date.includes('/')) {
+        patientToSave.birth_date = formatDateForDB(patientToSave.birth_date) || "";
+        console.log("Re-formatted birth date:", patientToSave.birth_date);
+      }
       
       const savedPatient = await savePatient(patientToSave);
       

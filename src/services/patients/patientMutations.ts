@@ -8,9 +8,15 @@ import {
   savePatientNote,
   addPatientLog
 } from "./patientAdditionalDataService";
+import { formatDateForDatabase } from "@/services/patientService";
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
+    // Ensure birth_date is in the correct format
+    const formattedBirthDate = formatDateForDatabase(patient.birth_date);
+    console.log("Original birth_date:", patient.birth_date);
+    console.log("Formatted birth_date:", formattedBirthDate);
+    
     // Prepare patient data for saving
     const patientData = {
       id: patient.id || undefined, // Let Supabase generate UUID if not provided
@@ -19,13 +25,13 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       phone: patient.phone || null,
       email: patient.email || null,
       address: typeof patient.address === 'object' ? JSON.stringify(patient.address) : patient.address,
-      birth_date: patient.birth_date || null,
+      birth_date: formattedBirthDate || null,
       status: patient.status || 'Agendado',
       person_type: patient.person_type || null,
       gender: patient.gender || null
     };
 
-    console.log("Saving patient data:", patientData);
+    console.log("Saving patient data to Supabase:", patientData);
 
     // Attempt to insert the patient data
     const { data, error } = await supabase
