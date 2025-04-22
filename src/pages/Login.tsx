@@ -63,14 +63,16 @@ const Login = () => {
         
         if (success) {
           notification.success("Login administrativo bem-sucedido", {
-            description: "Bem-vindo ao ambiente administrativo Agicare"
+            description: "Bem-vindo ao ambiente administrativo Agicare",
+            duration: 3000  // 3 seconds only
           });
           navigate('/admin');  // Redirect directly to admin dashboard
           return;
         } else {
           setLoginError("Não foi possível fazer login administrativo");
           notification.error("Erro de Login", {
-            description: "Não foi possível fazer login administrativo"
+            description: "Não foi possível fazer login administrativo",
+            duration: 3000 // 3 seconds only
           });
         }
       }
@@ -80,7 +82,8 @@ const Login = () => {
       
       if (success) {
         notification.success("Login realizado com sucesso", {
-          description: "Bem-vindo ao sistema Agicare"
+          description: "Bem-vindo ao sistema Agicare",
+          duration: 3000 // 3 seconds only
         });
         navigate('/menu');
       } else {
@@ -92,14 +95,16 @@ const Login = () => {
         }
         
         notification.error("Erro ao fazer login", {
-          description: "Credenciais inválidas. Tente novamente."
+          description: "Credenciais inválidas. Tente novamente.",
+          duration: 3000 // 3 seconds only
         });
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       setLoginError("Ocorreu um erro ao processar sua solicitação. Verifique sua conexão e tente novamente.");
       notification.error("Erro ao fazer login", {
-        description: "Ocorreu um erro ao processar sua solicitação"
+        description: "Ocorreu um erro ao processar sua solicitação",
+        duration: 3000 // 3 seconds only
       });
     } finally {
       setIsLoading(false);
