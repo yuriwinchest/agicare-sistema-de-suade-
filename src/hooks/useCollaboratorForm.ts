@@ -8,13 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadCollaboratorPhoto } from '@/services/storageService';
 
 const collaboratorFormSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido"),
   phone: z.string().optional(),
   specialty: z.string().optional(),
   department: z.string().optional(),
   active: z.boolean().default(true),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").optional(),
   role: z.string().default("doctor"),
   image_url: z.string().optional(),
 });
@@ -33,6 +34,7 @@ export function useCollaboratorForm(
   const form = useForm<CollaboratorFormValues>({
     resolver: zodResolver(collaboratorFormSchema),
     defaultValues: {
+      id: collaborator?.id || "",
       name: collaborator?.name || "",
       email: collaborator?.email || "",
       phone: collaborator?.phone || "",
@@ -75,7 +77,7 @@ export function useCollaboratorForm(
       console.log("Registrando colaborador:", data);
 
       // First create auth user if password is provided and not editing an existing user
-      if (data.password && !collaborator?.id) {
+      if (data.password && !data.id) {
         const { error: authError } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
@@ -85,7 +87,7 @@ export function useCollaboratorForm(
       }
 
       // Then create or update collaborator profile
-      if (collaborator?.id) {
+      if (data.id) {
         // Update existing collaborator
         const { error: collaboratorError } = await supabase
           .from('collaborators')
@@ -99,7 +101,7 @@ export function useCollaboratorForm(
             role: data.role,
             image_url: data.image_url,
           })
-          .eq('id', collaborator.id);
+          .eq('id', data.id);
 
         if (collaboratorError) throw collaboratorError;
       } else {
@@ -121,13 +123,13 @@ export function useCollaboratorForm(
       }
 
       toast({
-        title: collaborator?.id ? "Colaborador atualizado com sucesso" : "Colaborador registrado com sucesso",
-        description: `${data.name} foi ${collaborator?.id ? 'atualizado' : 'registrado'} como colaborador`,
+        title: data.id ? "Colaborador atualizado com sucesso" : "Colaborador registrado com sucesso",
+        description: `${data.name} foi ${data.id ? 'atualizado' : 'registrado'} como colaborador`,
       });
 
       if (onSuccess) onSuccess();
       if (onClose) onClose(false);
-      if (!collaborator?.id) form.reset();
+      if (!data.id) form.reset();
       return true;
     } catch (error: any) {
       console.error("Erro ao registrar colaborador:", error);
