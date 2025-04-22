@@ -17,7 +17,8 @@ export {
   saveCompletePatient 
 } from './mutations/completeMutations';
 
+// Importing from the new location
 export {
   updateCollaboratorProfile,
   deleteCollaborator
-} from './mutations/collaboratorMutations';
+} from '@/services/collaborators';
