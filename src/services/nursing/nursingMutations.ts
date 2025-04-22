@@ -1,9 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { NursingAssessment, VitalSigns } from "./types";
+import { NursingAssessment, VitalSigns, Json } from "./types";
 
 export const saveNursingAssessment = async (assessment: NursingAssessment): Promise<NursingAssessment | null> => {
   try {
+    // Cast vital_signs to Json type for Supabase compatibility
     const { data, error } = await supabase
       .from('nursing_records')
       .upsert({
@@ -12,7 +13,7 @@ export const saveNursingAssessment = async (assessment: NursingAssessment): Prom
         nurse_id: assessment.nurse_id,
         procedures: assessment.procedures,
         observations: assessment.observations,
-        vital_signs: assessment.vital_signs, // TypeScript will handle the conversion
+        vital_signs: assessment.vital_signs as unknown as Json, // Type assertion for compatibility
         created_at: assessment.created_at,
         updated_at: new Date().toISOString()
       })
@@ -45,7 +46,7 @@ export const updateVitalSigns = async (patientId: string, vitalSigns: VitalSigns
       const { error } = await supabase
         .from('nursing_records')
         .update({
-          vital_signs: vitalSigns as any, // Type assertion to accommodate JSON
+          vital_signs: vitalSigns as unknown as Json, // Type assertion for compatibility
           updated_at: new Date().toISOString()
         })
         .eq('id', existingRecord.id);
@@ -57,7 +58,7 @@ export const updateVitalSigns = async (patientId: string, vitalSigns: VitalSigns
         .from('nursing_records')
         .insert({
           patient_id: patientId,
-          vital_signs: vitalSigns as any, // Type assertion to accommodate JSON
+          vital_signs: vitalSigns as unknown as Json, // Type assertion for compatibility
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });

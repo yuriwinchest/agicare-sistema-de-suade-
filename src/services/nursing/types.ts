@@ -1,3 +1,4 @@
+
 // Remove duplicate Json type
 // Ensure VitalSigns is properly defined
 
@@ -26,6 +27,7 @@ export interface NursingAssessment {
   updated_at?: string;
 }
 
+// Define Json type to match Supabase's Json type
 export type Json =
   | string
   | number
