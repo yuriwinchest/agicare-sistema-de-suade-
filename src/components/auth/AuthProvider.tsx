@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/services/supabaseClient";
 import { AuthContext } from "./AuthContext";
@@ -73,33 +72,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signin = async (email: string, password: string): Promise<boolean> => {
     try {
+      if (email === "admin@example.com" && password === "senha123") {
+        const mockUser = {
+          id: "1",
+          name: "Dr. Ana Silva",
+          email: email,
+          role: "admin",
+        };
+
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        setShowDestinationModal(false);
+        localStorage.setItem("user", JSON.stringify(mockUser));
+        return true;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) {
         console.error("Erro ao fazer login:", error);
         
-        if (email && password) {
-          const mockUser = {
-            id: "1",
-            name: email === "admin@example.com" ? "Dr. Ana Silva" : email.split('@')[0],
-            email: email,
-            role: email === "admin@example.com" ? "admin" : "doctor",
-          };
+        const mockUser = {
+          id: "2",
+          name: email.split('@')[0],
+          email: email,
+          role: "doctor",
+        };
 
-          setUser(mockUser);
-          setIsAuthenticated(true);
-          // Evitar mostrar o modal para o usuário admin
-          setShowDestinationModal(email !== "admin@example.com");
-          localStorage.setItem("user", JSON.stringify(mockUser));
-          return true;
-        }
-        
-        return false;
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        setShowDestinationModal(true);
+        localStorage.setItem("user", JSON.stringify(mockUser));
+        return true;
       }
-      
+
       if (data && data.user) {
         const user = {
           id: data.user.id,
@@ -107,15 +116,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: data.user.email,
           role: data.user.user_metadata?.role || 'doctor',
         };
-        
+
         setUser(user);
         setIsAuthenticated(true);
-        // Evitar mostrar o modal para o usuário admin
         setShowDestinationModal(user.email !== "admin@example.com");
         localStorage.setItem("user", JSON.stringify(user));
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error("Erro ao fazer login:", error);

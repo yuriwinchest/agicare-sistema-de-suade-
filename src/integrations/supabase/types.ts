@@ -201,6 +201,42 @@ export type Database = {
         }
         Relationships: []
       }
+      healthcare_units: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       medical_records: {
         Row: {
           created_at: string | null
@@ -653,6 +689,62 @@ export type Database = {
             columns: ["professional_id"]
             isOneToOne: false
             referencedRelation: "health_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vital_signs: {
+        Row: {
+          blood_pressure: string | null
+          created_at: string | null
+          heart_rate: number | null
+          id: string
+          measured_at: string | null
+          measured_by: string | null
+          notes: string | null
+          oxygen_saturation: number | null
+          pain_level: number | null
+          patient_id: string | null
+          respiratory_rate: number | null
+          temperature: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          blood_pressure?: string | null
+          created_at?: string | null
+          heart_rate?: number | null
+          id?: string
+          measured_at?: string | null
+          measured_by?: string | null
+          notes?: string | null
+          oxygen_saturation?: number | null
+          pain_level?: number | null
+          patient_id?: string | null
+          respiratory_rate?: number | null
+          temperature?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          blood_pressure?: string | null
+          created_at?: string | null
+          heart_rate?: number | null
+          id?: string
+          measured_at?: string | null
+          measured_by?: string | null
+          notes?: string | null
+          oxygen_saturation?: number | null
+          pain_level?: number | null
+          patient_id?: string | null
+          respiratory_rate?: number | null
+          temperature?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vital_signs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]

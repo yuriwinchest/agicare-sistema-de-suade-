@@ -1,7 +1,6 @@
 
 import { supabase } from '../supabaseClient';
 
-// Simple function to check if a table exists
 const checkTableExists = async (tableName: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
@@ -9,8 +8,12 @@ const checkTableExists = async (tableName: string): Promise<boolean> => {
       .select('*')
       .limit(1);
     
-    // If no error, table exists
-    return !error;
+    if (error) {
+      console.log(`Table ${tableName} check result:`, error.message);
+      return error.code !== "PGRST116"; // Table doesn't exist error
+    }
+    
+    return true;
   } catch (error) {
     console.error(`Error checking if table ${tableName} exists:`, error);
     return false;
@@ -39,11 +42,14 @@ export const initializeTables = async (): Promise<boolean> => {
   try {
     console.log("Verificando tabelas do banco de dados...");
     
-    // Check tables
-    const patientsExists = await checkPatientsTable();
-    const vitalSignsExists = await checkVitalSignsTable();
-    const professionalsExists = await checkHealthProfessionalsTable();
-    const unitsExists = await checkHealthcareUnitsTable();
+    const tables = await Promise.all([
+      checkPatientsTable(),
+      checkVitalSignsTable(),
+      checkHealthProfessionalsTable(),
+      checkHealthcareUnitsTable(),
+    ]);
+    
+    const [patientsExists, vitalSignsExists, professionalsExists, unitsExists] = tables;
     
     console.log("Status das tabelas:");
     console.log("- Pacientes:", patientsExists ? "Existe" : "Não existe");
@@ -51,7 +57,6 @@ export const initializeTables = async (): Promise<boolean> => {
     console.log("- Profissionais:", professionalsExists ? "Existe" : "Não existe");
     console.log("- Unidades:", unitsExists ? "Existe" : "Não existe");
     
-    // Return true even if some tables don't exist, as we're just checking
     return true;
   } catch (error) {
     console.error("Erro ao verificar tabelas:", error);
