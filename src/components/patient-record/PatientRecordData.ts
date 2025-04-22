@@ -6,116 +6,108 @@ export const patientInfo = {
   name: "João Silva",
   age: 45,
   gender: "Masculino",
-  birthDate: "1977-05-15",
+  birthdate: "1977-05-15",
   phone: "(11) 98765-4321",
   email: "joao.silva@email.com",
   address: "Rua das Flores, 123 - São Paulo, SP",
   status: "Em Atendimento",
   arrivalTime: "08:30",
-  vitalSigns: {
-    date: "2023-05-10",
-    time: "09:15",
-    temperature: 36.5,
-    systolicPressure: 120,
-    diastolicPressure: 80,
-    heartRate: 72,
-    respiratoryRate: 16,
-    oxygenSaturation: 98,
-    painScale: 0,
-    bloodGlucose: 95
-  },
-  allergies: ["Penicilina", "Dipirona"],
-  medicalNotes: [
+  vitalSigns: [
     {
       date: "2023-05-10",
-      time: "09:30",
-      professional: "Dr. Carlos Oliveira",
-      specialty: "Clínico Geral",
-      notes: "Paciente relata dor abdominal há 2 dias, localizada em região epigástrica, sem irradiação, de intensidade moderada. Nega febre, vômitos ou alterações intestinais.",
-      diagnosis: "Gastrite aguda",
-      plan: "Solicitados exames laboratoriais e prescrita medicação sintomática. Orientado retorno em 7 dias."
+      temperature: "36.5",
+      pressure: "120/80",
+      pulse: "72",
+      respiratory: "16",
+      oxygen: "98%"
+    }
+  ],
+  allergies: [
+    { substance: "Penicilina", reaction: "Urticária" },
+    { substance: "Dipirona", reaction: "Edema" }
+  ],
+  medicalNotes: [
+    {
+      id: "note1",
+      date: "2023-05-10",
+      title: "Consulta Inicial",
+      doctor: "Dr. Carlos Oliveira",
+      content: "Paciente relata dor abdominal há 2 dias, localizada em região epigástrica, sem irradiação, de intensidade moderada. Nega febre, vômitos ou alterações intestinais. Diagnóstico: Gastrite aguda."
     }
   ],
   prescriptions: [
     {
+      id: "presc1",
       date: "2023-05-10",
-      medication: "Omeprazol 20mg",
-      dosage: "1 comprimido",
-      frequency: "1x ao dia",
-      duration: "30 dias",
-      instructions: "Tomar em jejum"
-    },
-    {
-      date: "2023-05-10",
-      medication: "Simeticona 40mg",
-      dosage: "1 comprimido",
-      frequency: "3x ao dia",
-      duration: "5 dias",
-      instructions: "Tomar após as refeições"
+      doctor: "Dr. Carlos Oliveira",
+      items: [
+        { medication: "Omeprazol", dose: "20mg", frequency: "1x ao dia", route: "Oral" },
+        { medication: "Simeticona", dose: "40mg", frequency: "3x ao dia", route: "Oral" }
+      ],
+      nursingInstructions: [
+        { instruction: "Monitorar sintomas gástricos", frequency: "A cada 8 horas" }
+      ],
+      diet: "Branda, evitar alimentos condimentados"
     }
   ],
   labTests: [
     {
+      id: "exam1",
       date: "2023-05-10",
-      type: "Hemograma Completo",
-      status: "Solicitado",
-      results: null
+      name: "Hemograma Completo",
+      status: "Solicitado"
     },
     {
+      id: "exam2",
       date: "2023-05-10",
-      type: "Endoscopia Digestiva Alta",
-      status: "Agendado",
-      results: null
+      name: "Endoscopia Digestiva Alta",
+      status: "Agendado"
     }
   ]
 };
 
 export const availableForms = [
-  { id: "anamnese-geral", name: "Anamnese Geral" },
-  { id: "anamnese-pediatrica", name: "Anamnese Pediátrica" },
-  { id: "anamnese-ginecologica", name: "Anamnese Ginecológica" },
-  { id: "anamnese-cardiologica", name: "Anamnese Cardiológica" },
-  { id: "anamnese-ortopedica", name: "Anamnese Ortopédica" },
-  { id: "anamnese-neurologica", name: "Anamnese Neurológica" }
+  { id: "anamnese-geral", title: "Anamnese Geral" },
+  { id: "anamnese-pediatrica", title: "Anamnese Pediátrica" },
+  { id: "anamnese-ginecologica", title: "Anamnese Ginecológica" },
+  { id: "anamnese-cardiologica", title: "Anamnese Cardiológica" },
+  { id: "anamnese-ortopedica", title: "Anamnese Ortopédica" },
+  { id: "anamnese-neurologica", title: "Anamnese Neurológica" }
 ];
 
 export const clinicalRecords = [
   {
     id: "record1",
+    number: "CR001",
     date: "2023-05-10",
-    time: "09:30",
+    speciality: "Clínico Geral",
     professional: "Dr. Carlos Oliveira",
-    specialty: "Clínico Geral",
-    notes: "Consulta inicial. Paciente relata dor abdominal há 2 dias.",
-    diagnosis: "Gastrite aguda",
-    prescription: "Omeprazol 20mg 1x ao dia, Simeticona 40mg 3x ao dia",
+    type: "Consulta inicial",
     status: "Concluído"
   },
   {
     id: "record2",
+    number: "CR002",
     date: "2023-05-17",
-    time: "10:15",
+    speciality: "Clínico Geral",
     professional: "Dr. Carlos Oliveira",
-    specialty: "Clínico Geral",
-    notes: "Retorno. Paciente relata melhora dos sintomas após medicação.",
-    diagnosis: "Gastrite aguda - em recuperação",
-    prescription: "Manter Omeprazol 20mg 1x ao dia por mais 15 dias",
+    type: "Retorno",
     status: "Agendado"
   }
 ];
 
 export const specialities = [
-  "Clínico Geral",
-  "Cardiologia",
-  "Dermatologia",
-  "Endocrinologia",
-  "Gastroenterologia",
-  "Ginecologia",
-  "Neurologia",
-  "Oftalmologia",
-  "Ortopedia",
-  "Otorrinolaringologia",
-  "Pediatria",
-  "Psiquiatria",
-  "Urologia"
+  { id: "clin-geral", name: "Clínico Geral" },
+  { id: "cardio", name: "Cardiologia" },
+  { id: "dermato", name: "Dermatologia" },
+  { id: "endocrino", name: "Endocrinologia" },
+  { id: "gastro", name: "Gastroenterologia" },
+  { id: "gineco", name: "Ginecologia" },
+  { id: "neuro", name: "Neurologia" },
+  { id: "oftalmo", name: "Oftalmologia" },
+  { id: "ortopedia", name: "Ortopedia" },
+  { id: "otorrino", name: "Otorrinolaringologia" },
+  { id: "pediatria", name: "Pediatria" },
+  { id: "psiquiatria", name: "Psiquiatria" },
+  { id: "urologia", name: "Urologia" }
 ];

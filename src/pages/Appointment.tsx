@@ -22,19 +22,31 @@ const Appointment = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState<Date>(new Date());
   const [patients, setPatients] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   
   useEffect(() => {
-    const loadAppointments = () => {
-      const activeAppointments = getActiveAppointmentsAsync();
-      setPatients(activeAppointments);
+    const loadAppointments = async () => {
+      try {
+        setLoading(true);
+        const activeAppointments = await getActiveAppointmentsAsync();
+        setPatients(activeAppointments);
+      } catch (error) {
+        console.error("Erro ao carregar consultas:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     
     loadAppointments();
     
-    window.addEventListener('focus', loadAppointments);
+    window.addEventListener('focus', () => {
+      loadAppointments();
+    });
     
     return () => {
-      window.removeEventListener('focus', loadAppointments);
+      window.removeEventListener('focus', () => {
+        loadAppointments();
+      });
     };
   }, []);
   
@@ -118,75 +130,81 @@ const Appointment = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredPatients.length > 0 ? (
-                filteredPatients.map((patient) => (
-                  <div
-                    key={patient.id}
-                    className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                      <div className="flex items-start md:items-center">
-                        <User className="h-5 w-5 mr-2 text-muted-foreground mt-0.5 md:mt-0" />
-                        <div>
-                          <h3 className="font-medium">{patient.name}</h3>
-                          <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
+            {loading ? (
+              <div className="p-8 text-center">
+                <p className="text-muted-foreground">Carregando consultas...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredPatients.length > 0 ? (
+                  filteredPatients.map((patient) => (
+                    <div
+                      key={patient.id}
+                      className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+                        <div className="flex items-start md:items-center">
+                          <User className="h-5 w-5 mr-2 text-muted-foreground mt-0.5 md:mt-0" />
+                          <div>
+                            <h3 className="font-medium">{patient.name}</h3>
+                            <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Especialidade</p>
+                            <p className="font-medium">{patient.specialty || patient.speciality || "Não especificada"}</p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-sm text-muted-foreground">Médico</p>
+                            <p className="font-medium">{patient.doctor || patient.professional || "Não definido"}</p>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <span className="font-medium">{patient.time}</span>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Especialidade</p>
-                          <p className="font-medium">{patient.specialty || patient.speciality || "Não especificada"}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm text-muted-foreground">Médico</p>
-                          <p className="font-medium">{patient.doctor || patient.professional || "Não definido"}</p>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                          <span className="font-medium">{patient.time}</span>
-                        </div>
+                      <div className="flex items-center justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
+                          onClick={() => handleCallPatient(patient)}
+                        >
+                          Chamar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
+                          onClick={() => handleCancelAppointment(patient)}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-teal-500 text-white hover:bg-teal-600"
+                          onClick={() => handleStartConsult(patient)}
+                        >
+                          <Stethoscope className="h-4 w-4 mr-1" />
+                          Atender
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
-                        onClick={() => handleCallPatient(patient)}
-                      >
-                        Chamar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
-                        onClick={() => handleCancelAppointment(patient)}
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        Cancelar
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-teal-500 text-white hover:bg-teal-600"
-                        onClick={() => handleStartConsult(patient)}
-                      >
-                        <Stethoscope className="h-4 w-4 mr-1" />
-                        Atender
-                      </Button>
-                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center">
+                    <p className="text-muted-foreground">Nenhuma consulta encontrada para os critérios selecionados.</p>
                   </div>
-                ))
-              ) : (
-                <div className="p-8 text-center">
-                  <p className="text-muted-foreground">Nenhuma consulta encontrada para os critérios selecionados.</p>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -16,6 +16,7 @@ interface HospitalizedPatient {
   id: string;
   name: string;
   status: string;
+  birth_date?: string;
   medical_records?: {
     doctor?: {
       name?: string;
