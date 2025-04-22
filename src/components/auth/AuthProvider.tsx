@@ -3,11 +3,13 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
 import { User } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -69,6 +71,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           setUser(user);
           setIsAuthenticated(true);
+          
+          toast({
+            title: "Login realizado com sucesso",
+            description: `Bem-vindo, ${user.name}!`,
+          });
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
@@ -181,8 +188,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(false);
       localStorage.removeItem("user");
       localStorage.removeItem("user_prefs");
+      
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu do sistema com sucesso",
+      });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
+      toast({
+        title: "Erro ao fazer logout",
+        description: "Ocorreu um erro ao tentar sair do sistema",
+        variant: "destructive",
+      });
     }
   };
 

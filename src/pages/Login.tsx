@@ -74,7 +74,7 @@ const Login = () => {
         }
       }
       
-      // Regular user login logic remains the same
+      // Regular user login logic 
       const success = await signin(values.email, values.password);
       
       if (success) {
