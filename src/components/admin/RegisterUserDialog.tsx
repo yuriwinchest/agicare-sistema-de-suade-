@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -8,24 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import {
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { UserPlus } from "lucide-react";
 import { CollaboratorImageUpload } from './CollaboratorImageUpload';
-import { useUserRegistration } from '@/hooks/useUserRegistration';
+import { useCollaboratorForm } from '@/hooks/useCollaboratorForm';
 import { ContactFields } from './collaborator/ContactFields';
 import { ProfessionalFields } from './collaborator/ProfessionalFields';
 import { StatusToggle } from './collaborator/StatusToggle';
@@ -40,7 +28,7 @@ export const RegisterUserDialog = () => {
     isSubmitting,
     handleImageUpload,
     onSubmit
-  } = useUserRegistration();
+  } = useCollaboratorForm();
 
   const handleSubmit = async (data: any) => {
     const success = await onSubmit(data);
@@ -66,7 +54,7 @@ export const RegisterUserDialog = () => {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="w-full md:w-1/3">
                 <CollaboratorImageUpload
-                  imageUrl={form.watch("imageUrl")}
+                  imageUrl={form.watch("image_url")}
                   uploading={uploading}
                   onImageUpload={handleImageUpload}
                   name={form.watch("name")}

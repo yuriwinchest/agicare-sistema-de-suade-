@@ -42,10 +42,10 @@ export function EditCollaboratorDialog({
 }: EditCollaboratorDialogProps) {
   const {
     form,
+    onSubmit,
     uploading,
     isSubmitting,
     handleImageUpload,
-    onSubmit,
   } = useCollaboratorForm(collaborator, onCollaboratorUpdate, onOpenChange);
 
   return (
