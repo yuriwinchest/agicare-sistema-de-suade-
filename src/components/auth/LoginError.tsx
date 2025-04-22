@@ -30,6 +30,21 @@ export const LoginError = ({ error }: LoginErrorProps) => {
             </TooltipProvider>
           </div>
         )}
+        {error.includes("Este email não está cadastrado") && (
+          <div className="flex items-center gap-1 text-xs text-red-200/80">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center">
+                  <HelpCircle size={12} className="mr-1" /> O que fazer?
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Verifique se digitou o e-mail corretamente. Caso seja um colaborador, 
+                     solicite que o administrador cadastre seu e-mail no sistema primeiro.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
     </div>
   );

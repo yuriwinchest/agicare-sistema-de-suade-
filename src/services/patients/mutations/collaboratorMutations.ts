@@ -85,6 +85,8 @@ export const getCollaboratorByEmail = async (email: string) => {
 
 export const registerCollaboratorAccount = async (email: string, password: string) => {
   try {
+    console.log("Tentando registrar conta para colaborador:", email);
+    
     // Check if collaborator exists first
     const { data: collaborator, error: collaboratorError } = await supabase
       .from('collaborators')
@@ -93,6 +95,7 @@ export const registerCollaboratorAccount = async (email: string, password: strin
       .single();
       
     if (collaboratorError) {
+      console.error("Colaborador não encontrado com este email:", collaboratorError);
       throw new Error("Colaborador não encontrado com este email");
     }
     
@@ -103,18 +106,49 @@ export const registerCollaboratorAccount = async (email: string, password: strin
     });
     
     if (error) {
+      console.error("Erro ao registrar usuário:", error);
+      
       if (error.message.includes("already registered")) {
-        throw new Error("Este email já possui uma conta de autenticação");
+        // Tentar fazer login em vez de registrar
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (signInError) {
+          throw new Error("Este email já possui uma conta, mas a senha fornecida está incorreta");
+        }
+        
+        return {
+          success: true,
+          user: signInData.user,
+          collaborator
+        };
       }
+      
       throw error;
+    }
+    
+    // Aguardar um momento para garantir que o usuário foi registrado corretamente
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Tentar fazer login após o registro
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (signInError) {
+      console.error("Erro ao fazer login após registro:", signInError);
+      throw new Error("Conta criada, mas não foi possível fazer login automaticamente");
     }
     
     return {
       success: true,
-      user: data.user,
+      user: signInData.user || data.user,
       collaborator
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao registrar conta para colaborador:", error);
     throw error;
   }

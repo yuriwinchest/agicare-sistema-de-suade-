@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
 import { useSession } from "@/hooks/useSession";
 import { useNotification } from "@/hooks/useNotification";
 import { AppUser } from "./types";
+import { registerCollaboratorAccount } from "@/services/patients/mutations/collaboratorMutations";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated, setUser, setIsAuthenticated } = useSession();
@@ -74,53 +74,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (error.message.includes("Invalid login credentials")) {
             // Check if collaborator exists but auth.user doesn't
             if (collaboratorData) {
-              // Attempt to register the user in auth system if they have a collaborator record
-              notification.info("Conta não configurada", {
-                description: "Seu email foi encontrado como colaborador, mas precisa ser configurado para login. Tentando criar sua conta...",
-                duration: 4000
-              });
-              
-              // Try to create the auth account
-              const { data: signupData, error: signupError } = await supabase.auth.signUp({
-                email,
-                password,
-              });
-              
-              if (signupError) {
-                notification.error("Erro ao configurar conta", {
-                  description: "Não foi possível configurar sua conta para login. Entre em contato com o administrador.",
+              try {
+                // Attempt to register the user in auth system if they have a collaborator record
+                notification.info("Criando conta de autenticação", {
+                  description: "Seu email foi encontrado como colaborador. Criando sua conta de autenticação...",
+                  duration: 4000
+                });
+                
+                // Try to create the auth account using the register function from mutations
+                const result = await registerCollaboratorAccount(email, password);
+                
+                if (!result || !result.success) {
+                  notification.error("Erro ao configurar conta", {
+                    description: "Não foi possível configurar sua conta para login. Entre em contato com o administrador.",
+                    duration: 5000
+                  });
+                  return false;
+                }
+                
+                // If signup successful, let them know and then log them in
+                notification.success("Conta configurada", {
+                  description: "Sua conta foi configurada com sucesso! Você agora está logado.",
                   duration: 5000
                 });
-                return false;
-              }
-              
-              // If signup successful, let them know and then log them in
-              notification.success("Conta configurada", {
-                description: "Sua conta foi configurada com sucesso! Você pode fazer login agora.",
-                duration: 5000
-              });
-              
-              // Try logging in again with the new credentials
-              const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-              });
-              
-              if (loginError) {
-                notification.error("Erro no login após configuração", {
-                  description: "Não foi possível fazer login após configurar sua conta. Tente novamente em alguns instantes.",
-                  duration: 5000
-                });
-                return false;
-              }
-              
-              // Continue with login process using the new loginData
-              if (loginData && loginData.user) {
-                // Create user object
+                
+                // Create user object with data from the registration result
                 const appUser: AppUser = {
-                  id: loginData.user.id,
-                  name: collaboratorData.name || loginData.user.email?.split('@')[0] || 'Usuário',
-                  email: loginData.user.email || '',
+                  id: result.user?.id || collaboratorData.id,
+                  name: collaboratorData.name || email.split('@')[0] || 'Usuário',
+                  email: email,
                   role: collaboratorData.role || 'doctor',
                 };
                 
@@ -131,14 +113,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Set destination modal based on role
                 setShowDestinationModal(collaboratorData.role === 'doctor');
                 
-                notification.success("Login Bem-Sucedido", {
-                  description: `Bem-vindo ao sistema, ${appUser.name}`
-                });
-                
                 return true;
+              } catch (registerError: any) {
+                console.error("Erro ao registrar usuário:", registerError);
+                notification.error("Erro ao criar conta", {
+                  description: registerError.message || "Erro ao criar conta de autenticação. Tente novamente mais tarde."
+                });
+                return false;
               }
-              
-              return false;
             } else {
               notification.error("Senha Incorreta", {
                 description: "A senha fornecida está incorreta. Por favor, tente novamente."
@@ -146,7 +128,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           } else {
             notification.error("Erro de Autenticação", {
-              description: "Ocorreu um erro inesperado. Entre em contato com o suporte."
+              description: error.message || "Ocorreu um erro inesperado. Entre em contato com o suporte."
             });
           }
           
