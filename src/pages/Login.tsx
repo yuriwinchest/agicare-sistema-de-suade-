@@ -133,18 +133,37 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-4">
       <Card className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="w-24 h-24 mb-4">
-            <svg viewBox="0 0 120 120" className="w-full h-full">
-              <path d="M30,90 C50,30 70,30 90,90" 
-                    fill="none" 
-                    stroke="#a3e6e0" 
-                    strokeWidth="6" 
-                    strokeLinecap="round" />
-              <circle cx="60" cy="60" r="50" 
-                      fill="none" 
-                      stroke="#a3e6e0" 
-                      strokeWidth="6" 
-                      strokeDasharray="10 10" />
+          <div className="w-24 h-24 mb-4 animate-logo-spin">
+            <svg 
+              viewBox="0 0 120 120" 
+              className="w-full h-full transition-all duration-300 ease-in-out"
+            >
+              <path 
+                d="M30,90 C50,30 70,30 90,90" 
+                fill="none" 
+                stroke="url(#gradientStroke)" 
+                strokeWidth="6" 
+                strokeLinecap="round" 
+              />
+              <circle 
+                cx="60" 
+                cy="60" 
+                r="50" 
+                fill="none" 
+                stroke="url(#gradientCircle)" 
+                strokeWidth="6" 
+                strokeDasharray="10 10" 
+              />
+              <defs>
+                <linearGradient id="gradientStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{stopColor: "#a3e6e0", stopOpacity: 1}} />
+                  <stop offset="100%" style={{stopColor: "#14b8a6", stopOpacity: 1}} />
+                </linearGradient>
+                <linearGradient id="gradientCircle" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{stopColor: "#2dd4bf", stopOpacity: 1}} />
+                  <stop offset="100%" style={{stopColor: "#0d9488", stopOpacity: 1}} />
+                </linearGradient>
+              </defs>
             </svg>
           </div>
           <CardTitle className="text-2xl text-white">Agicare Sistemas</CardTitle>
