@@ -1,4 +1,5 @@
-import { supabase } from './supabaseClient';
+
+import { supabase } from '@/integrations/supabase/client';
 import { getPatientById, savePatient } from './patientService';
 import { Patient } from './patients/types';
 

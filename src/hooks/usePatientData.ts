@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { getPatientById } from "@/services/patientService";
-import { supabase } from "@/services/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export const usePatientData = (patientId: string | undefined) => {
   const [patientData, setPatientData] = useState<any>(null);

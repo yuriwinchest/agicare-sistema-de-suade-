@@ -1,5 +1,5 @@
 
-import { supabase } from "@/services/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { NursingAssessment, VitalSigns } from "./types";
 
 export const saveNursingAssessment = async (assessment: NursingAssessment): Promise<NursingAssessment | null> => {

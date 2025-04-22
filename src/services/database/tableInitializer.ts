@@ -1,5 +1,4 @@
-
-import { supabase } from '../supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 const checkTableExists = async (tableName: string): Promise<boolean> => {
   try {
