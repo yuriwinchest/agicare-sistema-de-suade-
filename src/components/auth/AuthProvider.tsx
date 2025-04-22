@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Tentando login com:", email);
       
-      // Handle admin login
+      // Handle demo accounts
       if (email === "admin@example.com" && password === "senha123") {
         console.log("Login administrativo bem-sucedido");
         const mockUser: AppUser = {
@@ -59,8 +59,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
-      // Handle Supabase authentication
-      console.log("Tentando autenticação no Supabase");
+      // Check if the email exists in collaborators table first
+      console.log("Verificando se o email existe na tabela de colaboradores...");
+      const { data: collaboratorData, error: collaboratorError } = await supabase
+        .from('collaborators')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (collaboratorError) {
+        console.log("Email não encontrado na tabela de colaboradores:", collaboratorError);
+        notification.error("Email não encontrado", {
+          description: "Este email não está cadastrado no sistema. Verifique as credenciais ou utilize as contas de demonstração."
+        });
+        return false;
+      }
+
+      // If email exists in collaborators, try Supabase authentication
+      console.log("Email encontrado na tabela de colaboradores, tentando autenticação no Supabase");
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -68,13 +84,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) {
         console.error("Erro ao fazer login no Supabase:", error);
+        let errorMessage = "Credenciais inválidas. Verifique seu email e senha.";
+        
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Senha incorreta. Verifique sua senha ou utilize as contas de demonstração.";
+        }
+        
         notification.error("Erro ao fazer login", {
-          description: "Credenciais inválidas. Verifique seu email e senha."
+          description: errorMessage
         });
         return false;
       }
 
       if (data && data.user) {
+        // Fetch collaborator data to get role and other info
+        const { data: collaborator } = await supabase
+          .from('collaborators')
+          .select('*')
+          .eq('email', data.user.email)
+          .single();
+          
+        // Create user object
+        if (collaborator) {
+          const appUser: AppUser = {
+            id: data.user.id,
+            name: collaborator.name || data.user.email?.split('@')[0] || 'Usuário',
+            email: data.user.email || '',
+            role: collaborator.role || 'doctor',
+          };
+          
+          setUser(appUser);
+          setIsAuthenticated(true);
+          localStorage.setItem("user", JSON.stringify(appUser));
+          
+          // Set destination modal based on role
+          setShowDestinationModal(collaborator.role === 'doctor');
+          
+          notification.success("Login bem-sucedido", {
+            description: `Bem-vindo ao sistema Agicare, ${appUser.name}`
+          });
+        }
+        
         return true;
       }
 

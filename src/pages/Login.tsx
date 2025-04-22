@@ -26,10 +26,13 @@ const Login = () => {
       
       if (!success) {
         if (loginAttempt >= 2) {
-          setLoginError("Múltiplas tentativas falharam. Recomendamos utilizar as contas de demonstração abaixo.");
+          setLoginError("Múltiplas tentativas falharam. Recomendamos utilizar as contas de demonstração abaixo ou verificar se o email foi cadastrado corretamente no sistema.");
         } else {
-          setLoginError("Credenciais inválidas. Tente novamente ou use as contas de demonstração.");
+          setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
         }
+      } else {
+        // Redirecionar para a página principal após login bem-sucedido
+        navigate("/");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
@@ -46,8 +49,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-4">
-      {/* Removendo a div com a imagem de fundo que está causando o erro 404 */}
-      
       <Card className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="space-y-1 flex flex-col items-center">
           <div className="w-24 h-24 mb-4">
@@ -73,7 +74,7 @@ const Login = () => {
         <CardContent>
           <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
           <div className="mt-4 space-y-4">
-            <LoginError error={loginError || ''} />
+            {loginError && <LoginError error={loginError} />}
             <DemoAccounts onDemoLogin={handleDemoLogin} />
           </div>
         </CardContent>
