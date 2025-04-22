@@ -61,7 +61,7 @@ const Login = () => {
         }
       } else {
         // Show destination modal based on role
-        if (values.email === "doctor@example.com" || user?.role === 'doctor') {
+        if (values.email === "dentista@example.com" || user?.role === 'dentist') {
           setShowDestinationModal(true);
         }
         
@@ -85,7 +85,7 @@ const Login = () => {
   };
 
   const handleDemoLogin = (type: 'admin' | 'doctor') => {
-    const email = type === 'admin' ? 'admin@example.com' : 'doctor@example.com';
+    const email = type === 'admin' ? 'admin@example.com' : 'dentista@example.com';
     handleLogin({ email, password: 'senha123' });
   };
 
@@ -130,7 +130,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-600 p-4">
       <Card className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="space-y-1 flex flex-col items-center">
           <div className="w-24 h-24 mb-4 animate-logo-spin">
@@ -154,21 +154,32 @@ const Login = () => {
                 strokeWidth="6" 
                 strokeDasharray="10 10" 
               />
+              <path
+                d="M45,60 C50,53 55,50 60,50 C65,50 70,53 75,60"
+                fill="none"
+                stroke="url(#gradientTooth)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
               <defs>
                 <linearGradient id="gradientStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{stopColor: "#a3e6e0", stopOpacity: 1}} />
-                  <stop offset="100%" style={{stopColor: "#14b8a6", stopOpacity: 1}} />
+                  <stop offset="0%" style={{stopColor: "#818cf8", stopOpacity: 1}} />
+                  <stop offset="100%" style={{stopColor: "#4f46e5", stopOpacity: 1}} />
                 </linearGradient>
                 <linearGradient id="gradientCircle" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{stopColor: "#2dd4bf", stopOpacity: 1}} />
-                  <stop offset="100%" style={{stopColor: "#0d9488", stopOpacity: 1}} />
+                  <stop offset="0%" style={{stopColor: "#a5b4fc", stopOpacity: 1}} />
+                  <stop offset="100%" style={{stopColor: "#6366f1", stopOpacity: 1}} />
+                </linearGradient>
+                <linearGradient id="gradientTooth" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style={{stopColor: "#e0e7ff", stopOpacity: 1}} />
+                  <stop offset="100%" style={{stopColor: "#ffffff", stopOpacity: 1}} />
                 </linearGradient>
               </defs>
             </svg>
           </div>
-          <CardTitle className="text-2xl text-white">Agicare Sistemas</CardTitle>
+          <CardTitle className="text-2xl text-white">DentCare Sistemas</CardTitle>
           <CardDescription className="text-white/70">
-            Sistema de Gestão Hospitalar
+            Sistema para Consultórios Odontológicos
           </CardDescription>
         </CardHeader>
         

@@ -52,7 +52,26 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Theme colors from the login screen
+				// Theme colors for dental clinics
+				blue: {
+					600: '#2563EB',
+					700: '#1D4ED8',
+				},
+				indigo: {
+					500: '#6366F1',
+					600: '#4F46E5',
+					700: '#4338CA',
+				},
+				purple: {
+					600: '#9333EA',
+					700: '#7E22CE',
+				},
+				dental: {
+					DEFAULT: 'hsl(230, 100%, 50%)',
+					light: 'hsl(230, 100%, 60%)',
+					dark: 'hsl(230, 100%, 40%)',
+				},
+				// Keep existing emerald and teal colors for backward compatibility
 				emerald: {
 					600: '#059669',
 					700: '#047857',
@@ -63,15 +82,6 @@ export default {
 					600: '#0D9488',
 					700: '#0F766E',
 				},
-				blue: {
-					600: '#2563EB',
-					700: '#1D4ED8',
-				},
-				medblue: {
-					DEFAULT: 'hsl(210, 100%, 50%)',
-					light: 'hsl(210, 100%, 60%)',
-					dark: 'hsl(210, 100%, 40%)',
-				},
 				medgray: {
 					50: 'hsl(210, 20%, 99%)',
 					100: 'hsl(210, 20%, 98%)',
@@ -79,6 +89,11 @@ export default {
 					300: 'hsl(210, 20%, 90%)',
 					400: 'hsl(210, 20%, 80%)',
 					500: 'hsl(210, 20%, 70%)',
+				},
+				medblue: {
+					DEFAULT: 'hsl(210, 100%, 50%)',
+					light: 'hsl(210, 100%, 60%)',
+					dark: 'hsl(210, 100%, 40%)',
 				}
 			},
 			borderRadius: {
