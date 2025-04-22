@@ -84,10 +84,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) {
         console.error("Erro ao fazer login no Supabase:", error);
-        let errorMessage = "Credenciais inválidas. Verifique seu email e senha.";
+        let errorMessage = "Credenciais inválidas. Verifique sua senha.";
         
         if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Senha incorreta. Verifique sua senha ou utilize as contas de demonstração.";
+          errorMessage = "Senha incorreta ou usuário não registrado no sistema de autenticação. Por favor, contacte o administrador ou utilize as contas de demonstração.";
         }
         
         notification.error("Erro ao fazer login", {

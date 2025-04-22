@@ -8,6 +8,8 @@ import { DemoAccounts } from "@/components/auth/DemoAccounts";
 import { LoginError } from "@/components/auth/LoginError";
 import type { loginSchema } from "@/schemas/loginSchema";
 import type { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +28,7 @@ const Login = () => {
       
       if (!success) {
         if (loginAttempt >= 2) {
-          setLoginError("Múltiplas tentativas falharam. Recomendamos utilizar as contas de demonstração abaixo ou verificar se o email foi cadastrado corretamente no sistema.");
+          setLoginError("Múltiplas tentativas falharam. É possível que sua conta exista na tabela de colaboradores mas não no sistema de autenticação. Entre em contato com o administrador do sistema ou utilize as contas de demonstração abaixo.");
         } else {
           setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
         }
@@ -72,6 +74,14 @@ const Login = () => {
         </CardHeader>
         
         <CardContent>
+          <Alert className="mb-4 bg-blue-500/20 border-blue-300/30 text-white">
+            <InfoIcon className="h-4 w-4 text-blue-300" />
+            <AlertTitle className="text-blue-100">Informação</AlertTitle>
+            <AlertDescription className="text-blue-200 text-sm">
+              Para acessar o sistema, utilize as contas de demonstração abaixo ou entre em contato com o administrador para criar sua conta.
+            </AlertDescription>
+          </Alert>
+          
           <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
           <div className="mt-4 space-y-4">
             {loginError && <LoginError error={loginError} />}
