@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
@@ -15,52 +14,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Tentando login com:", email);
       
-      // Handle demo accounts
-      if (email === "admin@example.com" && password === "senha123") {
-        console.log("Login administrativo bem-sucedido");
-        const mockUser: AppUser = {
-          id: "1",
-          name: "Dr. Ana Silva",
-          email: email,
-          role: "admin",
-        };
-
-        setUser(mockUser);
-        setIsAuthenticated(true);
-        setShowDestinationModal(false);
-        localStorage.setItem("user", JSON.stringify(mockUser));
-        
-        notification.success("Login administrativo bem-sucedido", {
-          description: "Bem-vindo ao ambiente administrativo Agicare"
-        });
-        
-        return true;
-      }
-
-      // Demo doctor account
-      if (email === "doctor@example.com" && password === "senha123") {
-        console.log("Login do médico demonstrativo bem-sucedido");
-        const mockDoctor: AppUser = {
-          id: "2",
-          name: "Dr. Carlos Mendes",
-          email: email,
-          role: "doctor",
-        };
-
-        setUser(mockDoctor);
-        setIsAuthenticated(true);
-        setShowDestinationModal(true);
-        localStorage.setItem("user", JSON.stringify(mockDoctor));
-        
-        notification.success("Login médico bem-sucedido", {
-          description: "Bem-vindo ao sistema Agicare, Dr. Carlos"
-        });
-        
-        return true;
-      }
-
-      // Check if the email exists in collaborators table first
-      console.log("Verificando se o email existe na tabela de colaboradores...");
+      // First, check if the email exists in collaborators table
       const { data: collaboratorData, error: collaboratorError } = await supabase
         .from('collaborators')
         .select('*')
@@ -69,8 +23,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (collaboratorError) {
         console.log("Email não encontrado na tabela de colaboradores:", collaboratorError);
-        notification.error("Email não encontrado", {
-          description: "Este email não está cadastrado no sistema. Verifique as credenciais ou utilize as contas de demonstração."
+        notification.error("Erro de Login", {
+          description: "Este email não está cadastrado no sistema. Verifique suas credenciais."
         });
         return false;
       }
@@ -84,15 +38,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) {
         console.error("Erro ao fazer login no Supabase:", error);
-        let errorMessage = "Credenciais inválidas. Verifique sua senha.";
         
         if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Senha incorreta ou usuário não registrado no sistema de autenticação. Por favor, contacte o administrador ou utilize as contas de demonstração.";
+          // Check if user exists in auth.users but has incorrect password
+          const { data: authUserData } = await supabase.auth.getUser(email);
+          
+          if (authUserData.user) {
+            notification.error("Senha Incorreta", {
+              description: "A senha fornecida está incorreta. Por favor, tente novamente."
+            });
+          } else {
+            // User not found in auth.users
+            notification.error("Usuário Não Registrado", {
+              description: "Seu email foi encontrado, mas não está registrado para login. Entre em contato com o administrador do sistema."
+            });
+          }
+        } else {
+          notification.error("Erro de Autenticação", {
+            description: "Ocorreu um erro inesperado. Entre em contato com o suporte."
+          });
         }
         
-        notification.error("Erro ao fazer login", {
-          description: errorMessage
-        });
         return false;
       }
 
@@ -120,8 +86,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Set destination modal based on role
           setShowDestinationModal(collaborator.role === 'doctor');
           
-          notification.success("Login bem-sucedido", {
-            description: `Bem-vindo ao sistema Agicare, ${appUser.name}`
+          notification.success("Login Bem-Sucedido", {
+            description: `Bem-vindo ao sistema, ${appUser.name}`
           });
         }
         
@@ -131,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return false;
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      notification.error("Erro inesperado", {
+      notification.error("Erro Inesperado", {
         description: "Ocorreu um erro ao tentar fazer login. Tente novamente."
       });
       return false;
