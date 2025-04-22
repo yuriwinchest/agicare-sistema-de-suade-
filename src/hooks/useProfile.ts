@@ -1,18 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { User } from '@/components/auth/types';
-
-export type UserProfile = {
-  id: string;
-  username: string;
-  full_name: string;
-  role: string;
-  department_id?: string;
-  professional_id?: string;
-  is_active: boolean;
-  settings: Record<string, any>;
-};
+import { AppUser, UserProfile } from '@/components/auth/types';
 
 export const useProfile = (userId?: string) => {
   const queryClient = useQueryClient();
