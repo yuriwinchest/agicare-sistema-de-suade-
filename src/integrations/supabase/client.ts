@@ -25,5 +25,10 @@ export const supabase = createClient<Database>(
         eventsPerSecond: 10,
       },
     },
+    global: {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
   }
 );

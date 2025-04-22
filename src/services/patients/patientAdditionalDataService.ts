@@ -7,13 +7,33 @@ import {
   PatientNote, 
   PatientLog 
 } from "./types";
+import { v4 as uuidv4 } from 'uuid';
+
+// Helper to ensure UUID format
+const ensureUUID = (id: string | undefined): string => {
+  if (!id) return uuidv4();
+  
+  // Check if ID is already a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(id)) {
+    return id;
+  }
+  
+  return uuidv4();
+};
 
 // Serviço para dados complementares
 export const savePatientAdditionalData = async (data: PatientAdditionalData): Promise<PatientAdditionalData | null> => {
   try {
+    // Ensure valid UUID
+    const validData = {
+      ...data,
+      id: ensureUUID(data.id)
+    };
+    
     const { data: savedData, error } = await supabase
       .from('patient_additional_data')
-      .upsert(data)
+      .upsert(validData)
       .select()
       .single();
       
@@ -31,10 +51,13 @@ export const savePatientAdditionalData = async (data: PatientAdditionalData): Pr
 
 export const getPatientAdditionalData = async (patientId: string): Promise<PatientAdditionalData | null> => {
   try {
+    // Ensure valid UUID for query
+    const validId = ensureUUID(patientId);
+    
     const { data, error } = await supabase
       .from('patient_additional_data')
       .select('*')
-      .eq('id', patientId)
+      .eq('id', validId)
       .maybeSingle();
       
     if (error) {
@@ -52,9 +75,15 @@ export const getPatientAdditionalData = async (patientId: string): Promise<Patie
 // Serviço para documentos
 export const savePatientDocument = async (document: PatientDocument): Promise<PatientDocument | null> => {
   try {
+    // Ensure valid UUID
+    const validDoc = {
+      ...document,
+      patient_id: ensureUUID(document.patient_id)
+    };
+    
     const { data, error } = await supabase
       .from('patient_documents')
-      .upsert(document)
+      .upsert(validDoc)
       .select()
       .single();
       
@@ -92,9 +121,15 @@ export const getPatientDocuments = async (patientId: string): Promise<PatientDoc
 // Serviço para alergias
 export const savePatientAllergy = async (allergy: PatientAllergy): Promise<PatientAllergy | null> => {
   try {
+    // Ensure valid UUID
+    const validAllergy = {
+      ...allergy,
+      patient_id: ensureUUID(allergy.patient_id)
+    };
+    
     const { data, error } = await supabase
       .from('patient_allergies')
-      .upsert(allergy)
+      .upsert(validAllergy)
       .select()
       .single();
       
@@ -132,9 +167,15 @@ export const getPatientAllergies = async (patientId: string): Promise<PatientAll
 // Serviço para notas
 export const savePatientNote = async (note: PatientNote): Promise<PatientNote | null> => {
   try {
+    // Ensure valid UUID
+    const validNote = {
+      ...note,
+      patient_id: ensureUUID(note.patient_id)
+    };
+    
     const { data, error } = await supabase
       .from('patient_notes')
-      .upsert(note)
+      .upsert(validNote)
       .select()
       .single();
       
@@ -172,9 +213,15 @@ export const getPatientNotes = async (patientId: string): Promise<PatientNote[]>
 // Serviço para logs
 export const addPatientLog = async (log: PatientLog): Promise<PatientLog | null> => {
   try {
+    // Ensure valid UUID
+    const validLog = {
+      ...log,
+      patient_id: ensureUUID(log.patient_id)
+    };
+    
     const { data, error } = await supabase
       .from('patient_logs')
-      .insert(log)
+      .insert(validLog)
       .select()
       .single();
       

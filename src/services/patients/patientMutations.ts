@@ -9,6 +9,23 @@ import {
   addPatientLog
 } from "@/services/patients/patientAdditionalDataService";
 import { formatDateForDatabase } from "@/services/patientService";
+import { v4 as uuidv4 } from 'uuid';
+
+// Helper to validate and convert IDs to UUID format
+const ensureUUID = (id: string | undefined): string | undefined => {
+  if (!id) return undefined;
+  
+  // Check if ID is already a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(id)) {
+    return id;
+  }
+  
+  // If ID is not a valid UUID, generate a new one
+  // Optionally prefix with the original ID for tracking
+  console.log(`Converting non-UUID ID "${id}" to proper UUID format`);
+  return uuidv4();
+};
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
@@ -28,11 +45,14 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       ? JSON.stringify(patient.address) 
       : patient.address;
 
+    // Convert ID to proper UUID format if needed
+    const properUUID = ensureUUID(patient.id);
+    
     const patientData = {
       ...patient,
       birth_date: formattedBirthDate || null,
       address: formattedAddress,
-      id: patient.id || undefined,
+      id: properUUID,
       status: patient.status || 'Agendado'
     };
 
@@ -40,89 +60,99 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
 
     // First check if the patient exists by ID, if using an existing ID
     if (patientData.id) {
-      const { data: existingPatient, error: checkError } = await supabase
-        .from('patients')
-        .select('id')
-        .eq('id', patientData.id)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error("Erro ao verificar paciente existente:", checkError);
-      }
-
-      console.log("Verificação de paciente existente:", existingPatient ? "Encontrado" : "Não encontrado");
-
-      // If the patient exists, update it
-      if (existingPatient) {
-        const { data, error } = await supabase
+      try {
+        const { data: existingPatient, error: checkError } = await supabase
           .from('patients')
-          .update(patientData)
+          .select('id')
           .eq('id', patientData.id)
-          .select();
+          .maybeSingle();
 
-        if (error) {
-          console.error("Erro ao atualizar paciente:", error);
-          return null;
+        if (checkError) {
+          console.error("Erro ao verificar paciente existente:", checkError);
         }
 
-        console.log("Paciente atualizado com sucesso:", data[0]);
-        return data[0] as Patient;
+        console.log("Verificação de paciente existente:", existingPatient ? "Encontrado" : "Não encontrado");
+
+        // If the patient exists, update it
+        if (existingPatient) {
+          const { data, error } = await supabase
+            .from('patients')
+            .update(patientData)
+            .eq('id', patientData.id)
+            .select();
+
+          if (error) {
+            console.error("Erro ao atualizar paciente:", error);
+            return null;
+          }
+
+          console.log("Paciente atualizado com sucesso:", data[0]);
+          return data[0] as Patient;
+        }
+      } catch (checkErr) {
+        console.error("Erro ao verificar existência do paciente:", checkErr);
+        // Continue with insert if check fails
       }
     }
 
     // If patient doesn't exist or no ID was provided, insert a new one
-    const { data, error } = await supabase
-      .from('patients')
-      .insert(patientData)
-      .select();
-      
-    if (error) {
-      console.error("Erro ao salvar paciente:", error);
-      console.error("Detalhes do erro:", error.message, error.details, error.hint);
-      
-      // For demo purposes: if Supabase insert fails, return a mock patient
-      if (patient.name) {
-        console.log("Creating mock patient for demo purposes");
-        const mockPatient = {
-          ...patient,
-          id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
-          status: 'Agendado'
-        };
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .insert(patientData)
+        .select();
         
-        try {
-          await addPatientLog({
-            patient_id: mockPatient.id,
-            action: "Cadastro (Demo)",
-            description: "Paciente salvo no modo de demonstração",
-            performed_by: "Sistema"
-          });
-        } catch (logError) {
-          console.error("Erro ao registrar log de demonstração:", logError);
+      if (error) {
+        console.error("Erro ao salvar paciente:", error);
+        console.error("Detalhes do erro:", error.message, error.details, error.hint);
+        
+        // For demo purposes: if Supabase insert fails, return a mock patient
+        if (patient.name) {
+          console.log("Creating mock patient for demo purposes");
+          const mockPatient = {
+            ...patient,
+            id: properUUID || uuidv4(),
+            status: 'Agendado'
+          };
+          
+          try {
+            await addPatientLog({
+              patient_id: mockPatient.id,
+              action: "Cadastro (Demo)",
+              description: "Paciente salvo no modo de demonstração",
+              performed_by: "Sistema"
+            });
+          } catch (logError) {
+            console.error("Erro ao registrar log de demonstração:", logError);
+          }
+          
+          return mockPatient;
         }
         
-        return mockPatient;
+        return null;
       }
       
+      const savedPatient = data[0] as Patient;
+      console.log("Paciente salvo com sucesso:", savedPatient);
+      
+      // Log the action
+      try {
+        await addPatientLog({
+          patient_id: savedPatient.id,
+          action: "Cadastro/Atualização",
+          description: "Dados do paciente atualizados",
+          performed_by: "Sistema"
+        });
+      } catch (logError) {
+        console.error("Erro ao registrar log:", logError);
+        // Continue even if logging fails
+      }
+      
+      return savedPatient;
+    } catch (insertErr) {
+      console.error("Erro ao inserir paciente:", insertErr);
       return null;
     }
-    
-    const savedPatient = data[0] as Patient;
-    console.log("Paciente salvo com sucesso:", savedPatient);
-    
-    // Log the action
-    try {
-      await addPatientLog({
-        patient_id: savedPatient.id,
-        action: "Cadastro/Atualização",
-        description: "Dados do paciente atualizados",
-        performed_by: "Sistema"
-      });
-    } catch (logError) {
-      console.error("Erro ao registrar log:", logError);
-      // Continue even if logging fails
-    }
-    
-    return savedPatient;
   } catch (error) {
     console.error("Erro em savePatient:", error);
     
@@ -131,7 +161,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       console.log("Creating fallback mock patient");
       return {
         ...patient,
-        id: patient.id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
+        id: ensureUUID(patient.id) || uuidv4(),
         status: 'Agendado (Demo)'
       };
     }

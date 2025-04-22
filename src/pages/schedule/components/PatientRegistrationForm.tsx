@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { savePatient } from "@/services/patientService";
 import { Patient } from "@/services/patients/types";
 import { useDateMask } from "@/hooks/useDateMask";
+import { v4 as uuidv4 } from 'uuid';
 
 interface PatientRegistrationFormProps {
   onSuccess?: (patientName: string) => void;
@@ -21,12 +22,13 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const [activeTab, setActiveTab] = useState("dados-pessoais");
   const { value: birthDate, handleDateChange } = useDateMask();
   
-  const generatePatientNumber = () => {
-    return String(Math.floor(Math.random() * 999)).padStart(3, '0');
+  const generateId = () => {
+    // Generate proper UUID instead of number string
+    return uuidv4();
   };
   
   const defaultPatientData = {
-    id: generatePatientNumber(),
+    id: generateId(),
     name: "",
     cpf: "",
     phone: "",
