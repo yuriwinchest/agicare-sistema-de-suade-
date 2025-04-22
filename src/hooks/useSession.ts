@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotification } from './useNotification';
+import { AppUser } from '@/components/auth/types';
 
 export const useSession = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const notification = useNotification();
 
@@ -35,17 +36,17 @@ export const useSession = () => {
     };
   }, []);
 
-  const handleUserData = (userData: User) => {
-    const user = {
+  const handleUserData = (userData: SupabaseUser) => {
+    const appUser: AppUser = {
       id: userData.id,
       name: userData.user_metadata?.name || userData.email?.split('@')[0] || 'Usuário',
       email: userData.email || '',
       role: userData.user_metadata?.role || 'doctor',
     };
     
-    setUser(user);
+    setUser(appUser);
     setIsAuthenticated(true);
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("user", JSON.stringify(appUser));
   };
 
   const handleSignOut = () => {
@@ -67,7 +68,8 @@ export const useSession = () => {
       } else {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser) as AppUser;
+          setUser(parsedUser);
           setIsAuthenticated(true);
         }
       }

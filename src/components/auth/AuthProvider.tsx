@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
 import { useSession } from "@/hooks/useSession";
 import { useNotification } from "@/hooks/useNotification";
-import type { User } from "./types";
+import { AppUser } from "./types";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated, setUser, setIsAuthenticated } = useSession();
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Handle admin login
       if (email === "admin@example.com" && password === "senha123") {
         console.log("Login administrativo bem-sucedido");
-        const mockUser = {
+        const mockUser: AppUser = {
           id: "1",
           name: "Dr. Ana Silva",
           email: email,
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Demo doctor account
       if (email === "doctor@example.com" && password === "senha123") {
         console.log("Login do médico demonstrativo bem-sucedido");
-        const mockDoctor = {
+        const mockDoctor: AppUser = {
           id: "2",
           name: "Dr. Carlos Mendes",
           email: email,
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const updateUserSettings = (data: Partial<User>) => {
+  const updateUserSettings = (data: Partial<AppUser>) => {
     if (user) {
       const updatedUser = { ...user, ...data };
       setUser(updatedUser);

@@ -1,15 +1,7 @@
 
-export type User = {
-  id: string;
-  name: string;
-  role: string;
-  unit?: string;
-  room?: string;
-  email?: string;
-  profile?: UserProfile;
-};
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
-export type UserProfile = {
+export interface UserProfile {
   id: string;
   username: string;
   full_name: string;
@@ -18,14 +10,25 @@ export type UserProfile = {
   professional_id?: string;
   is_active: boolean;
   settings: Record<string, any>;
-};
+}
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email?: string;
+  role: string;
+  unit?: string;
+  room?: string;
+  profile?: UserProfile;
+}
 
 export type AuthContextType = {
-  user: User | null;
+  user: AppUser | null;
   signin: (email: string, password: string) => Promise<boolean>;
   signout: () => Promise<void>;
-  updateUserSettings: (data: Partial<User>) => void;
+  updateUserSettings: (data: Partial<AppUser>) => void;
   isAuthenticated: boolean;
   showDestinationModal: boolean;
   setShowDestinationModal: (show: boolean) => void;
 };
+
