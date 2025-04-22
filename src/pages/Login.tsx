@@ -23,7 +23,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff, Info } from "lucide-react";
+import { Eye, EyeOff, Info, AlertCircle } from "lucide-react";
+import { useNotification } from "@/hooks/useNotification";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +33,7 @@ const Login = () => {
   const { signin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const notification = useNotification();
   
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
@@ -58,18 +60,15 @@ const Login = () => {
         const success = await signin(values.email, values.password);
         
         if (success) {
-          toast({
-            title: "Login administrativo",
-            description: "Bem-vindo ao ambiente administrativo Agicare",
+          notification.success("Login administrativo bem-sucedido", {
+            description: "Bem-vindo ao ambiente administrativo Agicare"
           });
           navigate('/admin');  // Redirect directly to admin dashboard
           return;
         } else {
           setLoginError("Não foi possível fazer login administrativo");
-          toast({
-            title: "Erro de Login",
-            description: "Não foi possível fazer login administrativo",
-            variant: "destructive",
+          notification.error("Erro de Login", {
+            description: "Não foi possível fazer login administrativo"
           });
         }
       }
@@ -78,30 +77,30 @@ const Login = () => {
       const success = await signin(values.email, values.password);
       
       if (success) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema Agicare",
+        notification.success("Login realizado com sucesso", {
+          description: "Bem-vindo ao sistema Agicare"
         });
-        navigate('/menu');  // Alterado de '/dashboard' para '/menu'
+        navigate('/menu');
       } else {
         setLoginError("Credenciais inválidas. Tente novamente ou use as contas de demonstração.");
-        toast({
-          title: "Erro ao fazer login",
-          description: "Credenciais inválidas. Tente novamente.",
-          variant: "destructive",
+        notification.error("Erro ao fazer login", {
+          description: "Credenciais inválidas. Tente novamente."
         });
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      setLoginError("Ocorreu um erro ao processar sua solicitação");
-      toast({
-        title: "Erro ao fazer login",
-        description: "Ocorreu um erro ao processar sua solicitação",
-        variant: "destructive",
+      setLoginError("Ocorreu um erro ao processar sua solicitação. Verifique sua conexão e tente novamente.");
+      notification.error("Erro ao fazer login", {
+        description: "Ocorreu um erro ao processar sua solicitação"
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDemoLogin = (type: 'admin' | 'doctor') => {
+    loginForm.setValue('email', type === 'admin' ? 'admin@example.com' : 'doctor@example.com');
+    loginForm.setValue('password', 'senha123');
   };
 
   return (
@@ -180,15 +179,31 @@ const Login = () => {
               
               {loginError && (
                 <div className="bg-red-500/20 p-3 rounded-md flex items-start gap-2">
-                  <Info size={16} className="text-red-200 mt-0.5 flex-shrink-0" />
+                  <AlertCircle size={16} className="text-red-200 mt-0.5 flex-shrink-0" />
                   <p className="text-red-200 text-sm">{loginError}</p>
                 </div>
               )}
               
               <div className="bg-blue-500/20 p-3 rounded-md text-sm text-blue-200">
-                <p className="font-semibold mb-1">Contas para demonstração:</p>
-                <p>- Admin: admin@example.com / senha123</p>
-                <p>- Médico: doctor@example.com / senha123</p>
+                <p className="font-semibold mb-1 flex items-center gap-2">
+                  <Info size={14} /> Contas para demonstração:
+                </p>
+                <div className="space-y-2 mt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => handleDemoLogin('admin')}
+                    className="w-full py-1.5 px-2 bg-blue-400/30 hover:bg-blue-400/40 rounded text-left transition-colors"
+                  >
+                    <span className="font-medium">Admin:</span> admin@example.com / senha123
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => handleDemoLogin('doctor')}
+                    className="w-full py-1.5 px-2 bg-blue-400/30 hover:bg-blue-400/40 rounded text-left transition-colors"
+                  >
+                    <span className="font-medium">Médico:</span> doctor@example.com / senha123
+                  </button>
+                </div>
               </div>
               
               <Button 

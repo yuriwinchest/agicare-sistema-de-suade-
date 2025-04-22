@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
 import { User } from "./types";
 import { useToast } from "@/hooks/use-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
   const { toast } = useToast();
+  const notification = useNotification();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -106,6 +108,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true);
         setShowDestinationModal(false);
         localStorage.setItem("user", JSON.stringify(mockUser));
+        
+        notification.success("Login administrativo bem-sucedido", {
+          description: "Bem-vindo ao ambiente administrativo Agicare"
+        });
+        
         return true;
       }
 
@@ -123,11 +130,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true);
         setShowDestinationModal(true);
         localStorage.setItem("user", JSON.stringify(mockDoctor));
+        
+        notification.success("Login médico bem-sucedido", {
+          description: "Bem-vindo ao sistema Agicare, Dr. Carlos"
+        });
+        
         return true;
       }
 
       // Handle Supabase authentication
       console.log("Tentando autenticação no Supabase com:", email);
+      
+      // Clear any existing sessions before attempting login
+      await supabase.auth.signOut();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -150,9 +166,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsAuthenticated(true);
           setShowDestinationModal(true);
           localStorage.setItem("user", JSON.stringify(mockUser));
+          
+          notification.info("Login com credenciais mockadas", {
+            description: "Conectado com perfil de demonstração"
+          });
+          
           return true;
         }
         
+        notification.error("Falha na autenticação", {
+          description: "Credenciais inválidas. Verifique seu email e senha."
+        });
         return false;
       }
 
@@ -169,12 +193,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(true);
         setShowDestinationModal(user.role !== "admin");
         localStorage.setItem("user", JSON.stringify(user));
+        
+        notification.success("Login bem-sucedido", {
+          description: `Bem-vindo, ${user.name}!`
+        });
+        
         return true;
       }
 
       return false;
     } catch (error) {
       console.error("Erro ao fazer login:", error);
+      notification.error("Erro inesperado", {
+        description: "Ocorreu um erro ao tentar fazer login. Tente novamente."
+      });
       return false;
     }
   };
