@@ -5,9 +5,10 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { EditCollaboratorDialog } from './EditCollaboratorDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserX, Trash2 } from "lucide-react";
+import { Loader2, UserX, Trash2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { deleteCollaborator } from '@/services/patients/patientMutations';
+import { deleteCollaborator } from '@/services/patients/mutations/collaboratorMutations';
+import { useAuth } from "@/components/auth/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +35,8 @@ type Collaborator = {
 const roleTranslations = {
   doctor: 'Médico(a)',
   nurse: 'Enfermeiro(a)',
-  receptionist: 'Recepcionista'
+  receptionist: 'Recepcionista',
+  admin: 'Administrador(a)'
 };
 
 export const CollaboratorGrid = () => {
@@ -42,9 +44,11 @@ export const CollaboratorGrid = () => {
   const [selectedCollaborator, setSelectedCollaborator] = useState<Collaborator | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingCollaborator, setDeletingCollaborator] = useState<Collaborator | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchCollaborators();
@@ -69,19 +73,39 @@ export const CollaboratorGrid = () => {
   const fetchCollaborators = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('collaborators')
         .select('*')
         .order('name', { ascending: true });
 
       if (error) {
-        throw error;
+        console.error("Erro ao carregar colaboradores:", error);
+        setError("Não foi possível carregar os colaboradores devido a um erro de permissão.");
+        
+        if (error.code === 'PGRST301') {
+          toast({
+            title: "Acesso restrito",
+            description: "Apenas administradores podem visualizar a lista de colaboradores",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Erro ao carregar colaboradores",
+            description: "Ocorreu um problema ao tentar carregar a lista",
+            variant: "destructive"
+          });
+        }
+        
+        setCollaborators([]);
+      } else {
+        console.log("Colaboradores carregados:", data);
+        setCollaborators(data || []);
       }
-
-      console.log("Colaboradores carregados:", data);
-      setCollaborators(data || []);
     } catch (error) {
       console.error("Erro ao carregar colaboradores:", error);
+      setError("Ocorreu um erro inesperado ao tentar carregar os colaboradores.");
       toast({
         title: "Erro ao carregar colaboradores",
         description: "Não foi possível carregar a lista de colaboradores",
@@ -93,12 +117,31 @@ export const CollaboratorGrid = () => {
   };
 
   const handleCardClick = (collaborator: Collaborator) => {
+    if (user?.role !== 'admin' && user?.id !== collaborator.id) {
+      toast({
+        title: "Acesso negado",
+        description: "Você só pode editar seu próprio perfil ou precisa ser administrador",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSelectedCollaborator(collaborator);
     setIsEditModalOpen(true);
   };
 
   const handleDelete = async (collaborator: Collaborator, event: React.MouseEvent) => {
     event.stopPropagation(); // Previne que o clique propague para o card
+    
+    if (user?.role !== 'admin') {
+      toast({
+        title: "Acesso negado",
+        description: "Apenas administradores podem excluir colaboradores",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setDeletingCollaborator(collaborator);
     setIsDeleteDialogOpen(true);
   };
@@ -134,6 +177,16 @@ export const CollaboratorGrid = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="bg-red-500/20 border border-red-300/30 rounded-lg p-8 text-center">
+        <ShieldAlert className="h-10 w-10 text-red-300 mx-auto mb-2" />
+        <p className="text-white text-lg font-medium">Acesso Restrito</p>
+        <p className="text-white/80 mt-2">{error}</p>
+      </div>
+    );
+  }
+
   if (collaborators.length === 0) {
     return (
       <div className="bg-white/10 border border-white/20 rounded-lg p-8 text-center">
@@ -157,22 +210,30 @@ export const CollaboratorGrid = () => {
                 <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <CardTitle className="text-lg text-gray-800">{collaborator.name}</CardTitle>
-                <p className="text-sm text-gray-600">
-                  {roleTranslations[collaborator.role as keyof typeof roleTranslations]}
+                <CardTitle className="text-lg text-white">{collaborator.name}</CardTitle>
+                <p className="text-sm text-gray-200">
+                  {roleTranslations[collaborator.role as keyof typeof roleTranslations] || collaborator.role}
                 </p>
                 {collaborator.specialty && (
-                  <p className="text-xs text-gray-500">{collaborator.specialty}</p>
+                  <p className="text-xs text-gray-300">{collaborator.specialty}</p>
+                )}
+                {collaborator.role === 'admin' && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-300/80 text-amber-900">
+                    <ShieldAlert className="w-3 h-3 mr-1" />
+                    Admin
+                  </span>
                 )}
               </div>
-              <Button 
-                variant="destructive" 
-                size="sm"
-                className="absolute top-2 right-2"
-                onClick={(e) => handleDelete(collaborator, e)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {user?.role === 'admin' && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  className="absolute top-2 right-2"
+                  onClick={(e) => handleDelete(collaborator, e)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </CardHeader>
           </Card>
         ))}

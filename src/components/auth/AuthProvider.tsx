@@ -45,87 +45,116 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       // Regular authentication flow for non-demo accounts
-      // First, check if the email exists in collaborators table
-      const { data: collaboratorData, error: collaboratorError } = await supabase
-        .from('collaborators')
-        .select('*')
-        .eq('email', email)
-        .single();
+      try {
+        // First, check if the email exists in collaborators table
+        const { data: collaboratorData, error: collaboratorError } = await supabase
+          .from('collaborators')
+          .select('*')
+          .eq('email', email)
+          .single();
 
-      if (collaboratorError) {
-        console.log("Email não encontrado na tabela de colaboradores:", collaboratorError);
-        notification.error("Erro de Login", {
-          description: "Este email não está cadastrado no sistema. Verifique suas credenciais."
+        if (collaboratorError) {
+          console.log("Email não encontrado na tabela de colaboradores:", collaboratorError);
+          notification.error("Erro de Login", {
+            description: "Este email não está cadastrado no sistema. Verifique suas credenciais."
+          });
+          return false;
+        }
+
+        // If email exists in collaborators, try Supabase authentication
+        console.log("Email encontrado na tabela de colaboradores, tentando autenticação no Supabase");
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) {
+          console.error("Erro ao fazer login no Supabase:", error);
+          
+          if (error.message.includes("Invalid login credentials")) {
+            // Check if user exists in auth.users but has incorrect password
+            const { data: authUserData } = await supabase.auth.getUser(email);
+            
+            if (authUserData.user) {
+              notification.error("Senha Incorreta", {
+                description: "A senha fornecida está incorreta. Por favor, tente novamente."
+              });
+            } else {
+              // User not found in auth.users
+              notification.error("Usuário Não Registrado", {
+                description: "Seu email foi encontrado, mas não está registrado para login. Entre em contato com o administrador do sistema."
+              });
+            }
+          } else {
+            notification.error("Erro de Autenticação", {
+              description: "Ocorreu um erro inesperado. Entre em contato com o suporte."
+            });
+          }
+          
+          return false;
+        }
+
+        if (data && data.user) {
+          try {
+            // Fetch collaborator data to get role and other info
+            const { data: collaborator, error: collabError } = await supabase
+              .from('collaborators')
+              .select('*')
+              .eq('email', data.user.email)
+              .single();
+              
+            if (collabError) {
+              console.error("Erro ao buscar dados do colaborador:", collabError);
+              notification.error("Erro ao Carregar Perfil", {
+                description: "Não foi possível carregar seus dados de perfil."
+              });
+              return false;
+            }
+            
+            // Create user object
+            if (collaborator) {
+              const appUser: AppUser = {
+                id: data.user.id,
+                name: collaborator.name || data.user.email?.split('@')[0] || 'Usuário',
+                email: data.user.email || '',
+                role: collaborator.role || 'doctor',
+              };
+              
+              setUser(appUser);
+              setIsAuthenticated(true);
+              localStorage.setItem("user", JSON.stringify(appUser));
+              
+              // Set destination modal based on role
+              setShowDestinationModal(collaborator.role === 'doctor');
+              
+              notification.success("Login Bem-Sucedido", {
+                description: `Bem-vindo ao sistema, ${appUser.name}`
+              });
+              
+              return true;
+            } else {
+              notification.error("Perfil Não Encontrado", {
+                description: "Seu usuário existe mas não tem um perfil associado."
+              });
+              return false;
+            }
+          } catch (innerError) {
+            console.error("Erro ao processar dados do usuário:", innerError);
+            notification.error("Erro no Processamento", {
+              description: "Ocorreu um erro ao processar seus dados de usuário."
+            });
+            return false;
+          }
+        }
+
+        return false;
+      } catch (authError) {
+        console.error("Erro durante a autenticação:", authError);
+        notification.error("Falha na Autenticação", {
+          description: "Ocorreu um erro durante o processo de autenticação."
         });
         return false;
       }
-
-      // If email exists in collaborators, try Supabase authentication
-      console.log("Email encontrado na tabela de colaboradores, tentando autenticação no Supabase");
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error("Erro ao fazer login no Supabase:", error);
-        
-        if (error.message.includes("Invalid login credentials")) {
-          // Check if user exists in auth.users but has incorrect password
-          const { data: authUserData } = await supabase.auth.getUser(email);
-          
-          if (authUserData.user) {
-            notification.error("Senha Incorreta", {
-              description: "A senha fornecida está incorreta. Por favor, tente novamente."
-            });
-          } else {
-            // User not found in auth.users
-            notification.error("Usuário Não Registrado", {
-              description: "Seu email foi encontrado, mas não está registrado para login. Entre em contato com o administrador do sistema."
-            });
-          }
-        } else {
-          notification.error("Erro de Autenticação", {
-            description: "Ocorreu um erro inesperado. Entre em contato com o suporte."
-          });
-        }
-        
-        return false;
-      }
-
-      if (data && data.user) {
-        // Fetch collaborator data to get role and other info
-        const { data: collaborator } = await supabase
-          .from('collaborators')
-          .select('*')
-          .eq('email', data.user.email)
-          .single();
-          
-        // Create user object
-        if (collaborator) {
-          const appUser: AppUser = {
-            id: data.user.id,
-            name: collaborator.name || data.user.email?.split('@')[0] || 'Usuário',
-            email: data.user.email || '',
-            role: collaborator.role || 'doctor',
-          };
-          
-          setUser(appUser);
-          setIsAuthenticated(true);
-          localStorage.setItem("user", JSON.stringify(appUser));
-          
-          // Set destination modal based on role
-          setShowDestinationModal(collaborator.role === 'doctor');
-          
-          notification.success("Login Bem-Sucedido", {
-            description: `Bem-vindo ao sistema, ${appUser.name}`
-          });
-        }
-        
-        return true;
-      }
-
-      return false;
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       notification.error("Erro Inesperado", {

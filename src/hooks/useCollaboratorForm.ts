@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadCollaboratorPhoto } from '@/services/storageService';
+import { useAuth } from "@/components/auth/AuthContext";
 
 const collaboratorFormSchema = z.object({
   id: z.string().optional(),
@@ -28,6 +29,7 @@ export function useCollaboratorForm(
   onClose?: (open: boolean) => void
 ) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -76,6 +78,16 @@ export function useCollaboratorForm(
       setIsSubmitting(true);
       console.log("Registrando colaborador:", data);
 
+      // Verificar se o usuário atual é administrador
+      if (user?.role !== 'admin') {
+        toast({
+          title: "Acesso negado",
+          description: "Apenas administradores podem gerenciar colaboradores",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       // First create auth user if password is provided and not editing an existing user
       if (data.password && !data.id) {
         const { error: authError } = await supabase.auth.signUp({
@@ -83,7 +95,10 @@ export function useCollaboratorForm(
           password: data.password,
         });
 
-        if (authError) throw authError;
+        if (authError) {
+          console.error("Erro ao criar usuário no auth:", authError);
+          throw authError;
+        }
       }
 
       // Then create or update collaborator profile
@@ -103,7 +118,10 @@ export function useCollaboratorForm(
           })
           .eq('id', data.id);
 
-        if (collaboratorError) throw collaboratorError;
+        if (collaboratorError) {
+          console.error("Erro ao atualizar colaborador:", collaboratorError);
+          throw collaboratorError;
+        }
       } else {
         // Create new collaborator
         const { error: collaboratorError } = await supabase
@@ -119,7 +137,10 @@ export function useCollaboratorForm(
             image_url: data.image_url,
           });
 
-        if (collaboratorError) throw collaboratorError;
+        if (collaboratorError) {
+          console.error("Erro ao criar colaborador:", collaboratorError);
+          throw collaboratorError;
+        }
       }
 
       toast({
@@ -133,9 +154,21 @@ export function useCollaboratorForm(
       return true;
     } catch (error: any) {
       console.error("Erro ao registrar colaborador:", error);
+      let errorMessage = "Ocorreu um erro ao tentar registrar o colaborador";
+      
+      if (error.message) {
+        if (error.code === "PGRST301") {
+          errorMessage = "Você não tem permissão para realizar esta operação.";
+        } else if (error.message.includes("violates unique constraint")) {
+          errorMessage = "Este email já está cadastrado para outro colaborador.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Erro ao registrar colaborador",
-        description: error.message || "Ocorreu um erro ao tentar registrar o colaborador",
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
