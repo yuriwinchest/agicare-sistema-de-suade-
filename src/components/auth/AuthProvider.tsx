@@ -1,114 +1,15 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
-import { User } from "./types";
-import { useToast } from "@/hooks/use-toast";
+import { useSession } from "@/hooks/useSession";
 import { useNotification } from "@/hooks/useNotification";
+import type { User } from "./types";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { user, isAuthenticated, setUser, setIsAuthenticated } = useSession();
   const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
-  const { toast } = useToast();
   const notification = useNotification();
-
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Evento de autenticação:", event, session ? "Sessão presente" : "Sem sessão");
-      
-      if (event === 'SIGNED_IN' && session) {
-        try {
-          const { data: userData } = await supabase.auth.getUser();
-          
-          if (userData && userData.user) {
-            const user: User = {
-              id: userData.user.id,
-              name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-              email: userData.user.email || '',
-              role: userData.user.user_metadata?.role || 'doctor',
-            };
-            
-            setUser(user);
-            setIsAuthenticated(true);
-            localStorage.setItem("user", JSON.stringify(user));
-            
-            toast({
-              title: "Login realizado com sucesso",
-              description: `Bem-vindo, ${user.name}!`,
-            });
-          }
-        } catch (error) {
-          console.error("Erro ao obter dados do usuário após login:", error);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem("user");
-        localStorage.removeItem("user_prefs");
-      }
-    });
-    
-    // THEN check for existing session
-    const checkSession = async () => {
-      try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Erro ao verificar sessão:", sessionError);
-          return;
-        }
-        
-        if (sessionData && sessionData.session) {
-          console.log("Sessão encontrada:", sessionData.session);
-          const { data: userData, error: userError } = await supabase.auth.getUser();
-          
-          if (userError) {
-            console.error("Erro ao obter dados do usuário:", userError);
-            return;
-          }
-          
-          if (userData && userData.user) {
-            console.log("Usuário autenticado:", userData.user);
-            const user: User = {
-              id: userData.user.id,
-              name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-              email: userData.user.email || '',
-              role: userData.user.user_metadata?.role || 'doctor',
-            };
-            
-            const storedPrefs = localStorage.getItem("user_prefs");
-            if (storedPrefs) {
-              const prefs = JSON.parse(storedPrefs);
-              user.unit = prefs.unit;
-              user.room = prefs.room;
-            }
-            
-            setUser(user);
-            setIsAuthenticated(true);
-            localStorage.setItem("user", JSON.stringify(user));
-          }
-        } else {
-          console.log("Nenhuma sessão ativa encontrada, verificando usuário armazenado");
-          const storedUser = localStorage.getItem("user");
-          if (storedUser) {
-            console.log("Usuário armazenado encontrado");
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-      }
-    };
-    
-    checkSession();
-    
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   const signin = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -136,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
-      // Demo doctor account for testing
+      // Demo doctor account
       if (email === "doctor@example.com" && password === "senha123") {
         console.log("Login do médico demonstrativo bem-sucedido");
         const mockDoctor = {
@@ -158,119 +59,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
-      // Handle Supabase authentication with improved error handling
-      console.log("Tentando autenticação no Supabase com:", email);
-      
-      // Try Supabase login with retry mechanism
-      let attempts = 0;
-      const maxAttempts = 2;
-      
-      while (attempts < maxAttempts) {
-        attempts++;
-        console.log(`Tentativa ${attempts} de login no Supabase`);
-        
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-          
-          if (error) {
-            console.error(`Erro na tentativa ${attempts} de login no Supabase:`, error);
-            
-            if (attempts >= maxAttempts) {
-              console.log("Máximo de tentativas atingido, usando conta mockada");
-              
-              // For demo purposes: If Supabase auth fails, still allow mock login
-              if (email.includes('@') && password.length >= 6) {
-                console.log("Criando usuário mockado após falha na autenticação do Supabase");
-                const mockUser = {
-                  id: Math.random().toString(36).substring(2, 11),
-                  name: email.split('@')[0],
-                  email: email,
-                  role: "doctor",
-                };
-  
-                setUser(mockUser);
-                setIsAuthenticated(true);
-                setShowDestinationModal(true);
-                localStorage.setItem("user", JSON.stringify(mockUser));
-                
-                notification.info("Login com credenciais mockadas", {
-                  description: "Conectado com perfil de demonstração"
-                });
-                
-                return true;
-              }
-              
-              notification.error("Falha na autenticação", {
-                description: "Credenciais inválidas. Verifique seu email e senha."
-              });
-              return false;
-            }
-            
-            // Wait before retrying
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
-          }
-  
-          if (data && data.user) {
-            console.log("Login no Supabase bem-sucedido:", data.user);
-            const user = {
-              id: data.user.id,
-              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-              email: data.user.email || '',
-              role: data.user.user_metadata?.role || 'doctor',
-            };
-  
-            setUser(user);
-            setIsAuthenticated(true);
-            setShowDestinationModal(user.role !== "admin");
-            localStorage.setItem("user", JSON.stringify(user));
-            
-            notification.success("Login bem-sucedido", {
-              description: `Bem-vindo, ${user.name}!`
-            });
-            
-            return true;
-          }
-          
-          break;
-        } catch (e) {
-          console.error(`Exceção na tentativa ${attempts} de login:`, e);
-          
-          if (attempts >= maxAttempts) {
-            notification.error("Erro ao fazer login", {
-              description: "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde."
-            });
-            return false;
-          }
-          
-          // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-      // If we get here, all attempts failed but we didn't enter the mock login path
-      // Fallback to mock login for demo purposes
-      console.log("Todas as tentativas falharam, usando login mockado como fallback");
-      const mockUser = {
-        id: Math.random().toString(36).substring(2, 11),
-        name: email.split('@')[0],
-        email: email,
-        role: "doctor",
-      };
-
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      setShowDestinationModal(true);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      
-      notification.info("Login com credenciais demonstrativas", {
-        description: "Conectado com perfil de demonstração após falhas no servidor"
+      // Handle Supabase authentication
+      console.log("Tentando autenticação no Supabase");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
       
-      return true;
+      if (error) {
+        console.error("Erro ao fazer login no Supabase:", error);
+        notification.error("Erro ao fazer login", {
+          description: "Credenciais inválidas. Verifique seu email e senha."
+        });
+        return false;
+      }
+
+      if (data && data.user) {
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       notification.error("Erro inesperado", {
@@ -290,16 +98,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.removeItem("user");
       localStorage.removeItem("user_prefs");
       
-      toast({
-        title: "Logout realizado",
-        description: "Você saiu do sistema com sucesso",
+      notification.success("Logout realizado", {
+        description: "Você saiu do sistema com sucesso"
       });
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      toast({
-        title: "Erro ao fazer logout",
-        description: "Ocorreu um erro ao tentar sair do sistema",
-        variant: "destructive",
+      notification.error("Erro ao fazer logout", {
+        description: "Ocorreu um erro ao tentar sair do sistema"
       });
     }
   };
