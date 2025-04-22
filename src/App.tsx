@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -42,7 +43,7 @@ const queryClient = new QueryClient();
 
 function App() {
   useEffect(() => {
-    // Garantir que os buckets de armazenamento existam ao iniciar o aplicativo
+    // Ensure storage buckets exist when the app starts
     ensureStorageBuckets().catch(console.error);
   }, []);
 
