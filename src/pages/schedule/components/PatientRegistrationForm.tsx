@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,7 +68,7 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     }
   };
   
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!patientData.name) {
       toast({
         title: "Erro ao salvar",
@@ -77,26 +78,49 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       return;
     }
     
-    const patientToSave: Patient = {
-      id: patientData.id,
-      name: patientData.name,
-      cpf: patientData.cpf || "",
-      phone: patientData.phone || "",
-      email: patientData.email || "",
-      address: JSON.stringify(patientData.addressDetails),
-      birth_date: patientData.birth_date || patientData.birthDate || "",
-      status: patientData.status || "Agendado"
-    };
-    
-    savePatient(patientToSave);
-    
-    toast({
-      title: "Cadastro Salvo",
-      description: "Os dados do paciente foram salvos com sucesso."
-    });
-    
-    if (onSuccess) {
-      onSuccess(patientData.name);
+    try {
+      // Format address as a string or JSON string for database
+      const formattedAddress = typeof patientData.addressDetails === 'object' 
+        ? JSON.stringify(patientData.addressDetails) 
+        : patientData.address;
+      
+      const patientToSave: Patient = {
+        id: patientData.id,
+        name: patientData.name,
+        cpf: patientData.cpf || "",
+        phone: patientData.phone || "",
+        email: patientData.email || "",
+        address: formattedAddress || "",
+        birth_date: patientData.birth_date || patientData.birthDate || "",
+        gender: patientData.gender || "",
+        status: patientData.status || "Agendado"
+      };
+      
+      const savedPatient = await savePatient(patientToSave);
+      
+      if (savedPatient) {
+        toast({
+          title: "Cadastro Salvo",
+          description: "Os dados do paciente foram salvos com sucesso."
+        });
+        
+        if (onSuccess) {
+          onSuccess(patientData.name);
+        }
+      } else {
+        toast({
+          title: "Erro ao salvar",
+          description: "Não foi possível salvar os dados do paciente.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar paciente:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar os dados do paciente.",
+        variant: "destructive"
+      });
     }
   };
 

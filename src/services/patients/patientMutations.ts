@@ -1,5 +1,5 @@
 
-import { supabase } from "@/services/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { Patient, PatientDraft } from "./types";
 import { 
   savePatientAdditionalData, 
@@ -11,9 +11,9 @@ import {
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
-    // Extrair campos básicos do paciente
-    const basicPatientData = {
-      id: patient.id,
+    // Prepare patient data for saving
+    const patientData = {
+      id: patient.id || undefined, // Let Supabase generate UUID if not provided
       name: patient.name,
       cpf: patient.cpf || null,
       phone: patient.phone || null,
@@ -22,34 +22,39 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       birth_date: patient.birth_date || null,
       status: patient.status || 'Agendado',
       person_type: patient.person_type || null,
-      cns: patient.cns || null,
-      marital_status: patient.marital_status || null,
-      gender: patient.gender || null,
-      mother_name: patient.mother_name || null,
-      father_name: patient.father_name || null
+      gender: patient.gender || null
     };
 
-    // Salvar dados básicos do paciente
+    console.log("Saving patient data:", patientData);
+
+    // Attempt to insert the patient data
     const { data, error } = await supabase
       .from('patients')
-      .upsert(basicPatientData)
-      .select()
-      .single();
+      .upsert(patientData)
+      .select();
       
     if (error) {
       console.error("Erro ao salvar paciente:", error);
       return null;
     }
     
-    // Registrar no log a ação
-    await addPatientLog({
-      patient_id: data.id,
-      action: "Cadastro/Atualização",
-      description: "Dados do paciente atualizados",
-      performed_by: "Sistema"
-    });
+    const savedPatient = data[0] as Patient;
+    console.log("Patient saved successfully:", savedPatient);
     
-    return data;
+    // Log the action
+    try {
+      await addPatientLog({
+        patient_id: savedPatient.id,
+        action: "Cadastro/Atualização",
+        description: "Dados do paciente atualizados",
+        performed_by: "Sistema"
+      });
+    } catch (logError) {
+      console.error("Erro ao registrar log:", logError);
+      // Continue even if logging fails
+    }
+    
+    return savedPatient;
   } catch (error) {
     console.error("Erro em savePatient:", error);
     return null;
