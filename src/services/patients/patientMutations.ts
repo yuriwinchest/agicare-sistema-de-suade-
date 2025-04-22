@@ -27,31 +27,26 @@ const ensureUUID = (id: string | undefined): string | undefined => {
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
-    // Enhanced date formatting with robust error handling
+    // Ensure we have a session before proceeding
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error("No authenticated session");
+    }
+
+    // Format birth date properly
     const formattedBirthDate = formatDateForDatabase(patient.birth_date);
     
-    console.log("Cadastrando paciente com dados:", {
-      nome: patient.name,
-      cpf: patient.cpf,
-      dataNascimento: patient.birth_date,
-      dataFormatada: formattedBirthDate,
-      endereco: patient.address
-    });
-
     // Ensure address is a string (stringify if it's an object)
     const formattedAddress = typeof patient.address === 'object' 
       ? JSON.stringify(patient.address) 
       : patient.address;
-
-    // Convert ID to proper UUID format if needed
-    const properUUID = ensureUUID(patient.id);
     
     // Make sure required fields are not undefined or null
     const patientData = {
       name: patient.name,
       birth_date: formattedBirthDate || null,
       address: formattedAddress,
-      id: properUUID,
+      id: patient.id,
       status: patient.status || 'Agendado',
       cpf: patient.cpf || null,
       phone: patient.phone || null,
@@ -64,106 +59,37 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       marital_status: patient.marital_status || null
     };
 
-    console.log("Dados preparados para envio ao Supabase:", patientData);
-
-    // First check if the patient exists by ID, if using an existing ID
-    if (patientData.id) {
-      try {
-        const { data: existingPatient, error: checkError } = await supabase
-          .from('patients')
-          .select('id')
-          .eq('id', patientData.id)
-          .maybeSingle();
-
-        if (checkError) {
-          console.error("Erro ao verificar paciente existente:", checkError);
-        }
-
-        console.log("Verificação de paciente existente:", existingPatient ? "Encontrado" : "Não encontrado");
-
-        // If the patient exists, update it
-        if (existingPatient) {
-          const { data, error } = await supabase
-            .from('patients')
-            .update(patientData)
-            .eq('id', patientData.id)
-            .select();
-
-          if (error) {
-            console.error("Erro ao atualizar paciente:", error);
-            console.error("Detalhes do erro:", error.message, error.details, error.hint);
-            return null;
-          }
-
-          console.log("Paciente atualizado com sucesso:", data[0]);
-          return data[0] as Patient;
-        }
-      } catch (checkErr) {
-        console.error("Erro ao verificar existência do paciente:", checkErr);
-      }
+    // First try to insert the patient
+    const { data, error } = await supabase
+      .from('patients')
+      .upsert(patientData)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Erro ao salvar paciente:", error);
+      throw error;
     }
-
-    // If patient doesn't exist or no ID was provided, insert a new one
+    
+    const savedPatient = data as Patient;
+    
+    // Try to add a log entry
     try {
-      const { data, error } = await supabase
-        .from('patients')
-        .insert(patientData)
-        .select();
-        
-      if (error) {
-        console.error("Erro ao salvar paciente:", error);
-        console.error("Detalhes do erro:", error.message, error.details, error.hint);
-        
-        // For demo purposes: if Supabase insert fails, return a mock patient
-        if (patient.name) {
-          console.log("Creating mock patient for demo purposes");
-          const mockPatient = {
-            ...patientData,
-            id: properUUID || uuidv4(),
-            status: 'Agendado (Demo)'
-          };
-          
-          return mockPatient;
-        }
-        
-        return null;
-      }
-      
-      const savedPatient = data[0] as Patient;
-      console.log("Paciente salvo com sucesso:", savedPatient);
-      
-      // Log the action
-      try {
-        await addPatientLog({
-          patient_id: savedPatient.id,
-          action: "Cadastro/Atualização",
-          description: "Dados do paciente atualizados",
-          performed_by: "Sistema"
-        });
-      } catch (logError) {
-        console.error("Erro ao registrar log:", logError);
-        // Continue even if logging fails
-      }
-      
-      return savedPatient;
-    } catch (insertErr) {
-      console.error("Erro ao inserir paciente:", insertErr);
-      return null;
+      await addPatientLog({
+        patient_id: savedPatient.id,
+        action: "Cadastro/Atualização",
+        description: "Dados do paciente atualizados",
+        performed_by: session.user.email || "Sistema"
+      });
+    } catch (logError) {
+      console.error("Erro ao registrar log:", logError);
+      // Continue even if logging fails
     }
+    
+    return savedPatient;
   } catch (error) {
     console.error("Erro em savePatient:", error);
-    
-    // For demo purposes: if entire process fails, create a mock response
-    if (patient.name) {
-      console.log("Creating fallback mock patient");
-      return {
-        ...patient,
-        id: ensureUUID(patient.id) || uuidv4(),
-        status: 'Agendado (Demo)'
-      };
-    }
-    
-    return null;
+    throw error;
   }
 };
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +23,6 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const generateId = () => {
-    // Generate proper UUID
     return uuidv4();
   };
   
@@ -56,14 +54,12 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const formatDateForDB = (dateStr: string): string | null => {
     if (!dateStr) return null;
     
-    // Verifica se a data já está no formato ISO (YYYY-MM-DD)
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }
     
     const parts = dateStr.split('/');
     if (parts.length === 3) {
-      // Create YYYY-MM-DD format
       let year = parts[2];
       if (year.length < 4) {
         year = (parseInt(year) < 50) ? `20${year.padStart(2, '0')}` : `19${year.padStart(2, '0')}`;
@@ -105,12 +101,6 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     try {
       setIsSubmitting(true);
       
-      // Format address as a string or JSON string for database
-      const formattedAddress = typeof patientData.addressDetails === 'object' 
-        ? JSON.stringify(patientData.addressDetails) 
-        : patientData.address;
-      
-      // Format the birth date properly for database storage
       const formattedBirthDate = formatDateForDB(birthDate);
       
       const patientToSave: Patient = {
@@ -119,13 +109,13 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
         cpf: patientData.cpf || "",
         phone: patientData.phone || "",
         email: patientData.email || "",
-        address: formattedAddress || "",
+        address: typeof patientData.addressDetails === 'object' 
+          ? JSON.stringify(patientData.addressDetails) 
+          : patientData.address || "",
         birth_date: formattedBirthDate || "",
         gender: patientData.gender || "",
         status: patientData.status || "Agendado"
       };
-      
-      console.log("Saving patient with data:", patientToSave);
       
       const savedPatient = await savePatient(patientToSave);
       
@@ -135,24 +125,19 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
           description: "Os dados do paciente foram salvos com sucesso."
         });
         
-        // Reset form after successful save
         setPatientData(defaultPatientData);
         
         if (onSuccess) {
           onSuccess(patientData.name);
         }
-      } else {
-        toast({
-          title: "Erro ao salvar",
-          description: "Não foi possível salvar os dados do paciente.",
-          variant: "destructive"
-        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao salvar paciente:", error);
       toast({
         title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar os dados do paciente.",
+        description: error.message === "Usuário não autenticado" 
+          ? "Você precisa estar logado para salvar pacientes."
+          : "Ocorreu um erro ao salvar os dados do paciente.",
         variant: "destructive"
       });
     } finally {

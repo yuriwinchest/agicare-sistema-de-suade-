@@ -1,4 +1,3 @@
-
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -38,8 +37,9 @@ export const formatDateForDatabase = (dateString: string | null): string | null 
 };
 
 // Check if we are in development/demo mode
-const isDemoMode = () => {
-  return !supabase.auth.getSession || !supabase.auth.getUser;
+const isDemoMode = async () => {
+  const { data: session } = await supabase.auth.getSession();
+  return !session?.session;
 };
 
 // Re-export functions from patientMutations.ts with additional authentication check
@@ -49,15 +49,19 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     const { data: session } = await supabase.auth.getSession();
     const isAuthenticated = !!session?.session;
     
-    if (!isAuthenticated && !isDemoMode()) {
-      console.warn("Tentativa de salvar paciente sem autenticação");
+    if (!isAuthenticated) {
+      console.error("Erro: Usuário não autenticado");
       throw new Error("Usuário não autenticado");
     }
     
     return await savePatientMutation(patient);
   } catch (error) {
-    console.error("Error in savePatient service layer:", error);
-    return savePatientMutation(patient); // Fallback to original function
+    console.error("Erro em savePatient service layer:", error);
+    if (await isDemoMode()) {
+      // Only fallback to demo mode if authentication fails and we're in demo mode
+      return savePatientMutation(patient);
+    }
+    throw error;
   }
 };
 
