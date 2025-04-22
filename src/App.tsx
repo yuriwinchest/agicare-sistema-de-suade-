@@ -34,8 +34,8 @@ import ScheduleConsultation from "./pages/ScheduleConsultation";
 import ScheduleAccountPage from "./pages/ScheduleAccountPage";
 import ScheduleDetailPage from "./pages/ScheduleDetailPage";
 
-// Auth Provider - Now importing from the refactored structure
-import { AuthProvider, RequireAuth } from "./components/auth/AuthContext";
+// Auth Provider
+import { AuthProvider, RequireAuth } from "@/components/auth/AuthContext";
 import DestinationModal from "./components/auth/DestinationModal";
 import { SidebarProvider } from "./components/layout/SidebarContext";
 
@@ -50,12 +50,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <AuthProvider>
-          <SidebarProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <SidebarProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
                 <DestinationModal />
                 <Routes>
                   <Route path="/login" element={<Login />} />
@@ -85,10 +85,10 @@ function App() {
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </SidebarProvider>
-        </AuthProvider>
+              </TooltipProvider>
+            </SidebarProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
   );
