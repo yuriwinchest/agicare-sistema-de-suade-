@@ -59,6 +59,31 @@ export interface PatientDraft {
   marital_status?: string;
   mother_name?: string;
   father_name?: string;
+  // Campos adicionais que estavam faltando na interface
+  additionalData?: {
+    nationality?: string;
+    place_of_birth?: string;
+    place_of_birth_state?: string;
+    ethnicity?: string;
+    occupation?: string;
+    education_level?: string;
+    health_plan?: string;
+    health_card_number?: string;
+  };
+  documents?: Array<{
+    id?: string;
+    document_type: string;
+    document_number: string;
+    issuing_body?: string;
+    issue_date?: string;
+  }>;
+  allergies?: Array<{
+    id?: string;
+    allergy_type: string;
+    description: string;
+    severity?: string;
+  }>;
+  notes?: string;
 }
 
 export interface HospitalizedPatient extends Patient {
