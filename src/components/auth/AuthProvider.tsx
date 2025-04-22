@@ -14,6 +14,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const notification = useNotification();
 
   useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Evento de autenticação:", event, session ? "Sessão presente" : "Sem sessão");
+      
+      if (event === 'SIGNED_IN' && session) {
+        const { data: userData } = await supabase.auth.getUser();
+        
+        if (userData && userData.user) {
+          const user: User = {
+            id: userData.user.id,
+            name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
+            email: userData.user.email || '',
+            role: userData.user.user_metadata?.role || 'doctor',
+          };
+          
+          setUser(user);
+          setIsAuthenticated(true);
+          
+          toast({
+            title: "Login realizado com sucesso",
+            description: `Bem-vindo, ${user.name}!`,
+          });
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    });
+    
+    // THEN check for existing session
     const checkSession = async () => {
       try {
         const { data: sessionData } = await supabase.auth.getSession();
@@ -56,34 +86,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     
     checkSession();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Evento de autenticação:", event, session ? "Sessão presente" : "Sem sessão");
-      
-      if (event === 'SIGNED_IN' && session) {
-        const { data: userData } = await supabase.auth.getUser();
-        
-        if (userData && userData.user) {
-          const user: User = {
-            id: userData.user.id,
-            name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-            email: userData.user.email || '',
-            role: userData.user.user_metadata?.role || 'doctor',
-          };
-          
-          setUser(user);
-          setIsAuthenticated(true);
-          
-          toast({
-            title: "Login realizado com sucesso",
-            description: `Bem-vindo, ${user.name}!`,
-          });
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-    });
     
     return () => {
       authListener.subscription.unsubscribe();
@@ -141,9 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Handle Supabase authentication
       console.log("Tentando autenticação no Supabase com:", email);
       
-      // Clear any existing sessions before attempting login
-      await supabase.auth.signOut();
-      
+      // Try Supabase login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
