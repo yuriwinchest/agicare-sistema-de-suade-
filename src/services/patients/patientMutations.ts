@@ -1,24 +1,118 @@
 
 import { supabase } from "@/services/supabaseClient";
 import { Patient, PatientDraft } from "./types";
+import { 
+  savePatientAdditionalData, 
+  savePatientDocument, 
+  savePatientAllergy, 
+  savePatientNote,
+  addPatientLog
+} from "./patientAdditionalDataService";
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
+    // Extrair campos básicos do paciente
+    const basicPatientData = {
+      id: patient.id,
+      name: patient.name,
+      cpf: patient.cpf || null,
+      phone: patient.phone || null,
+      email: patient.email || null,
+      address: typeof patient.address === 'object' ? JSON.stringify(patient.address) : patient.address,
+      birth_date: patient.birth_date || null,
+      status: patient.status || 'Agendado',
+      person_type: patient.person_type || null,
+      cns: patient.cns || null,
+      marital_status: patient.marital_status || null,
+      gender: patient.gender || null,
+      mother_name: patient.mother_name || null,
+      father_name: patient.father_name || null
+    };
+
+    // Salvar dados básicos do paciente
     const { data, error } = await supabase
       .from('patients')
-      .upsert(patient)
+      .upsert(basicPatientData)
       .select()
       .single();
       
     if (error) {
-      console.error("Error saving patient:", error);
+      console.error("Erro ao salvar paciente:", error);
       return null;
     }
     
+    // Registrar no log a ação
+    await addPatientLog({
+      patient_id: data.id,
+      action: "Cadastro/Atualização",
+      description: "Dados do paciente atualizados",
+      performed_by: "Sistema"
+    });
+    
     return data;
   } catch (error) {
-    console.error("Error in savePatient:", error);
+    console.error("Erro em savePatient:", error);
     return null;
+  }
+};
+
+export const saveCompletePatient = async (
+  patient: Patient, 
+  additionalData?: any, 
+  documents?: any[], 
+  allergies?: any[], 
+  notes?: string
+): Promise<boolean> => {
+  try {
+    // 1. Salvar dados básicos do paciente
+    const savedPatient = await savePatient(patient);
+    
+    if (!savedPatient) {
+      return false;
+    }
+    
+    // 2. Salvar dados complementares se fornecidos
+    if (additionalData) {
+      const patientAdditionalData = {
+        id: savedPatient.id,
+        ...additionalData
+      };
+      await savePatientAdditionalData(patientAdditionalData);
+    }
+    
+    // 3. Salvar documentos se fornecidos
+    if (documents && documents.length > 0) {
+      for (const doc of documents) {
+        await savePatientDocument({
+          ...doc,
+          patient_id: savedPatient.id
+        });
+      }
+    }
+    
+    // 4. Salvar alergias se fornecidas
+    if (allergies && allergies.length > 0) {
+      for (const allergy of allergies) {
+        await savePatientAllergy({
+          ...allergy,
+          patient_id: savedPatient.id
+        });
+      }
+    }
+    
+    // 5. Salvar notas se fornecidas
+    if (notes) {
+      await savePatientNote({
+        patient_id: savedPatient.id,
+        notes: notes,
+        created_by: "Sistema"
+      });
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Erro em saveCompletePatient:", error);
+    return false;
   }
 };
 
@@ -26,7 +120,7 @@ export const saveDraftPatient = (patientDraft: PatientDraft): void => {
   try {
     localStorage.setItem('patientDraft', JSON.stringify(patientDraft));
   } catch (error) {
-    console.error("Error saving patient draft:", error);
+    console.error("Erro ao salvar rascunho do paciente:", error);
   }
 };
 
@@ -35,7 +129,7 @@ export const loadDraftPatient = (): PatientDraft | null => {
     const draft = localStorage.getItem('patientDraft');
     return draft ? JSON.parse(draft) : null;
   } catch (error) {
-    console.error("Error loading patient draft:", error);
+    console.error("Erro ao carregar rascunho do paciente:", error);
     return null;
   }
 };
@@ -44,13 +138,13 @@ export const clearDraftPatient = (): void => {
   try {
     localStorage.removeItem('patientDraft');
   } catch (error) {
-    console.error("Error clearing patient draft:", error);
+    console.error("Erro ao limpar rascunho do paciente:", error);
   }
 };
 
 export const confirmPatientAppointment = async (patientId: string, appointmentData?: any): Promise<Patient | null> => {
   try {
-    // Update patient status to confirmed
+    // Atualizar status do paciente para confirmado
     const { data, error } = await supabase
       .from('patients')
       .update({ status: 'Confirmado' })
@@ -59,11 +153,11 @@ export const confirmPatientAppointment = async (patientId: string, appointmentDa
       .single();
       
     if (error) {
-      console.error("Error confirming patient appointment:", error);
+      console.error("Erro ao confirmar agendamento do paciente:", error);
       return null;
     }
     
-    // If appointment data is provided, save it to the appointments table
+    // Se dados de agendamento forem fornecidos, salve-os na tabela de agendamentos
     if (appointmentData) {
       const { error: appointmentError } = await supabase
         .from('appointments')
@@ -73,13 +167,21 @@ export const confirmPatientAppointment = async (patientId: string, appointmentDa
         });
         
       if (appointmentError) {
-        console.error("Error saving appointment data:", appointmentError);
+        console.error("Erro ao salvar dados do agendamento:", appointmentError);
       }
     }
     
+    // Registrar no log
+    await addPatientLog({
+      patient_id: patientId,
+      action: "Confirmação",
+      description: "Agendamento confirmado",
+      performed_by: "Sistema"
+    });
+    
     return data;
   } catch (error) {
-    console.error("Error in confirmPatientAppointment:", error);
+    console.error("Erro em confirmPatientAppointment:", error);
     return null;
   }
 };

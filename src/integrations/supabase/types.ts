@@ -300,15 +300,220 @@ export type Database = {
           },
         ]
       }
+      patient_additional_data: {
+        Row: {
+          created_at: string | null
+          education_level: string | null
+          ethnicity: string | null
+          health_card_number: string | null
+          health_plan: string | null
+          id: string
+          nationality: string | null
+          occupation: string | null
+          place_of_birth: string | null
+          place_of_birth_state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          education_level?: string | null
+          ethnicity?: string | null
+          health_card_number?: string | null
+          health_plan?: string | null
+          id: string
+          nationality?: string | null
+          occupation?: string | null
+          place_of_birth?: string | null
+          place_of_birth_state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          education_level?: string | null
+          ethnicity?: string | null
+          health_card_number?: string | null
+          health_plan?: string | null
+          id?: string
+          nationality?: string | null
+          occupation?: string | null
+          place_of_birth?: string | null
+          place_of_birth_state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_additional_data_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_allergies: {
+        Row: {
+          allergy_type: string
+          created_at: string | null
+          description: string
+          id: string
+          patient_id: string | null
+          severity: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          allergy_type: string
+          created_at?: string | null
+          description: string
+          id?: string
+          patient_id?: string | null
+          severity?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          allergy_type?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          patient_id?: string | null
+          severity?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_allergies_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_documents: {
+        Row: {
+          created_at: string | null
+          document_number: string
+          document_type: string
+          id: string
+          issue_date: string | null
+          issuing_body: string | null
+          patient_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_number: string
+          document_type: string
+          id?: string
+          issue_date?: string | null
+          issuing_body?: string | null
+          patient_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_number?: string
+          document_type?: string
+          id?: string
+          issue_date?: string | null
+          issuing_body?: string | null
+          patient_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_documents_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string
+          id: string
+          patient_id: string | null
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description: string
+          id?: string
+          patient_id?: string | null
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          patient_id?: string | null
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_notes: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          patient_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string | null
           birth_date: string | null
+          cns: string | null
           cpf: string | null
           created_at: string | null
           email: string | null
+          father_name: string | null
+          gender: string | null
           id: string
+          marital_status: string | null
+          mother_name: string | null
           name: string
+          person_type: string | null
           phone: string | null
           status: string | null
           updated_at: string | null
@@ -316,11 +521,17 @@ export type Database = {
         Insert: {
           address?: string | null
           birth_date?: string | null
+          cns?: string | null
           cpf?: string | null
           created_at?: string | null
           email?: string | null
+          father_name?: string | null
+          gender?: string | null
           id?: string
+          marital_status?: string | null
+          mother_name?: string | null
           name: string
+          person_type?: string | null
           phone?: string | null
           status?: string | null
           updated_at?: string | null
@@ -328,11 +539,17 @@ export type Database = {
         Update: {
           address?: string | null
           birth_date?: string | null
+          cns?: string | null
           cpf?: string | null
           created_at?: string | null
           email?: string | null
+          father_name?: string | null
+          gender?: string | null
           id?: string
+          marital_status?: string | null
+          mother_name?: string | null
           name?: string
+          person_type?: string | null
           phone?: string | null
           status?: string | null
           updated_at?: string | null
