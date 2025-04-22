@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, PatientDraft } from "@/services/patients/types";
 import { 
@@ -7,6 +8,30 @@ import {
   savePatientNote,
   addPatientLog
 } from "@/services/patients/patientAdditionalDataService";
+
+// Função para formatar a data do formato DD/MM/YYYY para YYYY-MM-DD
+const formatDateForDatabase = (dateString: string | null): string | null => {
+  if (!dateString) return null;
+  
+  // Verifica se a data já está no formato ISO (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  
+  // Converte de DD/MM/YYYY para YYYY-MM-DD
+  const parts = dateString.split('/');
+  if (parts.length === 3) {
+    // Garante que o ano tenha 4 dígitos
+    let year = parts[2];
+    if (year.length < 4) {
+      // Adiciona '19' ou '20' dependendo do valor do ano
+      year = (parseInt(year) < 50) ? `20${year.padStart(2, '0')}` : `19${year.padStart(2, '0')}`;
+    }
+    return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+  }
+  
+  return null;
+};
 
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
@@ -18,7 +43,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       phone: patient.phone || null,
       email: patient.email || null,
       address: typeof patient.address === 'object' ? JSON.stringify(patient.address) : patient.address,
-      birth_date: patient.birth_date || null,
+      birth_date: formatDateForDatabase(patient.birth_date) || null,
       status: patient.status || 'Agendado',
       person_type: patient.person_type || null,
       gender: patient.gender || null,
