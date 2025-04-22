@@ -7,7 +7,7 @@ export const getCollaboratorByEmail = async (email: string) => {
       .from('collaborators')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
 
     if (error) {
       console.error("Erro ao buscar colaborador por email:", error);

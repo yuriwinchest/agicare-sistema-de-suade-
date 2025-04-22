@@ -49,10 +49,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .from('collaborators')
           .select('*')
           .eq('email', email)
-          .single();
+          .maybeSingle(); // Changed from single() to maybeSingle() to prevent errors when no data is found
 
-        if (collaboratorError) {
-          console.log("Email não encontrado na tabela de colaboradores:", collaboratorError);
+        if (collaboratorError || !collaboratorData) {
+          console.log("Email não encontrado na tabela de colaboradores:", collaboratorError || "Nenhum registro encontrado");
           notification.error("Erro de Login", {
             description: "Este email não está cadastrado no sistema. Verifique suas credenciais."
           });
@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               .from('collaborators')
               .select('*')
               .eq('email', data.user.email)
-              .single();
+              .maybeSingle(); // Changed from single() to maybeSingle()
               
             if (collabError) {
               console.error("Erro ao buscar dados do colaborador:", collabError);
@@ -196,10 +196,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               
               return { success: true };
             } else {
-              notification.error("Perfil Não Encontrado", {
-                description: "Seu usuário existe mas não tem um perfil associado."
+              // If no collaborator found but user authenticated, create a basic user profile
+              const appUser: AppUser = {
+                id: data.user.id,
+                name: data.user.email?.split('@')[0] || 'Usuário',
+                email: data.user.email || '',
+                role: 'user',
+              };
+              
+              setUser(appUser);
+              setIsAuthenticated(true);
+              localStorage.setItem("user", JSON.stringify(appUser));
+              
+              notification.success("Login Bem-Sucedido", {
+                description: `Bem-vindo ao sistema, ${appUser.name}`
               });
-              return { success: false, error: "Seu usuário existe mas não tem um perfil associado." };
+              
+              return { success: true };
             }
           } catch (innerError: any) {
             console.error("Erro ao processar dados do usuário:", innerError);

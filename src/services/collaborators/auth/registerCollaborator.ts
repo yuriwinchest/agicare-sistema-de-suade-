@@ -10,10 +10,10 @@ export const registerCollaboratorAccount = async (email: string, password: strin
       .from('collaborators')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
       
-    if (collaboratorError) {
-      console.error("Colaborador não encontrado com este email:", collaboratorError);
+    if (collaboratorError || !collaborator) {
+      console.error("Colaborador não encontrado com este email:", collaboratorError || "Nenhum registro encontrado");
       throw new Error("Colaborador não encontrado com este email");
     }
     
