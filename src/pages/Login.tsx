@@ -30,6 +30,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginAttempt, setLoginAttempt] = useState(0);
   const { signin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const Login = () => {
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
     setLoginError(null);
+    setLoginAttempt(prev => prev + 1);
     
     try {
       console.log("Tentando login com e-mail:", values.email);
@@ -82,7 +84,13 @@ const Login = () => {
         });
         navigate('/menu');
       } else {
-        setLoginError("Credenciais inválidas. Tente novamente ou use as contas de demonstração.");
+        // If login failed multiple times, suggest using demo accounts
+        if (loginAttempt >= 2) {
+          setLoginError("Múltiplas tentativas falharam. Recomendamos utilizar as contas de demonstração abaixo.");
+        } else {
+          setLoginError("Credenciais inválidas. Tente novamente ou use as contas de demonstração.");
+        }
+        
         notification.error("Erro ao fazer login", {
           description: "Credenciais inválidas. Tente novamente."
         });
@@ -101,6 +109,11 @@ const Login = () => {
   const handleDemoLogin = (type: 'admin' | 'doctor') => {
     loginForm.setValue('email', type === 'admin' ? 'admin@example.com' : 'doctor@example.com');
     loginForm.setValue('password', 'senha123');
+    
+    // Submit the form programmatically after setting values
+    setTimeout(() => {
+      loginForm.handleSubmit(handleLogin)();
+    }, 100);
   };
 
   return (

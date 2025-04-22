@@ -19,38 +19,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("Evento de autenticação:", event, session ? "Sessão presente" : "Sem sessão");
       
       if (event === 'SIGNED_IN' && session) {
-        const { data: userData } = await supabase.auth.getUser();
-        
-        if (userData && userData.user) {
-          const user: User = {
-            id: userData.user.id,
-            name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
-            email: userData.user.email || '',
-            role: userData.user.user_metadata?.role || 'doctor',
-          };
+        try {
+          const { data: userData } = await supabase.auth.getUser();
           
-          setUser(user);
-          setIsAuthenticated(true);
-          
-          toast({
-            title: "Login realizado com sucesso",
-            description: `Bem-vindo, ${user.name}!`,
-          });
+          if (userData && userData.user) {
+            const user: User = {
+              id: userData.user.id,
+              name: userData.user.user_metadata?.name || userData.user.email?.split('@')[0] || 'Usuário',
+              email: userData.user.email || '',
+              role: userData.user.user_metadata?.role || 'doctor',
+            };
+            
+            setUser(user);
+            setIsAuthenticated(true);
+            localStorage.setItem("user", JSON.stringify(user));
+            
+            toast({
+              title: "Login realizado com sucesso",
+              description: `Bem-vindo, ${user.name}!`,
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao obter dados do usuário após login:", error);
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setIsAuthenticated(false);
+        localStorage.removeItem("user");
+        localStorage.removeItem("user_prefs");
       }
     });
     
     // THEN check for existing session
     const checkSession = async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Erro ao verificar sessão:", sessionError);
+          return;
+        }
         
         if (sessionData && sessionData.session) {
           console.log("Sessão encontrada:", sessionData.session);
-          const { data: userData } = await supabase.auth.getUser();
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          
+          if (userError) {
+            console.error("Erro ao obter dados do usuário:", userError);
+            return;
+          }
           
           if (userData && userData.user) {
             console.log("Usuário autenticado:", userData.user);
@@ -70,6 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             
             setUser(user);
             setIsAuthenticated(true);
+            localStorage.setItem("user", JSON.stringify(user));
           }
         } else {
           console.log("Nenhuma sessão ativa encontrada, verificando usuário armazenado");
@@ -140,68 +158,119 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
-      // Handle Supabase authentication
+      // Handle Supabase authentication with improved error handling
       console.log("Tentando autenticação no Supabase com:", email);
       
-      // Try Supabase login
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error("Erro ao fazer login no Supabase:", error);
+      // Try Supabase login with retry mechanism
+      let attempts = 0;
+      const maxAttempts = 2;
+      
+      while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`Tentativa ${attempts} de login no Supabase`);
         
-        // For demo purposes: If Supabase auth fails, still allow mock login
-        if (email.includes('@') && password.length >= 6) {
-          console.log("Criando usuário mockado após falha na autenticação do Supabase");
-          const mockUser = {
-            id: Math.random().toString(36).substring(2, 11),
-            name: email.split('@')[0],
-            email: email,
-            role: "doctor",
-          };
-
-          setUser(mockUser);
-          setIsAuthenticated(true);
-          setShowDestinationModal(true);
-          localStorage.setItem("user", JSON.stringify(mockUser));
-          
-          notification.info("Login com credenciais mockadas", {
-            description: "Conectado com perfil de demonstração"
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
           });
           
-          return true;
+          if (error) {
+            console.error(`Erro na tentativa ${attempts} de login no Supabase:`, error);
+            
+            if (attempts >= maxAttempts) {
+              console.log("Máximo de tentativas atingido, usando conta mockada");
+              
+              // For demo purposes: If Supabase auth fails, still allow mock login
+              if (email.includes('@') && password.length >= 6) {
+                console.log("Criando usuário mockado após falha na autenticação do Supabase");
+                const mockUser = {
+                  id: Math.random().toString(36).substring(2, 11),
+                  name: email.split('@')[0],
+                  email: email,
+                  role: "doctor",
+                };
+  
+                setUser(mockUser);
+                setIsAuthenticated(true);
+                setShowDestinationModal(true);
+                localStorage.setItem("user", JSON.stringify(mockUser));
+                
+                notification.info("Login com credenciais mockadas", {
+                  description: "Conectado com perfil de demonstração"
+                });
+                
+                return true;
+              }
+              
+              notification.error("Falha na autenticação", {
+                description: "Credenciais inválidas. Verifique seu email e senha."
+              });
+              return false;
+            }
+            
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+  
+          if (data && data.user) {
+            console.log("Login no Supabase bem-sucedido:", data.user);
+            const user = {
+              id: data.user.id,
+              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
+              email: data.user.email || '',
+              role: data.user.user_metadata?.role || 'doctor',
+            };
+  
+            setUser(user);
+            setIsAuthenticated(true);
+            setShowDestinationModal(user.role !== "admin");
+            localStorage.setItem("user", JSON.stringify(user));
+            
+            notification.success("Login bem-sucedido", {
+              description: `Bem-vindo, ${user.name}!`
+            });
+            
+            return true;
+          }
+          
+          break;
+        } catch (e) {
+          console.error(`Exceção na tentativa ${attempts} de login:`, e);
+          
+          if (attempts >= maxAttempts) {
+            notification.error("Erro ao fazer login", {
+              description: "Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde."
+            });
+            return false;
+          }
+          
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        
-        notification.error("Falha na autenticação", {
-          description: "Credenciais inválidas. Verifique seu email e senha."
-        });
-        return false;
       }
 
-      if (data && data.user) {
-        console.log("Login no Supabase bem-sucedido:", data.user);
-        const user = {
-          id: data.user.id,
-          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-          email: data.user.email || '',
-          role: data.user.user_metadata?.role || 'doctor',
-        };
+      // If we get here, all attempts failed but we didn't enter the mock login path
+      // Fallback to mock login for demo purposes
+      console.log("Todas as tentativas falharam, usando login mockado como fallback");
+      const mockUser = {
+        id: Math.random().toString(36).substring(2, 11),
+        name: email.split('@')[0],
+        email: email,
+        role: "doctor",
+      };
 
-        setUser(user);
-        setIsAuthenticated(true);
-        setShowDestinationModal(user.role !== "admin");
-        localStorage.setItem("user", JSON.stringify(user));
-        
-        notification.success("Login bem-sucedido", {
-          description: `Bem-vindo, ${user.name}!`
-        });
-        
-        return true;
-      }
-
-      return false;
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      setShowDestinationModal(true);
+      localStorage.setItem("user", JSON.stringify(mockUser));
+      
+      notification.info("Login com credenciais demonstrativas", {
+        description: "Conectado com perfil de demonstração após falhas no servidor"
+      });
+      
+      return true;
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       notification.error("Erro inesperado", {
