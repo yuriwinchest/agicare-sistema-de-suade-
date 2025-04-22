@@ -17,3 +17,15 @@ export interface AuthContextType {
   signout: () => Promise<void>;
   updateUserSettings: (data: Partial<AppUser>) => void;
 }
+
+// Add the UserProfile interface
+export interface UserProfile {
+  id?: string;
+  full_name?: string;
+  username?: string;
+  role?: string;
+  department_id?: string;
+  professional_id?: string;
+  is_active?: boolean;
+  settings?: Record<string, any>;
+}
