@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -29,7 +28,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
+import { uploadCollaboratorPhoto } from '@/services/storageService';
 
 const collaboratorSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -104,34 +103,11 @@ export function EditCollaboratorDialog({
     
     try {
       setUploading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
       
-      console.log("Iniciando upload para:", fileName);
+      // Usar o serviço de upload
+      const photoUrl = await uploadCollaboratorPhoto(file);
       
-      // Upload diretamente com o nome do arquivo, sem caminho adicional
-      const { data, error } = await supabase.storage
-        .from('collaborator_photos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (error) {
-        console.error("Erro no upload:", error);
-        throw error;
-      }
-
-      console.log("Upload concluído:", data);
-
-      // Obter a URL pública da imagem
-      const { data: urlData } = supabase.storage
-        .from('collaborator_photos')
-        .getPublicUrl(fileName);
-
-      console.log("URL gerada:", urlData.publicUrl);
-      
-      form.setValue("image_url", urlData.publicUrl);
+      form.setValue("image_url", photoUrl);
 
       toast({
         title: "Imagem carregada com sucesso",

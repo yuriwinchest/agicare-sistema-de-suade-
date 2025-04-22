@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 
+import { useEffect } from 'react';
+import { ensureStorageBuckets } from './services/storageService';
+
 // Pages
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -37,50 +40,57 @@ import { SidebarProvider } from "./components/layout/SidebarContext";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <AuthProvider>
-        <SidebarProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <DestinationModal />
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                
-                <Route element={<RequireAuth />}>
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/" element={<Index />} />
-                  <Route path="/menu" element={<MainMenu />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/ambulatory" element={<Ambulatory />} />
-                  <Route path="/appointment" element={<Appointment />} />
-                  <Route path="/reception" element={<Reception />} />
-                  <Route path="/patient-reception/:id" element={<PatientReception />} />
-                  <Route path="/hospitalization" element={<Hospitalization />} />
-                  <Route path="/patient/:id" element={<PatientRecord />} />
-                  <Route path="/patient-consultation" element={<PatientConsultation />} />
-                  <Route path="/patient-registration/:id?" element={<PatientRegistration />} />
-                  <Route path="/electronic-medical-record" element={<ElectronicMedicalRecord />} />
-                  <Route path="/nursing" element={<Nursing />} />
-                  <Route path="/nursing/assessment/:id" element={<NursingAssessment />} />
-                  <Route path="/system-summary" element={<SystemSummary />} />
-                  <Route path="/system-overview" element={<SystemOverview />} />
-                  <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
-                  <Route path="/schedule-account" element={<ScheduleAccountPage />} />
-                  <Route path="/schedule-detail/:id?" element={<ScheduleDetailPage />} />
-                </Route>
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </SidebarProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+function App() {
+  useEffect(() => {
+    // Garantir que os buckets de armazenamento existam ao iniciar o aplicativo
+    ensureStorageBuckets().catch(console.error);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <AuthProvider>
+          <SidebarProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <DestinationModal />
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  
+                  <Route element={<RequireAuth />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/" element={<Index />} />
+                    <Route path="/menu" element={<MainMenu />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/ambulatory" element={<Ambulatory />} />
+                    <Route path="/appointment" element={<Appointment />} />
+                    <Route path="/reception" element={<Reception />} />
+                    <Route path="/patient-reception/:id" element={<PatientReception />} />
+                    <Route path="/hospitalization" element={<Hospitalization />} />
+                    <Route path="/patient/:id" element={<PatientRecord />} />
+                    <Route path="/patient-consultation" element={<PatientConsultation />} />
+                    <Route path="/patient-registration/:id?" element={<PatientRegistration />} />
+                    <Route path="/electronic-medical-record" element={<ElectronicMedicalRecord />} />
+                    <Route path="/nursing" element={<Nursing />} />
+                    <Route path="/nursing/assessment/:id" element={<NursingAssessment />} />
+                    <Route path="/system-summary" element={<SystemSummary />} />
+                    <Route path="/system-overview" element={<SystemOverview />} />
+                    <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
+                    <Route path="/schedule-account" element={<ScheduleAccountPage />} />
+                    <Route path="/schedule-detail/:id?" element={<ScheduleDetailPage />} />
+                  </Route>
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </SidebarProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

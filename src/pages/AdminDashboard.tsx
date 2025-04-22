@@ -39,6 +39,7 @@ import { CollaboratorGrid } from "@/components/admin/CollaboratorGrid";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+import { uploadCollaboratorPhoto } from '@/services/storageService';
 
 type UserRole = "doctor" | "nurse" | "receptionist";
 
@@ -95,32 +96,9 @@ const RegisterUserDialog = () => {
       setUploading(true);
       console.log("Iniciando upload do novo usuário");
       
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
+      const photoUrl = await uploadCollaboratorPhoto(file);
       
-      console.log("Enviando arquivo:", fileName);
-      
-      const { data, error } = await supabase.storage
-        .from('collaborator_photos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (error) {
-        console.error("Erro no upload:", error);
-        throw error;
-      }
-
-      console.log("Upload completo:", data);
-
-      const { data: urlData } = supabase.storage
-        .from('collaborator_photos')
-        .getPublicUrl(fileName);
-
-      console.log("URL gerada:", urlData.publicUrl);
-      
-      form.setValue("imageUrl", urlData.publicUrl);
+      form.setValue("imageUrl", photoUrl);
       
       toast({
         title: "Imagem carregada com sucesso",
