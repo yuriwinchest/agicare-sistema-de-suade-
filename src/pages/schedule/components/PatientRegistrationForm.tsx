@@ -50,6 +50,22 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   
   const [patientData, setPatientData] = useState(defaultPatientData);
   
+  const formatDateForDB = (dateStr: string): string | null => {
+    if (!dateStr) return null;
+    
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      // Create YYYY-MM-DD format
+      let year = parts[2];
+      if (year.length < 4) {
+        year = (parseInt(year) < 50) ? `20${year.padStart(2, '0')}` : `19${year.padStart(2, '0')}`;
+      }
+      return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    
+    return null;
+  };
+  
   const handleChange = (field: string, value: any) => {
     if (field.includes(".")) {
       const [parent, child] = field.split(".");
@@ -84,6 +100,9 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
         ? JSON.stringify(patientData.addressDetails) 
         : patientData.address;
       
+      // Format the birth date properly for database storage
+      const formattedBirthDate = formatDateForDB(birthDate);
+      
       const patientToSave: Patient = {
         id: patientData.id,
         name: patientData.name,
@@ -91,10 +110,12 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
         phone: patientData.phone || "",
         email: patientData.email || "",
         address: formattedAddress || "",
-        birth_date: patientData.birth_date || patientData.birthDate || "",
+        birth_date: formattedBirthDate || "",
         gender: patientData.gender || "",
         status: patientData.status || "Agendado"
       };
+      
+      console.log("Saving patient with data:", patientToSave);
       
       const savedPatient = await savePatient(patientToSave);
       

@@ -96,6 +96,22 @@ const PatientRegistration = () => {
     }
   }, []);
   
+  const formatDateForDB = (dateStr: string): string | null => {
+    if (!dateStr) return null;
+    
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      // Create YYYY-MM-DD format
+      let year = parts[2];
+      if (year.length < 4) {
+        year = (parseInt(year) < 50) ? `20${year.padStart(2, '0')}` : `19${year.padStart(2, '0')}`;
+      }
+      return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    
+    return null;
+  };
+  
   const handleChange = (field: string, value: any) => {
     if (field.includes(".")) {
       const parts = field.split(".");
@@ -166,6 +182,8 @@ const PatientRegistration = () => {
       return;
     }
     
+    const formattedBirthDate = formatDateForDB(patientData.birthDate || patientData.birth_date || '');
+    
     const patientToSave = {
       id: patientData.id,
       name: patientData.name,
@@ -173,7 +191,7 @@ const PatientRegistration = () => {
       phone: patientData.phone || "",
       email: patientData.email || "",
       address: JSON.stringify(patientData.addressDetails) || "",
-      birth_date: patientData.birth_date || patientData.birthDate || "",
+      birth_date: formattedBirthDate || "",
       status: patientData.status || "Agendado",
       person_type: patientData.person_type || "fisica",
       cns: patientData.cns || "",
@@ -182,6 +200,8 @@ const PatientRegistration = () => {
       mother_name: patientData.mother_name || "",
       father_name: patientData.father_name || ""
     };
+    
+    console.log("Saving patient with formatted data:", patientToSave);
     
     const success = await saveCompletePatient(
       patientToSave,
