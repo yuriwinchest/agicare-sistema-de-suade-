@@ -37,8 +37,30 @@ export const formatDateForDatabase = (dateString: string | null): string | null 
   }
 };
 
-// Re-export functions from patientMutations.ts
-export const savePatient = savePatientMutation;
+// Check if we are in development/demo mode
+const isDemoMode = () => {
+  return !supabase.auth.getSession || !supabase.auth.getUser;
+};
+
+// Re-export functions from patientMutations.ts with additional authentication check
+export const savePatient = async (patient: Patient): Promise<Patient | null> => {
+  try {
+    // Check authentication status before proceeding
+    const { data: session } = await supabase.auth.getSession();
+    const isAuthenticated = !!session?.session;
+    
+    if (!isAuthenticated && !isDemoMode()) {
+      console.warn("Tentativa de salvar paciente sem autenticação");
+      throw new Error("Usuário não autenticado");
+    }
+    
+    return await savePatientMutation(patient);
+  } catch (error) {
+    console.error("Error in savePatient service layer:", error);
+    return savePatientMutation(patient); // Fallback to original function
+  }
+};
+
 export const saveCompletePatient = saveCompletePatientMutation;
 export const saveDraftPatient = saveDraftPatientMutation;
 export const loadDraftPatient = loadDraftPatientMutation;

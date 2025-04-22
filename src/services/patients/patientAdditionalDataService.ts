@@ -22,13 +22,43 @@ const ensureUUID = (id: string | undefined): string => {
   return uuidv4();
 };
 
+// Verificar se o paciente existe antes de tentar salvar dados relacionados
+const verifyPatientExists = async (patientId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('id')
+      .eq('id', patientId)
+      .maybeSingle();
+      
+    if (error) {
+      console.error("Erro ao verificar existência do paciente:", error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error("Erro ao verificar existência do paciente:", error);
+    return false;
+  }
+};
+
 // Serviço para dados complementares
 export const savePatientAdditionalData = async (data: PatientAdditionalData): Promise<PatientAdditionalData | null> => {
   try {
     // Ensure valid UUID
+    const validId = ensureUUID(data.id);
+    
+    // Verificar se o paciente existe
+    const patientExists = await verifyPatientExists(validId);
+    if (!patientExists) {
+      console.error("Erro: Tentativa de salvar dados complementares para paciente inexistente:", validId);
+      return null;
+    }
+    
     const validData = {
       ...data,
-      id: ensureUUID(data.id)
+      id: validId
     };
     
     const { data: savedData, error } = await supabase
@@ -214,9 +244,18 @@ export const getPatientNotes = async (patientId: string): Promise<PatientNote[]>
 export const addPatientLog = async (log: PatientLog): Promise<PatientLog | null> => {
   try {
     // Ensure valid UUID
+    const validPatientId = ensureUUID(log.patient_id);
+    
+    // Verificar se o paciente existe
+    const patientExists = await verifyPatientExists(validPatientId);
+    if (!patientExists) {
+      console.error("Erro: Tentativa de adicionar log para paciente inexistente:", validPatientId);
+      return null;
+    }
+    
     const validLog = {
       ...log,
-      patient_id: ensureUUID(log.patient_id)
+      patient_id: validPatientId
     };
     
     const { data, error } = await supabase

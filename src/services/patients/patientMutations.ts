@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, PatientDraft } from "@/services/patients/types";
 import { 
@@ -22,7 +21,6 @@ const ensureUUID = (id: string | undefined): string | undefined => {
   }
   
   // If ID is not a valid UUID, generate a new one
-  // Optionally prefix with the original ID for tracking
   console.log(`Converting non-UUID ID "${id}" to proper UUID format`);
   return uuidv4();
 };
@@ -48,12 +46,22 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     // Convert ID to proper UUID format if needed
     const properUUID = ensureUUID(patient.id);
     
+    // Make sure required fields are not undefined or null
     const patientData = {
-      ...patient,
+      name: patient.name,
       birth_date: formattedBirthDate || null,
       address: formattedAddress,
       id: properUUID,
-      status: patient.status || 'Agendado'
+      status: patient.status || 'Agendado',
+      cpf: patient.cpf || null,
+      phone: patient.phone || null,
+      email: patient.email || null,
+      gender: patient.gender || null,
+      person_type: patient.person_type || null,
+      father_name: patient.father_name || null,
+      mother_name: patient.mother_name || null,
+      cns: patient.cns || null,
+      marital_status: patient.marital_status || null
     };
 
     console.log("Dados preparados para envio ao Supabase:", patientData);
@@ -83,6 +91,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
 
           if (error) {
             console.error("Erro ao atualizar paciente:", error);
+            console.error("Detalhes do erro:", error.message, error.details, error.hint);
             return null;
           }
 
@@ -91,7 +100,6 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         }
       } catch (checkErr) {
         console.error("Erro ao verificar existência do paciente:", checkErr);
-        // Continue with insert if check fails
       }
     }
 
@@ -110,21 +118,10 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         if (patient.name) {
           console.log("Creating mock patient for demo purposes");
           const mockPatient = {
-            ...patient,
+            ...patientData,
             id: properUUID || uuidv4(),
-            status: 'Agendado'
+            status: 'Agendado (Demo)'
           };
-          
-          try {
-            await addPatientLog({
-              patient_id: mockPatient.id,
-              action: "Cadastro (Demo)",
-              description: "Paciente salvo no modo de demonstração",
-              performed_by: "Sistema"
-            });
-          } catch (logError) {
-            console.error("Erro ao registrar log de demonstração:", logError);
-          }
           
           return mockPatient;
         }
@@ -178,49 +175,99 @@ export const saveCompletePatient = async (
   notes?: string
 ): Promise<boolean> => {
   try {
-    // 1. Salvar dados básicos do paciente
+    // 1. Salvar dados básicos do paciente primeiro e garantir que tenha sido salvo
     const savedPatient = await savePatient(patient);
     
     if (!savedPatient) {
+      console.error("Falha ao salvar os dados básicos do paciente");
       return false;
     }
     
+    console.log("Paciente salvo com sucesso:", savedPatient);
+    
+    // Garantir que temos um ID válido
+    const patientId = savedPatient.id;
+    if (!patientId) {
+      console.error("ID do paciente inexistente após salvamento");
+      return false;
+    }
+    
+    // Array de promessas para processar em sequência
+    const operations = [];
+    
     // 2. Salvar dados complementares se fornecidos
     if (additionalData) {
-      const patientAdditionalData = {
-        id: savedPatient.id,
-        ...additionalData
-      };
-      await savePatientAdditionalData(patientAdditionalData);
+      operations.push(async () => {
+        try {
+          const patientAdditionalData = {
+            id: patientId,
+            ...additionalData
+          };
+          await savePatientAdditionalData(patientAdditionalData);
+          console.log("Dados complementares salvos com sucesso");
+        } catch (error) {
+          console.error("Erro ao salvar dados complementares:", error);
+          // Continue com outras operações
+        }
+      });
     }
     
     // 3. Salvar documentos se fornecidos
     if (documents && documents.length > 0) {
-      for (const doc of documents) {
-        await savePatientDocument({
-          ...doc,
-          patient_id: savedPatient.id
-        });
-      }
+      operations.push(async () => {
+        try {
+          for (const doc of documents) {
+            await savePatientDocument({
+              ...doc,
+              patient_id: patientId
+            });
+          }
+          console.log("Documentos salvos com sucesso");
+        } catch (error) {
+          console.error("Erro ao salvar documentos:", error);
+          // Continue com outras operações
+        }
+      });
     }
     
     // 4. Salvar alergias se fornecidas
     if (allergies && allergies.length > 0) {
-      for (const allergy of allergies) {
-        await savePatientAllergy({
-          ...allergy,
-          patient_id: savedPatient.id
-        });
-      }
+      operations.push(async () => {
+        try {
+          for (const allergy of allergies) {
+            await savePatientAllergy({
+              ...allergy,
+              patient_id: patientId
+            });
+          }
+          console.log("Alergias salvas com sucesso");
+        } catch (error) {
+          console.error("Erro ao salvar alergias:", error);
+          // Continue com outras operações
+        }
+      });
     }
     
     // 5. Salvar notas se fornecidas
     if (notes) {
-      await savePatientNote({
-        patient_id: savedPatient.id,
-        notes: notes,
-        created_by: "Sistema"
+      operations.push(async () => {
+        try {
+          await savePatientNote({
+            patient_id: patientId,
+            notes: notes,
+            created_by: "Sistema"
+          });
+          console.log("Notas salvas com sucesso");
+        } catch (error) {
+          console.error("Erro ao salvar notas:", error);
+          // Continue com outras operações
+        }
       });
+    }
+    
+    // Executar operações em sequência
+    for (const operation of operations) {
+      await operation();
     }
     
     return true;

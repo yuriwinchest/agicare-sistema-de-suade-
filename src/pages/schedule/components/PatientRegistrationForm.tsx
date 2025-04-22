@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Save } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { savePatient } from "@/services/patientService";
 import { Patient } from "@/services/patients/types";
@@ -21,9 +21,10 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
   const { value: birthDate, handleDateChange } = useDateMask();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const generateId = () => {
-    // Generate proper UUID instead of number string
+    // Generate proper UUID
     return uuidv4();
   };
   
@@ -102,6 +103,8 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     }
     
     try {
+      setIsSubmitting(true);
+      
       // Format address as a string or JSON string for database
       const formattedAddress = typeof patientData.addressDetails === 'object' 
         ? JSON.stringify(patientData.addressDetails) 
@@ -123,13 +126,6 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       };
       
       console.log("Saving patient with data:", patientToSave);
-      console.log("Formatted birth date:", formattedBirthDate);
-      
-      // Garantir que a data está no formato correto antes de enviar
-      if (patientToSave.birth_date && patientToSave.birth_date.includes('/')) {
-        patientToSave.birth_date = formatDateForDB(patientToSave.birth_date) || "";
-        console.log("Re-formatted birth date:", patientToSave.birth_date);
-      }
       
       const savedPatient = await savePatient(patientToSave);
       
@@ -138,6 +134,9 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
           title: "Cadastro Salvo",
           description: "Os dados do paciente foram salvos com sucesso."
         });
+        
+        // Reset form after successful save
+        setPatientData(defaultPatientData);
         
         if (onSuccess) {
           onSuccess(patientData.name);
@@ -156,6 +155,8 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
         description: "Ocorreu um erro ao salvar os dados do paciente.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -346,9 +347,17 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       </Tabs>
       
       <div className="flex justify-end mt-6">
-        <Button className="gap-2 bg-teal-600 hover:bg-teal-700" onClick={handleSave}>
-          <Save className="h-4 w-4" />
-          Salvar e Finalizar
+        <Button 
+          className="gap-2 bg-teal-600 hover:bg-teal-700" 
+          onClick={handleSave}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          {isSubmitting ? "Salvando..." : "Salvar e Finalizar"}
         </Button>
       </div>
     </div>
