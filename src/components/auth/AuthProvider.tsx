@@ -5,7 +5,7 @@ import { AuthContext } from "./AuthContext";
 import { useSession } from "@/hooks/useSession";
 import { useNotification } from "@/hooks/useNotification";
 import { AppUser } from "./types";
-import { registerCollaboratorAccount } from "@/services/patients/mutations/collaboratorMutations";
+import { registerCollaboratorAccount } from "@/services/collaborators";
 import { DestinationModalProvider } from "./DestinationModalContext";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {

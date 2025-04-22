@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserX, Trash2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { deleteCollaborator } from '@/services/patients/mutations/collaboratorMutations';
+import { deleteCollaborator } from '@/services/collaborators';
 import { useAuth } from "@/components/auth/AuthContext";
 import {
   AlertDialog,
