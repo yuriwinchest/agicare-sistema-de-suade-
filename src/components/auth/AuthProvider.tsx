@@ -72,17 +72,76 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error("Erro ao fazer login no Supabase:", error);
           
           if (error.message.includes("Invalid login credentials")) {
-            // Check if user exists in auth.users but has incorrect password
-            const { data: authUserData } = await supabase.auth.getUser(email);
-            
-            if (authUserData.user) {
+            // Check if collaborator exists but auth.user doesn't
+            if (collaboratorData) {
+              // Attempt to register the user in auth system if they have a collaborator record
+              notification.info("Conta não configurada", {
+                description: "Seu email foi encontrado como colaborador, mas precisa ser configurado para login. Tentando criar sua conta...",
+                duration: 4000
+              });
+              
+              // Try to create the auth account
+              const { data: signupData, error: signupError } = await supabase.auth.signUp({
+                email,
+                password,
+              });
+              
+              if (signupError) {
+                notification.error("Erro ao configurar conta", {
+                  description: "Não foi possível configurar sua conta para login. Entre em contato com o administrador.",
+                  duration: 5000
+                });
+                return false;
+              }
+              
+              // If signup successful, let them know and then log them in
+              notification.success("Conta configurada", {
+                description: "Sua conta foi configurada com sucesso! Você pode fazer login agora.",
+                duration: 5000
+              });
+              
+              // Try logging in again with the new credentials
+              const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+              });
+              
+              if (loginError) {
+                notification.error("Erro no login após configuração", {
+                  description: "Não foi possível fazer login após configurar sua conta. Tente novamente em alguns instantes.",
+                  duration: 5000
+                });
+                return false;
+              }
+              
+              // Continue with login process using the new loginData
+              if (loginData && loginData.user) {
+                // Create user object
+                const appUser: AppUser = {
+                  id: loginData.user.id,
+                  name: collaboratorData.name || loginData.user.email?.split('@')[0] || 'Usuário',
+                  email: loginData.user.email || '',
+                  role: collaboratorData.role || 'doctor',
+                };
+                
+                setUser(appUser);
+                setIsAuthenticated(true);
+                localStorage.setItem("user", JSON.stringify(appUser));
+                
+                // Set destination modal based on role
+                setShowDestinationModal(collaboratorData.role === 'doctor');
+                
+                notification.success("Login Bem-Sucedido", {
+                  description: `Bem-vindo ao sistema, ${appUser.name}`
+                });
+                
+                return true;
+              }
+              
+              return false;
+            } else {
               notification.error("Senha Incorreta", {
                 description: "A senha fornecida está incorreta. Por favor, tente novamente."
-              });
-            } else {
-              // User not found in auth.users
-              notification.error("Usuário Não Registrado", {
-                description: "Seu email foi encontrado, mas não está registrado para login. Entre em contato com o administrador do sistema."
               });
             }
           } else {
