@@ -28,29 +28,24 @@ export const RegisterUserDialog = () => {
     isSubmitting,
     handleImageUpload,
     onSubmit
-  } = useCollaboratorForm();
-
-  const handleSubmit = async (data: any) => {
-    const success = await onSubmit(data);
-    if (success) {
-      setIsOpen(false);
-    }
-  };
+  } = useCollaboratorForm(undefined, () => {
+    setIsOpen(false);
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="w-full" variant="outline" onClick={() => setIsOpen(true)}>
           <UserPlus className="mr-2" size={16} />
-          Registrar Novo Usuário
+          Registrar Novo Colaborador
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Registrar Novo Usuário</DialogTitle>
+          <DialogTitle>Registrar Novo Colaborador</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="w-full md:w-1/3">
                 <CollaboratorImageUpload
@@ -76,7 +71,7 @@ export const RegisterUserDialog = () => {
               className="w-full" 
               disabled={uploading || isSubmitting}
             >
-              {isSubmitting ? "Registrando..." : "Registrar Usuário"}
+              {isSubmitting ? "Registrando..." : "Registrar Colaborador"}
             </Button>
           </form>
         </Form>
