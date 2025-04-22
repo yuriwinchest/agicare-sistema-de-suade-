@@ -45,6 +45,21 @@ export const LoginError = ({ error }: LoginErrorProps) => {
             </TooltipProvider>
           </div>
         )}
+        {error.includes("For security purposes") && (
+          <div className="flex items-center gap-1 text-xs text-red-200/80">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center">
+                  <HelpCircle size={12} className="mr-1" /> O que fazer?
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>O Supabase limita o número de tentativas de criação de conta em um curto período de tempo.
+                     Aguarde alguns minutos e tente novamente, ou use as contas de demonstração abaixo.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -24,10 +24,25 @@ const Login = () => {
     setLoginAttempt(prev => prev + 1);
     
     try {
-      const success = await signin(values.email, values.password);
+      const result = await signin(values.email, values.password);
       
-      if (!success) {
-        if (loginAttempt >= 2) {
+      if (!result.success) {
+        if (result.error) {
+          // Handle specific error messages
+          if (result.error.includes("For security purposes")) {
+            setLoginError("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
+          } else if (result.error.includes("rate limit")) {
+            setLoginError("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
+          } else if (result.error.includes("not found") || result.error.includes("não encontrado")) {
+            setLoginError("Este email não está cadastrado no sistema. Verifique suas credenciais.");
+          } else if (result.error.includes("Invalid login credentials")) {
+            setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
+          } else if (loginAttempt >= 2) {
+            setLoginError("Múltiplas tentativas falharam. É possível que sua conta exista na tabela de colaboradores mas não no sistema de autenticação. Entre em contato com o administrador do sistema ou utilize as contas de demonstração abaixo.");
+          } else {
+            setLoginError(result.error);
+          }
+        } else if (loginAttempt >= 2) {
           setLoginError("Múltiplas tentativas falharam. É possível que sua conta exista na tabela de colaboradores mas não no sistema de autenticação. Entre em contato com o administrador do sistema ou utilize as contas de demonstração abaixo.");
         } else {
           setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
@@ -36,9 +51,13 @@ const Login = () => {
         // Redirecionar para a página principal após login bem-sucedido
         navigate("/");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao fazer login:", error);
-      setLoginError("Ocorreu um erro ao processar sua solicitação. Verifique sua conexão e tente novamente.");
+      if (error.message && error.message.includes("For security purposes")) {
+        setLoginError("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
+      } else {
+        setLoginError("Ocorreu um erro ao processar sua solicitação. Verifique sua conexão e tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }

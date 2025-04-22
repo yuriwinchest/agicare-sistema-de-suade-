@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
   const notification = useNotification();
 
-  const signin = async (email: string, password: string): Promise<boolean> => {
+  const signin = async (email: string, password: string): Promise<{success: boolean, error?: string}> => {
     try {
       console.log("Tentando login com:", email);
       
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           description: `Bem-vindo ao sistema, ${appUser.name}`
         });
         
-        return true;
+        return { success: true };
       }
       
       // Regular authentication flow for non-demo accounts
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           notification.error("Erro de Login", {
             description: "Este email não está cadastrado no sistema. Verifique suas credenciais."
           });
-          return false;
+          return { success: false, error: "Este email não está cadastrado no sistema. Verifique suas credenciais." };
         }
 
         // If email exists in collaborators, try Supabase authentication
@@ -70,6 +70,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (error) {
           console.error("Erro ao fazer login no Supabase:", error);
+          
+          // Check for rate limiting
+          if (error.message.includes("For security purposes") || error.status === 429) {
+            notification.error("Limite de Taxa Excedido", {
+              description: "Por favor, aguarde alguns minutos antes de tentar novamente.",
+              duration: 5000
+            });
+            return { success: false, error: error.message };
+          }
           
           if (error.message.includes("Invalid login credentials")) {
             // Check if collaborator exists but auth.user doesn't
@@ -89,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     description: "Não foi possível configurar sua conta para login. Entre em contato com o administrador.",
                     duration: 5000
                   });
-                  return false;
+                  return { success: false, error: "Seu email foi encontrado, mas não está registrado para login. Entre em contato com o administrador do sistema." };
                 }
                 
                 // If signup successful, let them know and then log them in
@@ -113,26 +122,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Set destination modal based on role
                 setShowDestinationModal(collaboratorData.role === 'doctor');
                 
-                return true;
+                return { success: true };
               } catch (registerError: any) {
                 console.error("Erro ao registrar usuário:", registerError);
+                
+                // Handle rate limiting in registration
+                if (registerError.message && (registerError.message.includes("For security purposes") || 
+                                            registerError.message.includes("rate limit") || 
+                                            registerError.status === 429)) {
+                  notification.error("Limite de Tentativas Excedido", {
+                    description: "Por favor, aguarde alguns minutos antes de tentar novamente.",
+                    duration: 5000
+                  });
+                  return { success: false, error: registerError.message };
+                }
+                
                 notification.error("Erro ao criar conta", {
                   description: registerError.message || "Erro ao criar conta de autenticação. Tente novamente mais tarde."
                 });
-                return false;
+                return { success: false, error: registerError.message };
               }
             } else {
               notification.error("Senha Incorreta", {
                 description: "A senha fornecida está incorreta. Por favor, tente novamente."
               });
+              return { success: false, error: "A senha fornecida está incorreta. Por favor, tente novamente." };
             }
           } else {
             notification.error("Erro de Autenticação", {
               description: error.message || "Ocorreu um erro inesperado. Entre em contato com o suporte."
             });
+            return { success: false, error: error.message };
           }
-          
-          return false;
         }
 
         if (data && data.user) {
@@ -149,7 +170,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               notification.error("Erro ao Carregar Perfil", {
                 description: "Não foi possível carregar seus dados de perfil."
               });
-              return false;
+              return { success: false, error: "Erro ao carregar dados do perfil." };
             }
             
             // Create user object
@@ -172,36 +193,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 description: `Bem-vindo ao sistema, ${appUser.name}`
               });
               
-              return true;
+              return { success: true };
             } else {
               notification.error("Perfil Não Encontrado", {
                 description: "Seu usuário existe mas não tem um perfil associado."
               });
-              return false;
+              return { success: false, error: "Seu usuário existe mas não tem um perfil associado." };
             }
-          } catch (innerError) {
+          } catch (innerError: any) {
             console.error("Erro ao processar dados do usuário:", innerError);
             notification.error("Erro no Processamento", {
               description: "Ocorreu um erro ao processar seus dados de usuário."
             });
-            return false;
+            return { success: false, error: innerError.message };
           }
         }
 
-        return false;
-      } catch (authError) {
+        return { success: false, error: "Erro desconhecido durante o login." };
+      } catch (authError: any) {
         console.error("Erro durante a autenticação:", authError);
         notification.error("Falha na Autenticação", {
           description: "Ocorreu um erro durante o processo de autenticação."
         });
-        return false;
+        return { success: false, error: authError.message };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao fazer login:", error);
       notification.error("Erro Inesperado", {
         description: "Ocorreu um erro ao tentar fazer login. Tente novamente."
       });
-      return false;
+      return { success: false, error: error.message };
     }
   };
 
