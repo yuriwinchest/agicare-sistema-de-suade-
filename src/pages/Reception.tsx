@@ -36,7 +36,6 @@ const Reception = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Load patients when component mounts
   useEffect(() => {
     const loadPatientList = async () => {
       setIsLoading(true);
@@ -56,19 +55,15 @@ const Reception = () => {
       }
     };
     
-    // Initial load
     loadPatientList();
     
-    // Refresh list when component becomes visible after navigation
     window.addEventListener('focus', loadPatientList);
     
-    // Cleanup
     return () => {
       window.removeEventListener('focus', loadPatientList);
     };
   }, []);
   
-  // Filter patients based on search term and filters
   const filteredPatients = patients.filter((patient) => {
     const matchesSearch = 
       patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,17 +90,14 @@ const Reception = () => {
     }
   };
 
-  // Navigate to patient reception confirmation page when clicking on a patient
   const handlePatientClick = (patient: any) => {
     navigate(`/patient-reception/${patient.id}`);
   };
 
-  // Handle patient check-in button click
   const handleCheckIn = (patient: any) => {
     navigate(`/patient-reception/${patient.id}`);
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <Layout>
@@ -290,19 +282,16 @@ const Reception = () => {
                   <Button variant="outline" className="justify-start font-normal h-auto py-2">
                     <div className="flex justify-between items-center w-full">
                       <span>Recepção Central</span>
-                      <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full">18</span>
                     </div>
                   </Button>
                   <Button variant="outline" className="justify-start font-normal h-auto py-2">
                     <div className="flex justify-between items-center w-full">
                       <span>Recepção Pediatria</span>
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">7</span>
                     </div>
                   </Button>
                   <Button variant="outline" className="justify-start font-normal h-auto py-2">
                     <div className="flex justify-between items-center w-full">
                       <span>Recepção Ortopedia</span>
-                      <span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">12</span>
                     </div>
                   </Button>
                 </div>
@@ -319,12 +308,12 @@ const Reception = () => {
               <CardContent>
                 <div className="space-y-2">
                   <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
-                    <div className="font-medium">Pacientes aguardando há mais de 30 minutos: 3</div>
-                    <div className="text-xs mt-1">Verifique os pacientes com status de espera prolongada</div>
+                    <div className="font-medium">Pacientes aguardando atendimento</div>
+                    <div className="text-xs mt-1">Nenhum paciente em espera no momento.</div>
                   </div>
                   <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
-                    <div className="font-medium">Confirmações pendentes: 5</div>
-                    <div className="text-xs mt-1">Pacientes com consultas amanhã que ainda não confirmaram</div>
+                    <div className="font-medium">Confirmações pendentes</div>
+                    <div className="text-xs mt-1">Não há confirmações pendentes.</div>
                   </div>
                 </div>
               </CardContent>
