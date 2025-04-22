@@ -62,27 +62,42 @@ export type Database = {
       }
       collaborators: {
         Row: {
+          active: boolean | null
           created_at: string | null
+          department: string | null
+          email: string | null
           id: string
           image_url: string | null
           name: string
+          phone: string | null
           role: string
+          specialty: string | null
           updated_at: string | null
         }
         Insert: {
+          active?: boolean | null
           created_at?: string | null
+          department?: string | null
+          email?: string | null
           id?: string
           image_url?: string | null
           name: string
+          phone?: string | null
           role: string
+          specialty?: string | null
           updated_at?: string | null
         }
         Update: {
+          active?: boolean | null
           created_at?: string | null
+          department?: string | null
+          email?: string | null
           id?: string
           image_url?: string | null
           name?: string
+          phone?: string | null
           role?: string
+          specialty?: string | null
           updated_at?: string | null
         }
         Relationships: []

@@ -5,7 +5,17 @@ export const updateCollaboratorProfile = async (collaboratorId: string, updates:
   try {
     const { data, error } = await supabase
       .from('collaborators')
-      .update(updates)
+      .update({
+        name: updates.name,
+        role: updates.role,
+        image_url: updates.image_url,
+        email: updates.email,
+        phone: updates.phone,
+        specialty: updates.specialty,
+        department: updates.department,
+        active: updates.active,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', collaboratorId)
       .select()
       .single();
