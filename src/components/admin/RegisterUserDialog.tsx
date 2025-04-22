@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -27,6 +26,11 @@ import {
 import { UserPlus } from "lucide-react";
 import { CollaboratorImageUpload } from './CollaboratorImageUpload';
 import { useUserRegistration } from '@/hooks/useUserRegistration';
+import { ContactFields } from './collaborator/ContactFields';
+import { ProfessionalFields } from './collaborator/ProfessionalFields';
+import { StatusToggle } from './collaborator/StatusToggle';
+import { PasswordField } from './collaborator/PasswordField';
+import { PersonalInfoFields } from './collaborator/PersonalInfoFields';
 
 export const RegisterUserDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -70,118 +74,14 @@ export const RegisterUserDialog = () => {
               </div>
               
               <div className="w-full md:w-2/3 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nome do usuário" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="email@exemplo.com" type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input placeholder="******" type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <PersonalInfoFields form={form} />
+                <PasswordField form={form} />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Função</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a função" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="doctor">Médico</SelectItem>
-                        <SelectItem value="nurse">Enfermeiro</SelectItem>
-                        <SelectItem value="receptionist">Atendente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="(00) 00000-0000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="specialty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Especialidade</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Especialidade" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="department"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Departamento</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Departamento" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <ContactFields form={form} />
+            <ProfessionalFields form={form} />
+            <StatusToggle form={form} />
 
             <Button 
               type="submit" 

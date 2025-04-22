@@ -1,121 +1,84 @@
 
-import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/integrations/supabase/client';
-import { uploadCollaboratorPhoto } from '@/services/storageService';
-import { updateCollaboratorProfile } from '@/services/patients/patientMutations';
+import { supabase } from "@/integrations/supabase/client";
 
-export const collaboratorSchema = z.object({
+const collaboratorFormSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  role: z.enum(["doctor", "nurse", "receptionist"] as const),
-  image_url: z.string().optional(),
-  email: z.string().email("Email inválido").optional(),
+  email: z.string().email("Email inválido"),
   phone: z.string().optional(),
   specialty: z.string().optional(),
   department: z.string().optional(),
-  active: z.boolean().optional(),
+  active: z.boolean().default(true),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
-export type CollaboratorFormValues = z.infer<typeof collaboratorSchema>;
+export type CollaboratorFormValues = z.infer<typeof collaboratorFormSchema>;
 
-export const useCollaboratorForm = (
-  collaborator: { 
-    id?: string; 
-    name: string; 
-    role: string; 
-    image_url?: string;
-    email?: string;
-    phone?: string;
-    specialty?: string;
-    department?: string;
-    active?: boolean;
-  },
-  onCollaboratorUpdate: () => void,
-  onOpenChange: (open: boolean) => void,
-) => {
+export function useCollaboratorForm(collaborator?: Partial<CollaboratorFormValues>) {
   const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   const form = useForm<CollaboratorFormValues>({
-    resolver: zodResolver(collaboratorSchema),
+    resolver: zodResolver(collaboratorFormSchema),
     defaultValues: {
-      name: collaborator.name,
-      role: collaborator.role as "doctor" | "nurse" | "receptionist",
-      image_url: collaborator.image_url,
-      email: collaborator.email || '',
-      phone: collaborator.phone || '',
-      specialty: collaborator.specialty || '',
-      department: collaborator.department || '',
-      active: collaborator.active !== false,
+      name: collaborator?.name || "",
+      email: collaborator?.email || "",
+      phone: collaborator?.phone || "",
+      specialty: collaborator?.specialty || "",
+      department: collaborator?.department || "",
+      active: collaborator?.active ?? true,
+      password: "",
     },
   });
 
-  const handleImageUpload = async (file: File) => {
-    try {
-      setUploading(true);
-      const photoUrl = await uploadCollaboratorPhoto(file);
-      form.setValue("image_url", photoUrl);
-      
-      toast({
-        title: "Imagem carregada com sucesso",
-        description: "A foto do colaborador foi atualizada",
-      });
-    } catch (error) {
-      console.error("Erro detalhado:", error);
-      toast({
-        title: "Erro ao carregar imagem",
-        description: "Não foi possível carregar a imagem",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const onSubmit = async (data: CollaboratorFormValues) => {
     try {
-      setIsSubmitting(true);
-      
-      // Usar a nova função de atualização completa do perfil
-      await updateCollaboratorProfile(collaborator.id!, {
-        name: data.name,
-        role: data.role,
-        image_url: data.image_url,
+      console.log("Registrando colaborador:", data);
+
+      // First create auth user
+      const { error: authError } = await supabase.auth.signUp({
         email: data.email,
-        phone: data.phone,
-        specialty: data.specialty,
-        department: data.department,
-        active: data.active,
-        updated_at: new Date().toISOString(),
+        password: data.password,
       });
 
+      if (authError) throw authError;
+
+      // Then create collaborator profile
+      const { error: collaboratorError } = await supabase
+        .from('collaborators')
+        .insert({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          specialty: data.specialty,
+          department: data.department,
+          active: data.active,
+        });
+
+      if (collaboratorError) throw collaboratorError;
+
       toast({
-        title: "Colaborador atualizado com sucesso",
-        description: `${data.name} foi atualizado`,
+        title: "Colaborador registrado com sucesso",
+        description: `${data.name} foi registrado como colaborador`,
       });
-      onOpenChange(false);
-      onCollaboratorUpdate();
-    } catch (error) {
-      console.error("Erro ao atualizar colaborador:", error);
+
+      form.reset();
+      return true;
+    } catch (error: any) {
+      console.error("Erro ao registrar colaborador:", error);
       toast({
-        title: "Erro ao atualizar colaborador",
-        description: "Ocorreu um erro ao tentar atualizar o colaborador",
+        title: "Erro ao registrar colaborador",
+        description: error.message || "Ocorreu um erro ao tentar registrar o colaborador",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      return false;
     }
   };
 
   return {
     form,
-    uploading,
-    isSubmitting,
-    handleImageUpload,
     onSubmit,
   };
-};
+}
