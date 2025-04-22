@@ -9,6 +9,7 @@ import { Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { savePatient } from "@/services/patientService";
 import { Patient } from "@/services/patients/types";
+import { useDateMask } from "@/hooks/useDateMask";
 
 interface PatientRegistrationFormProps {
   onSuccess?: (patientName: string) => void;
@@ -17,6 +18,7 @@ interface PatientRegistrationFormProps {
 const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuccess }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
+  const { value: birthDate, handleDateChange } = useDateMask();
   
   const generatePatientNumber = () => {
     return String(Math.floor(Math.random() * 999)).padStart(3, '0');
@@ -166,10 +168,14 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
               <Input 
-                type="date" 
+                placeholder="DD/MM/AAAA"
                 className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                value={patientData.birthDate}
-                onChange={(e) => handleChange("birthDate", e.target.value)}
+                value={birthDate}
+                onChange={(e) => {
+                  const maskedDate = handleDateChange(e);
+                  handleChange("birthDate", maskedDate);
+                  handleChange("birth_date", maskedDate);
+                }}
               />
             </div>
             <div>

@@ -17,11 +17,13 @@ import {
   clearDraftPatient 
 } from "@/services/patientService";
 import { v4 as uuidv4 } from 'uuid';
+import { useDateMask } from "@/hooks/useDateMask";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
+  const { value: birthDate, handleDateChange } = useDateMask();
   
   const generatePatientNumber = () => {
     return String(Math.floor(Math.random() * 999)).padStart(3, '0');
@@ -309,12 +311,13 @@ const PatientRegistration = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
                     <Input 
-                      type="date" 
+                      placeholder="DD/MM/AAAA"
                       className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-                      value={patientData.birthDate}
+                      value={birthDate}
                       onChange={(e) => {
-                        handleChange("birthDate", e.target.value);
-                        handleChange("birth_date", e.target.value);
+                        const maskedDate = handleDateChange(e);
+                        handleChange("birthDate", maskedDate);
+                        handleChange("birth_date", maskedDate);
                       }}
                     />
                   </div>
