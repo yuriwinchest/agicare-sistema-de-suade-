@@ -32,14 +32,14 @@ const Login = () => {
       if (!result.success) {
         if (result.error) {
           // Handle specific error messages
-          if (result.error.includes("For security purposes")) {
-            setLoginError("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
-          } else if (result.error.includes("rate limit")) {
+          if (result.error.includes("For security purposes") || result.error.includes("rate limit")) {
             setLoginError("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
           } else if (result.error.includes("not found") || result.error.includes("não encontrado")) {
             setLoginError("Este email não está cadastrado no sistema. Verifique suas credenciais.");
           } else if (result.error.includes("Invalid login credentials")) {
             setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
+          } else if (result.error.includes("senha fornecida está incorreta")) {
+            setLoginError("A senha fornecida está incorreta. Verifique suas credenciais ou use as contas de demonstração abaixo.");
           } else if (loginAttempt >= 2) {
             // Show a more helpful message for login issues after multiple attempts
             toast({

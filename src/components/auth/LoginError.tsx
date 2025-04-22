@@ -1,3 +1,4 @@
+
 import React from "react";
 import { AlertCircle, HelpCircle, ArrowRight } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -56,6 +57,22 @@ export const LoginError = ({ error }: LoginErrorProps) => {
                 <TooltipContent className="max-w-xs">
                   <p>Verifique se digitou o e-mail corretamente. Caso seja um colaborador, 
                      solicite que o administrador cadastre seu e-mail no sistema primeiro.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+        
+        {error.includes("senha fornecida está incorreta") && (
+          <div className="flex items-center gap-1 text-xs text-red-200/80">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center">
+                  <HelpCircle size={12} className="mr-1" /> O que fazer?
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>Você digitou a senha incorreta para uma conta existente. 
+                     Verifique se não está com o Caps Lock ativado ou tente recuperar sua senha.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/hooks/use-toast";
 
 export const registerCollaboratorAccount = async (email: string, password: string) => {
   try {
@@ -22,34 +21,29 @@ export const registerCollaboratorAccount = async (email: string, password: strin
       // Check if user already exists in auth by trying to sign in
       const { data: existingUserData, error: userCheckError } = await supabase.auth.signInWithPassword({
         email,
-        password: 'temp-password-to-check-existence'
+        password
       });
       
-      const userExists = !userCheckError || 
-                         (userCheckError && userCheckError.message.includes("Invalid login credentials"));
-      
-      if (userExists) {
-        console.log("Usuário já existe na autenticação, tentando fazer login direto");
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        
-        if (signInError) {
-          if (signInError.message.includes("Invalid login credentials")) {
-            throw new Error("Este email já possui uma conta, mas a senha fornecida está incorreta");
-          }
-          throw signInError;
-        }
-        
+      // If login is successful with the provided password, return the user
+      if (existingUserData?.user) {
+        console.log("Usuário já existe e a senha está correta, login realizado com sucesso");
         return {
           success: true,
-          user: signInData.user,
+          user: existingUserData.user,
           collaborator
         };
       }
       
-      // Register the user in the authentication system
+      // If there's an error, check if it's because the user exists but password is wrong
+      if (userCheckError) {
+        if (userCheckError.message.includes("Invalid login credentials")) {
+          console.error("Senha incorreta para usuário existente:", email);
+          throw new Error("Este email já possui uma conta, mas a senha fornecida está incorreta");
+        }
+      }
+      
+      // If we reach here, we'll try to register the user
+      console.log("Tentando criar nova conta para:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -62,6 +56,10 @@ export const registerCollaboratorAccount = async (email: string, password: strin
       });
       
       if (error) {
+        // Handle specific error for already registered users
+        if (error.message.includes("already registered")) {
+          throw new Error("Este email já está registrado. Use a função de recuperação de senha se esqueceu sua senha.");
+        }
         handleAuthError(error);
       }
       
@@ -94,7 +92,7 @@ const handleAuthError = (error: any) => {
     throw new Error("Limite de taxa excedido. Por favor, aguarde alguns minutos antes de tentar novamente.");
   }
   
-  if (error.message.includes("already registered")) {
+  if (error.message.includes("already registered") || error.message.includes("já possui uma conta")) {
     throw error;
   }
   
