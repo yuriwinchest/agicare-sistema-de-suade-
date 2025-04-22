@@ -6,17 +6,33 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { uploadCollaboratorPhoto } from '@/services/storageService';
+import { updateCollaboratorProfile } from '@/services/patients/patientMutations';
 
 export const collaboratorSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   role: z.enum(["doctor", "nurse", "receptionist"] as const),
   image_url: z.string().optional(),
+  email: z.string().email("Email inválido").optional(),
+  phone: z.string().optional(),
+  specialty: z.string().optional(),
+  department: z.string().optional(),
+  active: z.boolean().optional(),
 });
 
 export type CollaboratorFormValues = z.infer<typeof collaboratorSchema>;
 
 export const useCollaboratorForm = (
-  collaborator: { id?: string; name: string; role: string; image_url?: string },
+  collaborator: { 
+    id?: string; 
+    name: string; 
+    role: string; 
+    image_url?: string;
+    email?: string;
+    phone?: string;
+    specialty?: string;
+    department?: string;
+    active?: boolean;
+  },
   onCollaboratorUpdate: () => void,
   onOpenChange: (open: boolean) => void,
 ) => {
@@ -30,6 +46,11 @@ export const useCollaboratorForm = (
       name: collaborator.name,
       role: collaborator.role as "doctor" | "nurse" | "receptionist",
       image_url: collaborator.image_url,
+      email: collaborator.email || '',
+      phone: collaborator.phone || '',
+      specialty: collaborator.specialty || '',
+      department: collaborator.department || '',
+      active: collaborator.active !== false,
     },
   });
 
@@ -58,17 +79,19 @@ export const useCollaboratorForm = (
   const onSubmit = async (data: CollaboratorFormValues) => {
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
-        .from('collaborators')
-        .upsert({
-          id: collaborator.id,
-          name: data.name,
-          role: data.role,
-          image_url: data.image_url,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (error) throw error;
+      
+      // Usar a nova função de atualização completa do perfil
+      await updateCollaboratorProfile(collaborator.id!, {
+        name: data.name,
+        role: data.role,
+        image_url: data.image_url,
+        email: data.email,
+        phone: data.phone,
+        specialty: data.specialty,
+        department: data.department,
+        active: data.active,
+        updated_at: new Date().toISOString(),
+      });
 
       toast({
         title: "Colaborador atualizado com sucesso",

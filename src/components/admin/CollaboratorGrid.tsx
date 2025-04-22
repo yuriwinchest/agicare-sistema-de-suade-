@@ -12,6 +12,11 @@ type Collaborator = {
   name: string;
   role: string;
   image_url?: string;
+  email?: string;
+  phone?: string;
+  specialty?: string;
+  department?: string;
+  active?: boolean;
 };
 
 const roleTranslations = {
@@ -112,6 +117,9 @@ export const CollaboratorGrid = () => {
                 <p className="text-sm text-gray-600">
                   {roleTranslations[collaborator.role as keyof typeof roleTranslations]}
                 </p>
+                {collaborator.specialty && (
+                  <p className="text-xs text-gray-500">{collaborator.specialty}</p>
+                )}
               </div>
             </CardHeader>
           </Card>

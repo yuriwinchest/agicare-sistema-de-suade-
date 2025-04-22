@@ -16,3 +16,7 @@ export {
 export { 
   saveCompletePatient 
 } from './mutations/completeMutations';
+
+export {
+  updateCollaboratorProfile
+} from './mutations/collaboratorMutations';

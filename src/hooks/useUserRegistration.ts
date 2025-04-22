@@ -13,6 +13,9 @@ const userSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   role: z.enum(["doctor", "nurse", "receptionist"] as const),
   imageUrl: z.string().optional(),
+  phone: z.string().optional(),
+  specialty: z.string().optional(),
+  department: z.string().optional(),
 });
 
 export type UserFormValues = z.infer<typeof userSchema>;
@@ -30,6 +33,9 @@ export function useUserRegistration() {
       name: "",
       role: "doctor",
       imageUrl: "",
+      phone: "",
+      specialty: "",
+      department: "",
     },
   });
 
@@ -67,7 +73,12 @@ export function useUserRegistration() {
         .insert({
           name: data.name,
           role: data.role,
-          image_url: data.imageUrl
+          image_url: data.imageUrl,
+          email: data.email,
+          phone: data.phone,
+          specialty: data.specialty,
+          department: data.department,
+          active: true
         })
         .select()
         .single();
