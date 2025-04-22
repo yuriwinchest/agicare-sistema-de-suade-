@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,7 +99,7 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     <Input 
       placeholder={placeholder} 
       className="border-teal-500/30 focus-visible:ring-teal-500/30" 
-      value={patientData.addressDetails?.[field as keyof typeof patientData.addressDetails] || ""}
+      value={patientData.addressDetails[field as keyof typeof patientData.addressDetails] || ""}
       onChange={(e) => handleChange(`addressDetails.${field}`, e.target.value)}
     />
   );

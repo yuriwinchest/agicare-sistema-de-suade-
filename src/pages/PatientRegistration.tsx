@@ -53,9 +53,13 @@ const PatientRegistration = () => {
       const updatedData = {
         ...defaultPatientData,
         ...draftData,
+        // Ensure address is a string
+        address: typeof draftData.address === 'string' ? draftData.address : JSON.stringify(draftData.address || {}),
+        // Merge addressDetails from draft or extract from address if it's an object
         addressDetails: {
           ...defaultPatientData.addressDetails,
-          ...(draftData.addressDetails || {})
+          ...(draftData.addressDetails || {}),
+          ...(typeof draftData.address === 'object' ? draftData.address : {})
         }
       };
       setPatientData(updatedData);
