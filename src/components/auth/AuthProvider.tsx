@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
@@ -14,6 +15,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Tentando login com:", email);
       
+      // Special handling for demo accounts
+      if (email === "admin@example.com" || email === "doctor@example.com") {
+        console.log("Usando conta de demonstração:", email);
+        
+        // Create user object for demo account
+        const role = email === "admin@example.com" ? "admin" : "doctor";
+        const name = email === "admin@example.com" ? "Administrador" : "Doutor";
+        
+        const appUser: AppUser = {
+          id: email === "admin@example.com" ? "admin-demo-id" : "doctor-demo-id",
+          name: name,
+          email: email,
+          role: role,
+        };
+        
+        setUser(appUser);
+        setIsAuthenticated(true);
+        localStorage.setItem("user", JSON.stringify(appUser));
+        
+        // Set destination modal for doctor, not for admin
+        setShowDestinationModal(role === "doctor");
+        
+        notification.success("Login Bem-Sucedido", {
+          description: `Bem-vindo ao sistema, ${appUser.name}`
+        });
+        
+        return true;
+      }
+      
+      // Regular authentication flow for non-demo accounts
       // First, check if the email exists in collaborators table
       const { data: collaboratorData, error: collaboratorError } = await supabase
         .from('collaborators')
