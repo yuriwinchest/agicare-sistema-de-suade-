@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { savePatient } from "@/services/patientService";
+import { Patient } from "@/services/patients/types";
 
 interface PatientRegistrationFormProps {
   onSuccess?: (patientName: string) => void;
@@ -23,20 +23,12 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     name: "",
     cpf: "",
     phone: "",
+    email: "",
+    address: "",
+    birth_date: "",
     birthDate: "",
     gender: "",
     active: true,
-    address: {
-      street: "",
-      number: "",
-      complement: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      zipCode: ""
-    },
-    healthPlan: "",
-    healthCardNumber: "",
     status: "Agendado"
   };
   
@@ -70,7 +62,20 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
       return;
     }
     
-    savePatient(patientData);
+    const patientToSave: Patient = {
+      id: patientData.id,
+      name: patientData.name,
+      cpf: patientData.cpf,
+      phone: patientData.phone,
+      email: patientData.email || "",
+      address: typeof patientData.address === 'object' 
+        ? JSON.stringify(patientData.address) 
+        : patientData.address || "",
+      birth_date: patientData.birth_date || patientData.birthDate || "",
+      status: patientData.status
+    };
+    
+    savePatient(patientToSave);
     
     toast({
       title: "Cadastro Salvo",

@@ -1,21 +1,6 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Patient } from "./types";
-
-export const getPatients = async (): Promise<Patient[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .order('created_at', { ascending: false });
-      
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Erro ao buscar pacientes:", error);
-    return [];
-  }
-};
+import { supabase } from "@/services/supabaseClient";
+import { HospitalizedPatient, Patient } from "./types";
 
 export const getPatientById = async (id: string): Promise<Patient | null> => {
   try {
@@ -25,43 +10,107 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       .eq('id', id)
       .single();
       
-    if (error || !data) return null;
+    if (error) {
+      console.error("Error fetching patient:", error);
+      return null;
+    }
+    
     return data;
   } catch (error) {
-    console.error("Erro ao buscar paciente:", error);
+    console.error("Error in getPatientById:", error);
     return null;
   }
 };
 
-export const getActiveAppointmentsAsync = async () => {
+export const getAllPatients = async (): Promise<Patient[]> => {
   try {
     const { data, error } = await supabase
       .from('patients')
       .select('*')
-      .or('status.neq.Atendido,status.neq.Medicação,status.neq.Observação,status.neq.Alta,status.neq.Internação')
-      .eq('redirected', false)
-      .order('created_at', { ascending: false });
+      .order('name');
+      
+    if (error) {
+      console.error("Error fetching patients:", error);
+      return [];
+    }
     
-    if (error) throw error;
-    return data;
+    return data || [];
   } catch (error) {
-    console.error("Erro ao buscar consultas ativas:", error);
+    console.error("Error in getAllPatients:", error);
     return [];
   }
 };
 
-export const getAmbulatoryPatients = async () => {
+// Additional query functions
+export const getAmbulatoryPatients = async (): Promise<Patient[]> => {
   try {
     const { data, error } = await supabase
       .from('patients')
       .select('*')
-      .in('status', ['Aguardando', 'Enfermagem', 'Em Atendimento'])
-      .order('created_at', { ascending: false });
+      .eq('status', 'active')
+      .order('name');
       
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error("Error fetching ambulatory patients:", error);
+      return [];
+    }
+    
+    return data || [];
   } catch (error) {
-    console.error("Erro ao buscar pacientes ambulatoriais:", error);
+    console.error("Error in getAmbulatoryPatients:", error);
     return [];
   }
 };
+
+export const getHospitalizedPatients = async (): Promise<HospitalizedPatient[]> => {
+  try {
+    // Simulated query - in a real app, would query with hospitalization status
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*, medical_records(doctor:health_professionals(name), diagnosis)')
+      .eq('status', 'hospitalized')
+      .order('name');
+      
+    if (error) {
+      console.error("Error fetching hospitalized patients:", error);
+      return [];
+    }
+    
+    // Format data for the UI
+    return (data || []).map(patient => ({
+      ...patient,
+      unit: 'A', // Mock data
+      bed: 'A-101', // Mock data
+      doctor: patient.medical_records?.[0]?.doctor?.name || 'Not assigned',
+      diagnosis: patient.medical_records?.[0]?.diagnosis || 'Under evaluation',
+      admissionDate: new Date().toISOString().split('T')[0] // Mock data
+    }));
+  } catch (error) {
+    console.error("Error in getHospitalizedPatients:", error);
+    return [];
+  }
+};
+
+export const getActiveAppointments = async (): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('*, patient:patients(*)')
+      .in('status', ['scheduled', 'confirmed'])
+      .order('date', { ascending: true });
+      
+    if (error) {
+      console.error("Error fetching active appointments:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getActiveAppointments:", error);
+    return [];
+  }
+};
+
+// Alias for compatibility
+export const getActiveAppointmentsAsync = getActiveAppointments;
+export const getPatientByIdAsync = getPatientById;

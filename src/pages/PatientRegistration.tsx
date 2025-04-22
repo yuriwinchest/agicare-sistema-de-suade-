@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { savePatient, saveDraftPatient, loadDraftPatient, clearDraftPatient } from "@/services/patientService";
+import { Patient } from "@/services/patients/types";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
@@ -22,10 +23,13 @@ const PatientRegistration = () => {
     name: "",
     cpf: "",
     phone: "",
+    email: "",
+    address: "",
+    birth_date: "",
     birthDate: "",
     gender: "",
     active: true,
-    address: {
+    addressDetails: {
       street: "",
       number: "",
       complement: "",
@@ -84,7 +88,20 @@ const PatientRegistration = () => {
       return;
     }
     
-    savePatient(patientData);
+    const patientToSave: Patient = {
+      id: patientData.id,
+      name: patientData.name,
+      cpf: patientData.cpf,
+      phone: patientData.phone,
+      email: patientData.email || "",
+      address: patientData.addressDetails 
+        ? JSON.stringify(patientData.addressDetails) 
+        : patientData.address || "",
+      birth_date: patientData.birth_date || patientData.birthDate || "",
+      status: patientData.status
+    };
+    
+    savePatient(patientToSave);
     clearDraftPatient();
     
     toast({

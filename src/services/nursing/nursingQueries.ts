@@ -1,5 +1,5 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/supabaseClient";
 import { getPatientById } from "../patients/patientQueries";
 import { NursingAssessment } from "./types";
 
@@ -15,7 +15,18 @@ export const getNursingAssessment = async (patientId: string): Promise<NursingAs
       .single();
       
     if (error) return null;
-    return data;
+    
+    // Map the database result to our NursingAssessment type
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      nurse_id: data.nurse_id,
+      procedures: data.procedures,
+      observations: data.observations,
+      vital_signs: data.vital_signs,
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    };
   } catch (error) {
     console.error("Erro ao obter dados de enfermagem:", error);
     return null;

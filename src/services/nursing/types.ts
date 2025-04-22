@@ -1,45 +1,33 @@
 
+import { Json } from "@/integrations/supabase/types";
+
 export interface VitalSigns {
-  temperature: string;
-  pressure: string;
-  pulse: string;
-  respiratory: string;
-  oxygen: string;
-  pain_scale?: string;
-  weight?: string;
-  height?: string;
-  bmi?: string;
+  temperature: number;
+  systolicPressure: number;
+  diastolicPressure: number;
+  heartRate: number;
+  respiratoryRate: number;
+  oxygenSaturation: number;
+  painScale: number;
+  bloodGlucose: number;
   date?: string;
   time?: string;
 }
 
-export interface NursingEvolution {
-  date: string;
-  time: string;
-  evolution: string;
-  previousEvolutions?: EvolutionEntry[];
-}
-
-export interface EvolutionEntry {
-  id: string;
-  date: string;
-  time: string;
-  evolution: string;
-}
-
-export interface HydricBalance {
-  date?: string;
-  intakeRecords?: Array<{id: string, type: string, volume: string, time: string}>;
-  outputRecords?: Array<{id: string, type: string, volume: string, time: string}>;
-  totalIntake?: string;
-  totalOutput?: string;
-  balance?: string;
-}
-
 export interface NursingAssessment {
-  vitalSigns?: VitalSigns;
-  evolution?: NursingEvolution;
-  hydricBalance?: HydricBalance;
-  lastUpdate?: string;
-  completedBy?: string;
+  id: string;
+  patient_id: string;
+  nurse_id: string;
+  procedures?: string[];
+  observations?: string;
+  vital_signs?: VitalSigns;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Make sure the Json type extends VitalSigns for Supabase compatibility
+declare module "@/integrations/supabase/types" {
+  interface Json {
+    [key: string]: any;
+  }
 }

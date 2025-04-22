@@ -1,215 +1,89 @@
-import { useState, useEffect } from "react";
-import Layout from "@/components/layout/Layout";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Search, Clock, User, Stethoscope, X, CalendarCheck } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { getActiveAppointmentsAsync } from "@/services/patientService";
 
-const Appointment = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [date, setDate] = useState<Date>(new Date());
-  const [patients, setPatients] = useState<any[]>([]);
+import { useEffect, useState } from "react";
+import Layout from "@/components/layout/Layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getActiveAppointments } from "@/services/patientService";
+
+const AppointmentPage = () => {
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   useEffect(() => {
-    const loadAppointments = async () => {
+    async function loadAppointments() {
       try {
-        setLoading(true);
-        const activeAppointments = await getActiveAppointmentsAsync();
-        setPatients(activeAppointments);
+        const data = await getActiveAppointments();
+        setAppointments(data);
       } catch (error) {
-        console.error("Erro ao carregar consultas:", error);
+        console.error("Error loading appointments:", error);
       } finally {
         setLoading(false);
       }
-    };
-    
+    }
+
     loadAppointments();
-    
-    window.addEventListener('focus', () => {
-      loadAppointments();
-    });
-    
-    return () => {
-      window.removeEventListener('focus', () => {
-        loadAppointments();
-      });
-    };
   }, []);
-  
-  const filteredPatients = patients.filter((patient) =>
-    (patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.id?.includes(searchTerm) ||
-    patient.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.professional?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (patient.status !== "Enfermagem")
-  );
-  
-  const handleCallPatient = (patient: any) => {
-    toast({
-      title: "Paciente Chamado",
-      description: `${patient.name} foi chamado para consulta`,
-    });
-  };
-  
-  const handleCancelAppointment = (patient: any) => {
-    toast({
-      title: "Consulta Cancelada",
-      description: `A consulta de ${patient.name} foi cancelada`,
-    });
-  };
-  
-  const handleStartConsult = (patient: any) => {
-    navigate(`/patient/${patient.id}`);
-  };
-  
+
   return (
     <Layout>
       <div className="page-container">
-        <div className="mb-8 section-fade">
-          <h1 className="text-2xl font-semibold tracking-tight">Agendamento</h1>
-          <p className="text-muted-foreground">Gerencie consultas agendadas</p>
-        </div>
+        <h1 className="text-2xl font-bold mb-6">Agenda de Atendimentos</h1>
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="relative w-full max-w-sm section-fade">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar por nome, registro ou especialidade..."
-              className="pl-8 border-teal-500/20 focus-visible:ring-teal-500/30"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        <Tabs defaultValue="today" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="today" className="text-sm">Hoje</TabsTrigger>
+            <TabsTrigger value="tomorrow" className="text-sm">Amanhã</TabsTrigger>
+            <TabsTrigger value="week" className="text-sm">Esta Semana</TabsTrigger>
+          </TabsList>
           
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal border-teal-500/20 hover:border-teal-500/30 hover:bg-teal-50",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4 text-teal-500" />
-                {date ? format(date, "PPP") : <span>Selecionar data</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 pointer-events-auto" align="end">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(date) => date && setDate(date)}
-                initialFocus
-                className="p-3"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        
-        <Card className="section-fade system-card" style={{ animationDelay: "0.1s" }}>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <CalendarCheck className="h-5 w-5 mr-2 text-teal-500" />
-              Consultas Agendadas - {format(date, "dd/MM/yyyy")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="p-8 text-center">
-                <p className="text-muted-foreground">Carregando consultas...</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredPatients.length > 0 ? (
-                  filteredPatients.map((patient) => (
-                    <div
-                      key={patient.id}
-                      className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                        <div className="flex items-start md:items-center">
-                          <User className="h-5 w-5 mr-2 text-muted-foreground mt-0.5 md:mt-0" />
-                          <div>
-                            <h3 className="font-medium">{patient.name}</h3>
-                            <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
-                          </div>
+          <TabsContent value="today">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {loading ? (
+                <p>Carregando agendamentos...</p>
+              ) : appointments.length === 0 ? (
+                <p>Nenhum agendamento para hoje.</p>
+              ) : (
+                appointments.map((appointment) => (
+                  <Card key={appointment.id} className="overflow-hidden">
+                    <div className={`bg-teal-500 h-2 w-full`}></div>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold text-lg">{appointment.patient?.name || 'Paciente não encontrado'}</p>
+                          <p className="text-gray-500 text-sm">
+                            {new Date(appointment.date).toLocaleDateString('pt-BR')} às {appointment.time.substring(0, 5)}
+                          </p>
                         </div>
-                        
-                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-                          <div>
-                            <p className="text-sm text-muted-foreground">Especialidade</p>
-                            <p className="font-medium">{patient.specialty || patient.speciality || "Não especificada"}</p>
-                          </div>
-                          
-                          <div>
-                            <p className="text-sm text-muted-foreground">Médico</p>
-                            <p className="font-medium">{patient.doctor || patient.professional || "Não definido"}</p>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                            <span className="font-medium">{patient.time}</span>
-                          </div>
-                        </div>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          appointment.status === 'confirmed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {appointment.status === 'confirmed' ? 'Confirmado' : 'Agendado'}
+                        </span>
                       </div>
                       
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
-                          onClick={() => handleCallPatient(patient)}
-                        >
-                          Chamar
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
-                          onClick={() => handleCancelAppointment(patient)}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Cancelar
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-teal-500 text-white hover:bg-teal-600"
-                          onClick={() => handleStartConsult(patient)}
-                        >
-                          <Stethoscope className="h-4 w-4 mr-1" />
-                          Atender
-                        </Button>
+                      <div className="text-sm">
+                        <p className="text-gray-700">{appointment.notes || 'Sem observações'}</p>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center">
-                    <p className="text-muted-foreground">Nenhuma consulta encontrada para os critérios selecionados.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="tomorrow">
+            <p>Nenhum agendamento para amanhã.</p>
+          </TabsContent>
+          
+          <TabsContent value="week">
+            <p>Nenhum agendamento para esta semana.</p>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
 };
 
-export default Appointment;
+export default AppointmentPage;

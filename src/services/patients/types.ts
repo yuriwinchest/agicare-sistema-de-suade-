@@ -10,6 +10,7 @@ export interface Patient {
   status: string;
   created_at?: string;
   updated_at?: string;
+  allergies?: string[];
 }
 
 export interface PatientDraft {
@@ -18,7 +19,28 @@ export interface PatientDraft {
   cpf?: string;
   phone?: string;
   email?: string;
-  address?: string;
+  address?: any; // Using any to accommodate complex address structure
   birth_date?: string;
+  birthDate?: string; // Alternative field used in UI
+  gender?: string;
+  active?: boolean;
+  healthPlan?: string;
+  healthCardNumber?: string;
   status?: string;
+}
+
+export interface HospitalizedPatient extends Patient {
+  unit?: string;
+  bed?: string;
+  age?: number;
+  doctor?: string;
+  diagnosis?: string;
+  admissionDate?: string;
+  birth_date: string; // Ensure this is required for HospitalizedPatient
+  medical_records?: {
+    doctor: {
+      name: string;
+    };
+    diagnosis: string;
+  }[];
 }
