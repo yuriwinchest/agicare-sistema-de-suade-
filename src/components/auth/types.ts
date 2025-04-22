@@ -8,6 +8,7 @@ export interface AppUser {
   role: string;
   unit?: string;
   room?: string;
+  avatar_url?: string; // Added avatar_url property
 }
 
 export interface AuthContextType {
