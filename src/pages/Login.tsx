@@ -11,6 +11,7 @@ import type { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { useDestinationModal } from "@/components/auth/DestinationModalContext";
+import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +41,12 @@ const Login = () => {
           } else if (result.error.includes("Invalid login credentials")) {
             setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
           } else if (loginAttempt >= 2) {
+            // Show a more helpful message for login issues after multiple attempts
+            toast({
+              title: "Problema de login detectado",
+              description: "Estamos tentando resolver seu problema de login.",
+              duration: 4000
+            });
             setLoginError("Múltiplas tentativas falharam. É possível que sua conta exista na tabela de colaboradores mas não no sistema de autenticação. Entre em contato com o administrador do sistema ou utilize as contas de demonstração abaixo.");
           } else {
             setLoginError(result.error);
@@ -51,12 +58,12 @@ const Login = () => {
         }
       } else {
         // Show destination modal based on role
-        if (values.email === "doctor@example.com") {
+        if (values.email === "doctor@example.com" || user?.role === 'doctor') {
           setShowDestinationModal(true);
         }
         
         // Navigate to appropriate page
-        if (values.email === "admin@example.com") {
+        if (values.email === "admin@example.com" || user?.role === 'admin') {
           navigate("/admin");
         } else {
           navigate("/");

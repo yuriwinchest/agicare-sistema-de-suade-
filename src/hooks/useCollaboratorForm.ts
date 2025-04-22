@@ -16,7 +16,7 @@ const collaboratorFormSchema = z.object({
   specialty: z.string().optional(),
   department: z.string().optional(),
   active: z.boolean().default(true),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").optional(),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   role: z.string().default("doctor"),
   image_url: z.string().optional(),
 });
@@ -43,7 +43,7 @@ export function useCollaboratorForm(
       specialty: collaborator?.specialty || "",
       department: collaborator?.department || "",
       active: collaborator?.active ?? true,
-      password: "",
+      password: collaborator?.password || "",
       role: collaborator?.role || "doctor",
       image_url: collaborator?.image_url || "",
     },
@@ -88,15 +88,25 @@ export function useCollaboratorForm(
         return false;
       }
 
-      // First create auth user if password is provided and not editing an existing user
-      if (data.password && !data.id) {
-        const { error: authError } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password,
-        });
+      // First create auth user with the provided password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.name,
+            role: data.role
+          }
+        }
+      });
 
-        if (authError) {
-          console.error("Erro ao criar usuário no auth:", authError);
+      if (authError) {
+        console.error("Erro ao criar usuário de autenticação:", authError);
+        // Check if user already exists
+        if (authError.message.includes("already registered")) {
+          // Continue with collaborator creation even if auth user already exists
+          console.log("Usuário já existe no sistema de autenticação, continuando com o cadastro do colaborador");
+        } else {
           throw authError;
         }
       }
