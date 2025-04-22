@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -26,7 +25,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { getPatients } from "@/services/patientService";
+import { getAllPatients } from "@/services/patientService";
 
 const Reception = () => {
   const navigate = useNavigate();
@@ -35,16 +34,25 @@ const Reception = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [receptionFilter, setReceptionFilter] = useState("");
   const [patients, setPatients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Load patients when component mounts
   useEffect(() => {
     const loadPatientList = async () => {
+      setIsLoading(true);
       try {
-        const patientsData = await getPatients();
+        const patientsData = await getAllPatients();
         setPatients(patientsData);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error loading patients:", error);
+        toast({
+          title: "Erro ao carregar pacientes",
+          description: "Não foi possível carregar a lista de pacientes.",
+          variant: "destructive"
+        });
         setPatients([]);
+        setIsLoading(false);
       }
     };
     
@@ -96,6 +104,17 @@ const Reception = () => {
   const handleCheckIn = (patient: any) => {
     navigate(`/patient-reception/${patient.id}`);
   };
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="page-container flex items-center justify-center">
+          <p>Carregando pacientes...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -170,84 +189,90 @@ const Reception = () => {
           <Card className="system-card">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Protocolo</TableHead>
-                      <TableHead>Paciente</TableHead>
-                      <TableHead>Recepção</TableHead>
-                      <TableHead>Data / Hora</TableHead>
-                      <TableHead>Telefone</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPatients.map((patient) => (
-                      <TableRow 
-                        key={patient.id} 
-                        className="cursor-pointer hover:bg-teal-50/50"
-                        onClick={() => handlePatientClick(patient)}
-                      >
-                        <TableCell className="font-medium">{patient.id}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{patient.name}</span>
-                            <span className="text-xs text-muted-foreground">{patient.cpf}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{patient.reception}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                            <span>{patient.date}</span>
-                            <Clock className="ml-3 mr-2 h-4 w-4 text-muted-foreground" />
-                            <span>{patient.time}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                            <span>{patient.phone}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`${getStatusClass(patient.status)}`}>
-                            {patient.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="teal-hover"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/patient/${patient.id}`);
-                              }}
-                            >
-                              <User className="h-4 w-4" />
-                              <span className="sr-only">Ver paciente</span>
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="teal-hover"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCheckIn(patient);
-                              }}
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span className="sr-only">Check-in</span>
-                            </Button>
-                          </div>
-                        </TableCell>
+                {filteredPatients.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground">
+                    Nenhum paciente encontrado
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Protocolo</TableHead>
+                        <TableHead>Paciente</TableHead>
+                        <TableHead>Recepção</TableHead>
+                        <TableHead>Data / Hora</TableHead>
+                        <TableHead>Telefone</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPatients.map((patient) => (
+                        <TableRow 
+                          key={patient.id} 
+                          className="cursor-pointer hover:bg-teal-50/50"
+                          onClick={() => handlePatientClick(patient)}
+                        >
+                          <TableCell className="font-medium">{patient.id}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{patient.name}</span>
+                              <span className="text-xs text-muted-foreground">{patient.cpf}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{patient.reception || 'Não definida'}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{patient.date || 'Não agendado'}</span>
+                              <Clock className="ml-3 mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{patient.time || 'Não definido'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{patient.phone || 'Não informado'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`${getStatusClass(patient.status)}`}>
+                              {patient.status || 'Sem status'}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="teal-hover"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/patient/${patient.id}`);
+                                }}
+                              >
+                                <User className="h-4 w-4" />
+                                <span className="sr-only">Ver paciente</span>
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="teal-hover"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCheckIn(patient);
+                                }}
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span className="sr-only">Check-in</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -312,4 +337,3 @@ const Reception = () => {
 };
 
 export default Reception;
-
