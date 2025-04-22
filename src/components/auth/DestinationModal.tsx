@@ -4,17 +4,21 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "./AuthContext";
+import { useDestinationModal } from "./DestinationModalContext";
 
 const DestinationModal = () => {
-  const { showDestinationModal, setShowDestinationModal, user } = useAuth();
+  const { showDestinationModal, setShowDestinationModal } = useDestinationModal();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Redirecionar admins diretamente para a página de admin sem mostrar o modal
   useEffect(() => {
-    if (user?.email === "admin@example.com") {
+    if (user?.role === 'doctor') {
+      setShowDestinationModal(true);
+    } else if (user?.email === "admin@example.com") {
       navigate("/admin");
     }
-  }, [user, navigate]);
+  }, [user, navigate, setShowDestinationModal]);
 
   const handleNavigation = (path: string) => {
     setShowDestinationModal(false);

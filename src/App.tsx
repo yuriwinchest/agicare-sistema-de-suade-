@@ -56,13 +56,20 @@ function App() {
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
-                <DestinationModal />
+                
+                {/* DestinationModal must be inside Routes to ensure it has access to AuthProvider context */}
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   
                   <Route element={<RequireAuth />}>
+                    {/* DestinationModal placed here so it only appears for authenticated routes */}
+                    <Route path="/" element={
+                      <>
+                        <DestinationModal />
+                        <Index />
+                      </>
+                    } />
                     <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/" element={<Index />} />
                     <Route path="/menu" element={<MainMenu />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/ambulatory" element={<Ambulatory />} />

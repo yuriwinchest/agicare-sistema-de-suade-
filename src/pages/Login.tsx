@@ -10,12 +10,14 @@ import type { loginSchema } from "@/schemas/loginSchema";
 import type { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { useDestinationModal } from "@/components/auth/DestinationModalContext";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginAttempt, setLoginAttempt] = useState(0);
-  const { signin } = useAuth();
+  const { signin, user } = useAuth();
+  const { setShowDestinationModal } = useDestinationModal();
   const navigate = useNavigate();
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
@@ -48,8 +50,17 @@ const Login = () => {
           setLoginError("Credenciais inválidas. Verifique se o email e senha estão corretos ou utilize as contas de demonstração.");
         }
       } else {
-        // Redirecionar para a página principal após login bem-sucedido
-        navigate("/");
+        // Show destination modal based on role
+        if (values.email === "doctor@example.com") {
+          setShowDestinationModal(true);
+        }
+        
+        // Navigate to appropriate page
+        if (values.email === "admin@example.com") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: any) {
       console.error("Erro ao fazer login:", error);

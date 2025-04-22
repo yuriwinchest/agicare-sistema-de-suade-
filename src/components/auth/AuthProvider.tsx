@@ -1,15 +1,15 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContext } from "./AuthContext";
 import { useSession } from "@/hooks/useSession";
 import { useNotification } from "@/hooks/useNotification";
 import { AppUser } from "./types";
 import { registerCollaboratorAccount } from "@/services/patients/mutations/collaboratorMutations";
+import { DestinationModalProvider } from "./DestinationModalContext";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated, setUser, setIsAuthenticated } = useSession();
-  const [showDestinationModal, setShowDestinationModal] = useState<boolean>(false);
   const notification = useNotification();
 
   const signin = async (email: string, password: string): Promise<{success: boolean, error?: string}> => {
@@ -34,9 +34,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(appUser);
         setIsAuthenticated(true);
         localStorage.setItem("user", JSON.stringify(appUser));
-        
-        // Set destination modal for doctor, not for admin
-        setShowDestinationModal(role === "doctor");
         
         notification.success("Login Bem-Sucedido", {
           description: `Bem-vindo ao sistema, ${appUser.name}`
@@ -120,9 +117,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setIsAuthenticated(true);
                 localStorage.setItem("user", JSON.stringify(appUser));
                 
-                // Set destination modal based on role
-                setShowDestinationModal(collaboratorData.role === 'doctor');
-                
                 return { success: true };
               } catch (registerError: any) {
                 console.error("Erro ao registrar usuário:", registerError);
@@ -195,9 +189,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setUser(appUser);
               setIsAuthenticated(true);
               localStorage.setItem("user", JSON.stringify(appUser));
-              
-              // Set destination modal based on role
-              setShowDestinationModal(collaborator.role === 'doctor');
               
               notification.success("Login Bem-Sucedido", {
                 description: `Bem-vindo ao sistema, ${appUser.name}`
@@ -277,9 +268,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signout,
     updateUserSettings,
     isAuthenticated,
-    showDestinationModal,
-    setShowDestinationModal,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      <DestinationModalProvider>
+        {children}
+      </DestinationModalProvider>
+    </AuthContext.Provider>
+  );
 };
