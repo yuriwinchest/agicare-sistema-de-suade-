@@ -19,7 +19,7 @@ export function useNotification() {
     title: string,
     options?: NotificationOptions
   ) => {
-    const { description, duration = 3000, position, action } = options || {}; // Default to 3 seconds
+    const { description, duration = 2000, position, action } = options || {}; // Default to 2 seconds
     
     switch (type) {
       case "success":
