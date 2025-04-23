@@ -35,23 +35,21 @@ const ReceptionShortcuts = () => (
         </div>
       </CardContent>
     </Card>
-    <Card className={`system-card md:col-span-2 ${CARD_BG}`}>
+    <Card className={`system-card ${CARD_BG}`}>
       <CardHeader className="pb-2">
         <CardTitle className="text-md flex items-center gap-2 text-gray-800 dark:text-gray-100">
           <AlertCircle className="h-5 w-5 text-amber-500" />
           Alertas
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <div className="bg-amber-50/90 dark:bg-amber-900/30 border border-amber-200/80 dark:border-amber-700/70 rounded-md p-3 text-sm text-amber-800 dark:text-amber-200">
-            <div className="font-medium">Pacientes aguardando atendimento</div>
-            <div className="text-xs mt-1">Nenhum paciente em espera no momento.</div>
-          </div>
-          <div className="bg-blue-50/90 dark:bg-blue-900/30 border border-blue-200/80 dark:border-blue-700/70 rounded-md p-3 text-sm text-blue-800 dark:text-blue-200">
-            <div className="font-medium">Confirmações pendentes</div>
-            <div className="text-xs mt-1">Não há confirmações pendentes.</div>
-          </div>
+      <CardContent className="space-y-2">
+        <div className="bg-amber-50/90 dark:bg-amber-900/30 border border-amber-200/80 dark:border-amber-700/70 rounded-md p-2 text-xs text-amber-800 dark:text-amber-200">
+          <div className="font-medium text-xs">Pacientes aguardando atendimento</div>
+          <div className="text-[0.6rem] mt-0.5 opacity-70">Nenhum paciente em espera no momento.</div>
+        </div>
+        <div className="bg-blue-50/90 dark:bg-blue-900/30 border border-blue-200/80 dark:border-blue-700/70 rounded-md p-2 text-xs text-blue-800 dark:text-blue-200">
+          <div className="font-medium text-xs">Confirmações pendentes</div>
+          <div className="text-[0.6rem] mt-0.5 opacity-70">Não há confirmações pendentes.</div>
         </div>
       </CardContent>
     </Card>
