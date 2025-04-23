@@ -1,4 +1,3 @@
-
 export interface Patient {
   id: string;
   name: string;
@@ -28,6 +27,7 @@ export interface Patient {
   gender?: string;
   mother_name?: string;
   father_name?: string;
+  protocol_number?: number; // Added protocol_number field
 }
 
 export interface PatientDraft {
