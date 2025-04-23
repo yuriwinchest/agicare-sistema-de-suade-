@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,13 +130,21 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
           description: "Os dados do paciente foram salvos com sucesso."
         });
         
+        // Reset form with new ID and protocol number
         setPatientData({
           ...defaultPatientData,
           id: generateId(),
           protocol_number: generateProtocolNumber(),
         });
         
-        handleDateChange({ target: { value: "" } });
+        // Create a properly structured event object for the date field reset
+        const resetEvent = {
+          target: {
+            value: ""
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        handleDateChange(resetEvent);
         
         if (onSuccess) {
           onSuccess(patientData.name);
