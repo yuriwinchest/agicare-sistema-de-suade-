@@ -14,11 +14,12 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
 
   const signin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      if (email === "admin@example.com" || email === "doctor@example.com") {
-        const role = email === "admin@example.com" ? "admin" : "doctor";
-        const name = email === "admin@example.com" ? "Administrador" : "Doutor";
+      // Demo accounts handling
+      if (email === "admin@example.com" || email === "doctor@example.com" || email === "medico@example.com") {
+        const role = email.includes("admin") ? "admin" : "doctor";
+        const name = email.includes("admin") ? "Administrador" : "Doutor";
         const appUser: AppUser = {
-          id: email === "admin@example.com" ? "admin-demo-id" : "doctor-demo-id",
+          id: email.includes("admin") ? "admin-demo-id" : "doctor-demo-id",
           name,
           email,
           role,
@@ -32,29 +33,37 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
         return { success: true };
       }
 
+      // Check if the user exists as a collaborator
       const { data: collaboratorData, error: collaboratorError } = await supabase
         .from("collaborators")
         .select("*")
         .eq("email", email)
         .maybeSingle();
 
-      if (collaboratorError || !collaboratorData) {
+      if (collaboratorError) {
+        console.error("Erro ao verificar colaborador:", collaboratorError);
+        notification.error("Erro de Login", {
+          description: "Erro ao verificar credenciais. Tente novamente mais tarde.",
+        });
+        return { success: false, error: "Erro ao verificar credenciais." };
+      }
+
+      if (!collaboratorData) {
         notification.error("Erro de Login", {
           description: "Este email não está cadastrado no sistema. Verifique suas credenciais.",
         });
         return { success: false, error: "Este email não está cadastrado no sistema. Verifique suas credenciais." };
       }
 
+      // Try to sign in with supabase auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        if (
-          error.message.includes("For security purposes") ||
-          error.status === 429
-        ) {
+        // Handle rate limiting errors
+        if (error.message.includes("For security purposes") || error.status === 429) {
           notification.error("Limite de Taxa Excedido", {
             description: "Por favor, aguarde alguns minutos antes de tentar novamente.",
             duration: 5000,
@@ -62,8 +71,8 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
           return { success: false, error: error.message };
         }
 
+        // Handle invalid credentials - try registration if needed
         if (error.message.includes("Invalid login credentials")) {
-          // Try registration if collaborator exists but no auth user
           if (collaboratorData) {
             try {
               notification.info("Criando conta de autenticação", {
@@ -102,12 +111,12 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
 
               return { success: true };
             } catch (registerError: any) {
-              if (
-                registerError.message &&
-                (registerError.message.includes("For security purposes") ||
+              console.error("Erro ao registrar:", registerError);
+              
+              if (registerError.message && 
+                  (registerError.message.includes("For security purposes") ||
                   registerError.message.includes("rate limit") ||
-                  registerError.status === 429)
-              ) {
+                  registerError.status === 429)) {
                 notification.error("Limite de Tentativas Excedido", {
                   description: "Por favor, aguarde alguns minutos antes de tentar novamente.",
                   duration: 5000,
@@ -142,8 +151,10 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
         }
       }
 
+      // Successful login
       if (data && data.user) {
         try {
+          // Get collaborator data to build user profile
           const { data: collaborator, error: collabError } = await supabase
             .from("collaborators")
             .select("*")
@@ -151,12 +162,14 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
             .maybeSingle();
 
           if (collabError) {
+            console.error("Erro ao obter dados do colaborador:", collabError);
             notification.error("Erro ao Carregar Perfil", {
               description: "Não foi possível carregar seus dados de perfil.",
             });
             return { success: false, error: "Erro ao carregar dados do perfil." };
           }
 
+          // Create user profile with collaborator data
           if (collaborator) {
             const appUser: AppUser = {
               id: data.user.id,
@@ -194,6 +207,7 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
             return { success: true };
           }
         } catch (innerError: any) {
+          console.error("Erro ao processar dados do usuário:", innerError);
           notification.error("Erro no Processamento", {
             description: "Ocorreu um erro ao processar seus dados de usuário.",
           });
@@ -203,6 +217,7 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
 
       return { success: false, error: "Erro desconhecido durante o login." };
     } catch (error: any) {
+      console.error("Erro inesperado no login:", error);
       notification.error("Erro Inesperado", {
         description: "Ocorreu um erro ao tentar fazer login. Tente novamente.",
       });
@@ -212,4 +227,3 @@ export const useSignin = ({ setUser, setIsAuthenticated }: UseSigninProps) => {
 
   return signin;
 };
-

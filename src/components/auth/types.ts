@@ -1,32 +1,34 @@
-
-import { User } from "@supabase/supabase-js";
-
 export interface AppUser {
   id: string;
   name: string;
   email: string;
   role: string;
-  unit?: string;
-  room?: string;
-  avatar_url?: string; // Added avatar_url property
+  avatar_url?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  created_at?: string;
+  updated_at?: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  settings?: any;
 }
 
 export interface AuthContextType {
   user: AppUser | null;
   isAuthenticated: boolean;
-  signin: (email: string, password: string) => Promise<{success: boolean, error?: string}>;
+  isLoading: boolean;
+  signin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signout: () => Promise<void>;
-  updateUserSettings: (data: Partial<AppUser>) => void;
+  updateUserSettings: (settings: any) => Promise<boolean>;
 }
 
-// Add the UserProfile interface
-export interface UserProfile {
-  id?: string;
-  full_name?: string;
-  username?: string;
-  role?: string;
-  department_id?: string;
-  professional_id?: string;
-  is_active?: boolean;
-  settings?: Record<string, any>;
+export interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export interface RequireAuthProps {
+  children?: React.ReactNode;
 }

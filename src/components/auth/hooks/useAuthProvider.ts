@@ -8,7 +8,7 @@ import { useUserSettings } from "./useUserSettings";
  * Centraliza a lógica de autenticação para o AuthProvider.
  */
 export const useAuthProvider = () => {
-  const { user, isAuthenticated, setUser, setIsAuthenticated } = useSession();
+  const { user, isAuthenticated, isLoading, setUser, setIsAuthenticated } = useSession();
   const signin = useSignin({ setUser, setIsAuthenticated });
   const signout = useSignout({ setUser, setIsAuthenticated });
   const updateUserSettings = useUserSettings({ user, setUser });
@@ -16,6 +16,7 @@ export const useAuthProvider = () => {
   return {
     user,
     isAuthenticated,
+    isLoading,
     signin,
     signout,
     updateUserSettings,

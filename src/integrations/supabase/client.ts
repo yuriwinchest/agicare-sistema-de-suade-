@@ -17,7 +17,8 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       storage: isBrowser ? localStorage : undefined,
       flowType: 'pkce',
-      detectSessionInUrl: false
+      detectSessionInUrl: false,
+      debug: process.env.NODE_ENV === 'development'
     },
     realtime: {
       params: {

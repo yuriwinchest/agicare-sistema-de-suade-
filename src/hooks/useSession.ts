@@ -8,6 +8,7 @@ import { AppUser } from '@/components/auth/types';
 export const useSession = () => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const notification = useNotification();
 
   useEffect(() => {
@@ -23,9 +24,12 @@ export const useSession = () => {
           }
         } catch (error) {
           console.error("Erro ao obter dados do usuário após login:", error);
+        } finally {
+          setIsLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
         handleSignOut();
+        setIsLoading(false);
       }
     });
     
@@ -75,12 +79,15 @@ export const useSession = () => {
       }
     } catch (error) {
       console.error("Erro ao verificar sessão:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     user,
     isAuthenticated,
+    isLoading,
     setUser,
     setIsAuthenticated,
   };

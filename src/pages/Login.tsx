@@ -13,6 +13,7 @@ import { InfoIcon } from "lucide-react";
 import { useDestinationModal } from "@/components/auth/DestinationModalContext";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Progress } from "@/components/ui/progress"; 
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +62,7 @@ const Login = () => {
         }
       } else {
         // Show destination modal based on role
-        if (values.email === "medico@example.com" || user?.role === 'doctor') {
+        if (values.email === "medico@example.com" || values.email === "doctor@example.com" || user?.role === 'doctor') {
           setShowDestinationModal(true);
         }
         
@@ -85,7 +86,7 @@ const Login = () => {
   };
 
   const handleDemoLogin = (type: 'admin' | 'doctor') => {
-    const email = type === 'admin' ? 'admin@example.com' : 'medico@example.com';
+    const email = type === 'admin' ? 'admin@example.com' : 'doctor@example.com';
     handleLogin({ email, password: 'senha123' });
   };
 
@@ -194,6 +195,7 @@ const Login = () => {
           
           <LoginForm onSubmit={handleLogin} isLoading={isLoading} onEmailChange={setEmail} />
           <div className="mt-4 space-y-4">
+            {isLoading && <Progress value={50} className="h-1 animate-pulse" />}
             {loginError && <LoginError error={loginError} onResetPassword={handleResetPassword} />}
             <DemoAccounts onDemoLogin={handleDemoLogin} />
           </div>
