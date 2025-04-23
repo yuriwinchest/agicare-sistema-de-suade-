@@ -11,7 +11,8 @@ import PatientTable from "./reception/PatientTable";
 import ReceptionShortcuts from "./reception/ReceptionShortcuts";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
 
-const PAGE_BACKGROUND = "bg-gradient-to-br from-[#e8f4fc] via-[#d2e8fc] to-[#f5fcff] dark:from-[#1a1f2c] dark:via-[#23293a] dark:to-[#181b26]";
+// Gradiente aprimorado: mais suave e menos contraste para clareza de dados
+const PAGE_BACKGROUND = "bg-gradient-to-br from-[#F6FDFF] via-[#D0F0FA] to-[#F3FAF8] dark:from-[#1d2332] dark:via-[#222a3a] dark:to-[#171b26]";
 
 const Reception = () => {
   const navigate = useNavigate();
@@ -97,4 +98,3 @@ const Reception = () => {
 };
 
 export default Reception;
-
