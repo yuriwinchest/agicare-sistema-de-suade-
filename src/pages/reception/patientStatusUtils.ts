@@ -1,4 +1,3 @@
-
 // Utilities to handle patient status styling and display.
 
 export const getStatusClass = (status: string) => {
@@ -18,9 +17,11 @@ export const getStatusClass = (status: string) => {
 
 // Helper function to get display status for Reception flow
 export const getDisplayStatus = (patient: any) => {
-  // If patient is 'Agendado' but missing appointment info, show as 'Pendente'
-  if (patient.status === "Agendado" && (!patient.specialty || !patient.date || !patient.time)) {
+  // If patient is missing appointment info (specialty, date, or time), show as 'Pendente'
+  if (!patient.specialty || !patient.date || !patient.time) {
     return "Pendente";
   }
+  
+  // Otherwise, return the actual status
   return patient.status;
 };

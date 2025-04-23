@@ -10,6 +10,7 @@ import { getAllPatients } from "@/services/patientService";
 import ReceptionFilters from "./reception/ReceptionFilters";
 import PatientTable from "./reception/PatientTable";
 import ReceptionShortcuts from "./reception/ReceptionShortcuts";
+import { getDisplayStatus } from "./reception/patientStatusUtils";
 
 const Reception = () => {
   const navigate = useNavigate();
@@ -49,7 +50,11 @@ const Reception = () => {
     const matchesSearch = 
       patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.cpf?.includes(searchTerm);
-    const matchesStatus = statusFilter ? patient.status === statusFilter : true;
+    
+    // Use the display status for filtering
+    const patientDisplayStatus = getDisplayStatus(patient);
+    const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
+    
     const matchesReception = receptionFilter ? patient.reception === receptionFilter : true;
     return matchesSearch && matchesStatus && matchesReception;
   });
