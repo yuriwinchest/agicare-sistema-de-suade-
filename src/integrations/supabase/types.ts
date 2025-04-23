@@ -664,6 +664,7 @@ export type Database = {
           name: string
           person_type: string | null
           phone: string | null
+          protocol_number: number
           status: string | null
           updated_at: string | null
         }
@@ -682,6 +683,7 @@ export type Database = {
           name: string
           person_type?: string | null
           phone?: string | null
+          protocol_number?: number
           status?: string | null
           updated_at?: string | null
         }
@@ -700,6 +702,7 @@ export type Database = {
           name?: string
           person_type?: string | null
           phone?: string | null
+          protocol_number?: number
           status?: string | null
           updated_at?: string | null
         }

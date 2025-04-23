@@ -199,14 +199,17 @@ const Reception = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredPatients.map((patient, idx) => (
+                      {filteredPatients.map((patient) => (
                         <TableRow 
                           key={patient.id} 
                           className="cursor-pointer hover:bg-teal-50/50"
                           onClick={() => handlePatientClick(patient)}
                         >
                           <TableCell className="font-medium">
-                            {String(idx + 1).padStart(3, "0")}
+                            {patient.protocol_number 
+                              ? String(patient.protocol_number).padStart(3, "0")
+                              : "--"
+                            }
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col">
