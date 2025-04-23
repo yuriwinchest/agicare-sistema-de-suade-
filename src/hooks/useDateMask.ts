@@ -24,7 +24,7 @@ export const useDateMask = (initialValue: string = '') => {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const maskedValue = maskDate(e.target.value);
     setValue(maskedValue);
-    return maskedValue;
+    return maskedValue; // Return the masked value
   };
 
   return { value, handleDateChange };

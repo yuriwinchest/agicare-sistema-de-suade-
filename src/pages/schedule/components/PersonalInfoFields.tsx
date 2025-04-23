@@ -9,7 +9,7 @@ interface PersonalInfoFieldsProps {
   data: any;
   birthDate: string;
   onChange: (field: string, value: any) => void;
-  onBirthDateChange: (e: React.ChangeEvent<HTMLInputElement>) => string;
+  onBirthDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ data, birthDate, onChange, onBirthDateChange }) => (
@@ -57,9 +57,9 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ data, birthDate
           className="border-teal-500/30 focus-visible:ring-teal-500/30"
           value={birthDate}
           onChange={(e) => {
-            const maskedDate = onBirthDateChange(e);
-            onChange("birthDate", maskedDate);
-            onChange("birth_date", maskedDate);
+            onBirthDateChange(e);
+            onChange("birthDate", e.target.value);
+            onChange("birth_date", e.target.value);
           }}
         />
       </div>
