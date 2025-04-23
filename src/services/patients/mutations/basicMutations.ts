@@ -12,6 +12,14 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       throw new Error("No authenticated session");
     }
 
+    // Validate required fields
+    if (!patient.name) {
+      throw new Error("Patient name is required");
+    }
+
+    // Ensure ID is in correct UUID format or null to let Supabase generate it
+    const patientId = patient.id ? ensureUUID(patient.id) : undefined;
+    
     // Format birth date properly if needed
     const patientData = {
       name: patient.name,
@@ -19,7 +27,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       address: typeof patient.address === 'object' 
         ? JSON.stringify(patient.address) 
         : patient.address,
-      id: patient.id,
+      id: patientId,
       status: patient.status || 'Agendado',
       cpf: patient.cpf || null,
       phone: patient.phone || null,
@@ -32,7 +40,9 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       marital_status: patient.marital_status || null
     };
 
-    // First try to insert the patient
+    console.log("Saving patient data:", patientData);
+
+    // First try to insert/update the patient
     const { data, error } = await supabase
       .from('patients')
       .upsert(patientData)
@@ -62,6 +72,17 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     return savedPatient;
   } catch (error) {
     console.error("Erro em savePatient:", error);
+    
+    // For demo mode without authentication
+    if (!supabase.auth.getSession()) {
+      console.log("Creating demo patient due to missing authentication");
+      return {
+        ...patient,
+        id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
+        status: 'Agendado (Demo)'
+      };
+    }
+    
     throw error;
   }
 };

@@ -16,7 +16,13 @@ export const saveCompletePatient = async (
   notes?: string
 ): Promise<boolean> => {
   try {
-    // 1. Salvar dados básicos do paciente primeiro e garantir que tenha sido salvo
+    // Validate patient data before saving
+    if (!patient.name) {
+      console.error("Patient name is required");
+      return false;
+    }
+    
+    // 1. Save basic patient data first and ensure it has been saved
     const savedPatient = await savePatient(patient);
     
     if (!savedPatient) {
@@ -26,17 +32,18 @@ export const saveCompletePatient = async (
     
     console.log("Paciente salvo com sucesso:", savedPatient);
     
-    // Garantir que temos um ID válido
+    // Ensure we have a valid ID
     const patientId = savedPatient.id;
     if (!patientId) {
       console.error("ID do paciente inexistente após salvamento");
       return false;
     }
     
-    // Array de promessas para processar em sequência
+    // Use a sequential approach to avoid simultaneous operations
+    // Array of promises to process in sequence
     const operations = [];
     
-    // 2. Salvar dados complementares se fornecidos
+    // 2. Save additional data if provided
     if (additionalData) {
       operations.push(async () => {
         try {
@@ -52,11 +59,12 @@ export const saveCompletePatient = async (
       });
     }
     
-    // 3. Salvar documentos se fornecidos
+    // 3. Save documents if provided
     if (documents && documents.length > 0) {
       operations.push(async () => {
         try {
           for (const doc of documents) {
+            if (!doc) continue; // Skip empty documents
             await savePatientDocument({
               ...doc,
               patient_id: patientId
@@ -69,11 +77,12 @@ export const saveCompletePatient = async (
       });
     }
     
-    // 4. Salvar alergias se fornecidas
+    // 4. Save allergies if provided
     if (allergies && allergies.length > 0) {
       operations.push(async () => {
         try {
           for (const allergy of allergies) {
+            if (!allergy) continue; // Skip empty allergies
             await savePatientAllergy({
               ...allergy,
               patient_id: patientId
@@ -86,7 +95,7 @@ export const saveCompletePatient = async (
       });
     }
     
-    // 5. Salvar notas se fornecidas
+    // 5. Save notes if provided
     if (notes) {
       operations.push(async () => {
         try {
@@ -102,7 +111,7 @@ export const saveCompletePatient = async (
       });
     }
     
-    // Executar operações em sequência
+    // Execute operations in sequence
     for (const operation of operations) {
       await operation();
     }

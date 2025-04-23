@@ -1,3 +1,4 @@
+
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -38,28 +39,51 @@ export const formatDateForDatabase = (dateString: string | null): string | null 
 
 // Check if we are in development/demo mode
 const isDemoMode = async () => {
-  const { data: session } = await supabase.auth.getSession();
-  return !session?.session;
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    return !session?.session;
+  } catch (error) {
+    console.error("Error checking session:", error);
+    return true; // Default to demo mode on error
+  }
 };
 
 // Re-export functions from patientMutations.ts with additional authentication check
 export const savePatient = async (patient: Patient): Promise<Patient | null> => {
   try {
+    // Format birth date correctly if provided
+    if (patient.birth_date) {
+      patient.birth_date = formatDateForDatabase(patient.birth_date);
+    }
+    
     // Check authentication status before proceeding
     const { data: session } = await supabase.auth.getSession();
     const isAuthenticated = !!session?.session;
     
     if (!isAuthenticated) {
-      console.error("Erro: Usuário não autenticado");
+      console.warn("Usuário não autenticado - tentando criar paciente em modo demo");
+      // If in demo mode, create a mock patient
+      if (await isDemoMode()) {
+        return {
+          ...patient,
+          id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
+          status: 'Agendado (Demo)'
+        };
+      }
       throw new Error("Usuário não autenticado");
     }
     
     return await savePatientMutation(patient);
   } catch (error) {
     console.error("Erro em savePatient service layer:", error);
+    // Only fallback to demo mode if we're not authenticated but in demo mode
     if (await isDemoMode()) {
-      // Only fallback to demo mode if authentication fails and we're in demo mode
-      return savePatientMutation(patient);
+      console.log("Creating fallback demo patient");
+      return {
+        ...patient,
+        id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
+        status: 'Agendado (Demo)'
+      };
     }
     throw error;
   }
