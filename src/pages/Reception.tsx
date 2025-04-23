@@ -214,16 +214,18 @@ const Reception = () => {
                           <TableCell>
                             <div className="flex flex-col">
                               <span className="font-medium">{patient.name}</span>
-                              <span className="text-xs text-muted-foreground">{patient.cpf}</span>
+                              {patient.cpf && (
+                                <span className="text-xs text-muted-foreground">{patient.cpf}</span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>{patient.reception || 'Não definida'}</TableCell>
                           <TableCell>
                             <div className="flex items-center">
                               <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                              <span>{patient.date || 'Não agendado'}</span>
+                              <span>{patient.date ? patient.date : 'Não agendado'}</span>
                               <Clock className="ml-3 mr-2 h-4 w-4 text-muted-foreground" />
-                              <span>{patient.time || 'Não definido'}</span>
+                              <span>{patient.time ? patient.time : 'Não definido'}</span>
                             </div>
                           </TableCell>
                           <TableCell>

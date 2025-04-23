@@ -67,11 +67,10 @@ export const usePatientRegistration = ({ onSuccess }: UsePatientRegistrationProp
       id: generateId(),
       protocol_number: generateProtocolNumber(),
     });
-    // Properly create reset event for birthDate mask
+
+    // Properly reset birthDate using a DOM event that matches expected type
     const resetEvent = {
-      target: {
-        value: "",
-      },
+      target: Object.assign(document.createElement('input'), { value: "" })
     } as React.ChangeEvent<HTMLInputElement>;
     handleDateChange(resetEvent);
   };

@@ -1,11 +1,7 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Loader2 } from "lucide-react";
-import PersonalInfoFields from "./PersonalInfoFields";
-import ContactFields from "./ContactFields";
-import DocumentFields from "./DocumentFields";
+import PatientTabs from "./PatientTabs";
+import PatientSubmitButton from "./PatientSubmitButton";
 import { usePatientRegistration } from "../hooks/usePatientRegistration";
 
 interface PatientRegistrationFormProps {
@@ -22,56 +18,44 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
     handleChange,
     handleSave,
     isSubmitting,
+    handleReset,
   } = usePatientRegistration({ onSuccess });
+
+  // Ensure clean reset for birth date (fixes TS2322 bug)
+  const handleFullReset = () => {
+    handleReset();
+    // After reset, scroll to top and focus CPF field (optional: adjust as needed)
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+      const cpfInput: HTMLElement | null = document.querySelector('input[name="cpf"]');
+      cpfInput?.focus();
+    }
+  };
 
   return (
     <div className="p-6 pt-0">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start rounded-none border-b h-auto mb-6">
-          <TabsTrigger value="dados-pessoais" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-            Dados Pessoais
-          </TabsTrigger>
-          <TabsTrigger value="contato" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-            Contato
-          </TabsTrigger>
-          <TabsTrigger value="documentos" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-            Documentos
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="dados-pessoais">
-          <PersonalInfoFields
-            data={patientData}
-            birthDate={birthDate}
-            onChange={handleChange}
-            onBirthDateChange={handleDateChange}
-          />
-        </TabsContent>
-        <TabsContent value="contato">
-          <ContactFields
-            data={patientData}
-            onChange={handleChange}
-          />
-        </TabsContent>
-        <TabsContent value="documentos">
-          <DocumentFields
-            data={patientData}
-            onChange={handleChange}
-          />
-        </TabsContent>
-      </Tabs>
-      <div className="flex justify-end mt-6">
-        <Button
-          className="gap-2 bg-teal-600 hover:bg-teal-700"
+      <PatientTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        patientData={patientData}
+        birthDate={birthDate}
+        handleChange={handleChange}
+        handleDateChange={handleDateChange}
+      />
+      <div className="flex justify-end mt-6 gap-2">
+        <PatientSubmitButton
           onClick={handleSave}
+          isSubmitting={isSubmitting}
+        />
+        <button
+          type="button"
+          className="text-sm text-teal-600 underline ml-4"
+          onClick={handleFullReset}
           disabled={isSubmitting}
+          aria-label="Limpar formulário"
         >
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
-          {isSubmitting ? "Salvando..." : "Salvar e Finalizar"}
-        </Button>
+          Limpar
+        </button>
       </div>
     </div>
   );
