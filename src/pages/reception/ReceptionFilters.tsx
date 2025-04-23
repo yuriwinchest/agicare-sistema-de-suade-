@@ -28,29 +28,29 @@ const ReceptionFilters = ({
   receptionFilter,
   setReceptionFilter
 }: ReceptionFiltersProps) => (
-  <Card className="system-card">
+  <Card className="backdrop-blur-sm bg-white/40 dark:bg-slate-900/40 border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
     <CardHeader className="pb-3">
-      <CardTitle className="text-lg font-medium">Filtros</CardTitle>
+      <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-100">Filtros</CardTitle>
     </CardHeader>
     <CardContent>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="patient-search">Paciente / CPF</Label>
+          <Label htmlFor="patient-search" className="text-gray-700 dark:text-gray-300">Paciente / CPF</Label>
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
             <Input
               id="patient-search"
               placeholder="Buscar por nome ou CPF"
-              className="pl-9"
+              className="pl-9 bg-white/80 dark:bg-slate-800/80 border border-gray-200/50 dark:border-gray-700/50"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="reception-filter">Recepção</Label>
+          <Label htmlFor="reception-filter" className="text-gray-700 dark:text-gray-300">Recepção</Label>
           <Select value={receptionFilter} onValueChange={setReceptionFilter}>
-            <SelectTrigger id="reception-filter">
+            <SelectTrigger id="reception-filter" className="bg-white/80 dark:bg-slate-800/80 border border-gray-200/50 dark:border-gray-700/50">
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent>
@@ -62,9 +62,9 @@ const ReceptionFilters = ({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="status-filter">Status</Label>
+          <Label htmlFor="status-filter" className="text-gray-700 dark:text-gray-300">Status</Label>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger id="status-filter">
+            <SelectTrigger id="status-filter" className="bg-white/80 dark:bg-slate-800/80 border border-gray-200/50 dark:border-gray-700/50">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>

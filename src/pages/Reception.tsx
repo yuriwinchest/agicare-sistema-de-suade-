@@ -57,16 +57,17 @@ const Reception = () => {
   });
 
   return (
-    // Fundo da página com degrade azul-cinza claro, inspirado pelo login, para melhor visibilidade:
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#e3f0fb] via-[#f4fafe] to-[#cef2f8] dark:from-[#192736] dark:via-[#16222a] dark:to-[#223049] transition-colors">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#f0f7ff] via-[#f5f9ff] to-[#e8f4ff] dark:from-[#1a2432] dark:via-[#1c2836] dark:to-[#1e2c3a] transition-colors">
       <Layout>
         <div className="page-container">
           <div className="flex flex-col space-y-6">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold text-gray-800">Controle de Atendimento Ambulatorial</h1>
+              <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                Controle de Atendimento Ambulatorial
+              </h1>
               <Button 
                 variant="teal" 
-                className="flex items-center gap-2" 
+                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all" 
                 onClick={() => navigate("/patient-registration")}
               >
                 <UserPlus size={18} />
