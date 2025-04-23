@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -77,7 +78,7 @@ const Reception = () => {
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case "Agendado":
+      case "Pendente":
         return "status-waiting";
       case "Confirmado":
         return "status-in-progress";
@@ -88,6 +89,15 @@ const Reception = () => {
       default:
         return "status-waiting";
     }
+  };
+
+  // Helper function to get display status
+  const getDisplayStatus = (patient: any) => {
+    // If the patient is in 'Agendado' state but doesn't have appointment details, show as 'Pendente'
+    if (patient.status === "Agendado" && (!patient.specialty || !patient.date || !patient.time)) {
+      return "Pendente";
+    }
+    return patient.status;
   };
 
   const handlePatientClick = (patient: any) => {
@@ -167,7 +177,7 @@ const Reception = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Todos</SelectItem>
-                      <SelectItem value="Agendado">Agendado</SelectItem>
+                      <SelectItem value="Pendente">Pendente</SelectItem>
                       <SelectItem value="Confirmado">Confirmado</SelectItem>
                       <SelectItem value="Aguardando">Aguardando</SelectItem>
                       <SelectItem value="Atendido">Atendido</SelectItem>
@@ -194,6 +204,7 @@ const Reception = () => {
                         <TableHead>CPF</TableHead>
                         <TableHead>Recepção</TableHead>
                         <TableHead>Data / Hora</TableHead>
+                        <TableHead>Especialidade</TableHead>
                         <TableHead>Telefone</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -232,14 +243,21 @@ const Reception = () => {
                             </div>
                           </TableCell>
                           <TableCell>
+                            {patient.specialty ? (
+                              <span>{patient.specialty}</span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Não definida</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
                             <div className="flex items-center">
                               <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
                               <span>{patient.phone || 'Não informado'}</span>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className={`${getStatusClass(patient.status)}`}>
-                              {patient.status || 'Sem status'}
+                            <span className={`${getStatusClass(getDisplayStatus(patient))}`}>
+                              {getDisplayStatus(patient)}
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
