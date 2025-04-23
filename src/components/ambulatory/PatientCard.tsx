@@ -1,16 +1,29 @@
-
 import React from "react";
-import { User, Clock, Stethoscope, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dot, Phone, Clipboard } from "lucide-react";
 
 interface PatientCardProps {
-  patient: any;
+  patient: {
+    id: string;
+    name: string;
+    protocol_number?: number;
+    age?: number;
+    status?: string;
+    gender?: string;
+    health_plan?: string;
+    doctor?: string;
+    specialty?: string;
+    arrival_time?: string;
+    wait_time?: string;
+    reception?: string;
+  };
   onCall: (patient: any) => void;
   onCancel: (patient: any) => void;
   onAttend: (patient: any) => void;
-  showActions?: boolean;
   variant?: 'default' | 'return' | 'observation';
+  showActions?: boolean;
 }
 
 export const PatientCard = ({
@@ -18,116 +31,111 @@ export const PatientCard = ({
   onCall,
   onCancel,
   onAttend,
-  showActions = true,
-  variant = 'default'
+  variant = 'default',
+  showActions = true
 }: PatientCardProps) => {
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "Urgente":
-        return <Badge variant="destructive">Urgente</Badge>;
-      case "Normal":
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">Normal</Badge>;
-      case "Não Urgente":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Não Urgente</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
+  const getStatusClass = (status: string) => {
     switch (status) {
       case "Aguardando":
-        return <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">Aguardando</Badge>;
+        return "status-critical";
       case "Em Atendimento":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">Em Atendimento</Badge>;
+        return "status-in-progress";
       case "Finalizado":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Finalizado</Badge>;
+        return "status-completed";
+      case "Retornando":
+        return "status-return";
+      case "Observação":
+        return "status-waiting";
       default:
-        return null;
+        return "status-waiting";
     }
   };
 
+  const StatusBadge = ({ status }: { status: string }) => (
+    <Badge variant="outline" className={`border-0 ${getStatusClass(status)}`}>
+      {status}
+    </Badge>
+  );
+
+  // Use protocol_number if available, otherwise format ID
+  const displayId = patient.protocol_number 
+    ? String(patient.protocol_number).padStart(3, "0")
+    : patient.id.substring(0, 8);
+
   return (
-    <div className="p-4 rounded-lg border bg-white hover:shadow-md transition-shadow border-teal-500/10 hover:border-teal-500/30">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center">
-          <User className="h-5 w-5 mr-2 text-muted-foreground" />
-          <div>
-            <h3 className="font-medium">{patient.name}</h3>
-            <p className="text-sm text-muted-foreground">Registro: {patient.id}</p>
+    <div className="border rounded-md p-4 bg-white shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 items-start justify-between w-full">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-lg">{patient.name}</h3>
+            {patient.status && (
+              <StatusBadge status={patient.status} />
+            )}
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="flex flex-col items-end">
-            <div className="flex items-center">
-              <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {patient.time}{patient.duration ? ` (${patient.duration})` : ''}
-              </span>
+          
+          <div className="mt-1 text-sm text-muted-foreground space-y-1">
+            <div className="flex items-center gap-1">
+              <Clipboard size={14} />
+              <span>Registro: {displayId}</span>
             </div>
-            {variant === 'default' && getPriorityBadge(patient.priority || "Normal")}
-            {variant === 'default' && getStatusBadge(patient.status)}
-            {(variant === 'return' || variant === 'observation') && (
-              <Badge variant="outline" className={
-                variant === 'observation' ? "bg-blue-100 text-blue-800 hover:bg-blue-100" : undefined
-              }>{patient.reason}</Badge>
+            {patient.age && (
+              <div className="flex items-center gap-1">
+                <Dot size={10} className="text-muted-foreground" />
+                <span>{patient.age} anos</span>
+              </div>
+            )}
+            {patient.health_plan && (
+              <div className="flex items-center gap-1">
+                <Dot size={10} className="text-muted-foreground" />
+                <span>{patient.health_plan}</span>
+              </div>
+            )}
+            {patient.doctor && (
+              <div className="flex items-center gap-1">
+                <Dot size={10} className="text-muted-foreground" />
+                <span>Dr(a). {patient.doctor}</span>
+              </div>
+            )}
+            {patient.specialty && (
+              <div className="flex items-center gap-1">
+                <Dot size={10} className="text-muted-foreground" />
+                <span>{patient.specialty}</span>
+              </div>
+            )}
+            {patient.reception && (
+              <div className="flex items-center gap-1">
+                <Dot size={10} className="text-muted-foreground" />
+                <span>Recepção: {patient.reception}</span>
+              </div>
             )}
           </div>
         </div>
+        
+        {showActions && (
+          <div className="flex items-center gap-2">
+            {variant === 'default' && (
+              <>
+                <Button size="sm" onClick={() => onCall(patient)}>
+                  Chamar
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => onCancel(patient)}>
+                  Cancelar
+                </Button>
+              </>
+            )}
+            {variant === 'return' && (
+              <Button size="sm" onClick={() => onAttend(patient)}>
+                Atender
+              </Button>
+            )}
+            {variant === 'observation' && (
+              <Button size="sm" onClick={() => onAttend(patient)}>
+                Liberar
+              </Button>
+            )}
+          </div>
+        )}
       </div>
-
-      {patient.triage && (
-        <div className="bg-medgray-100 p-3 rounded-md mb-4">
-          <div className="flex items-center mb-2">
-            <Stethoscope className="h-4 w-4 mr-1 text-muted-foreground" />
-            <h4 className="text-sm font-medium">Acolhimento</h4>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <p className="text-xs text-muted-foreground">Temperatura</p>
-              <p className="text-sm">{patient.triage.temp}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Pressão</p>
-              <p className="text-sm">{patient.triage.pressure}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Sintomas</p>
-              <p className="text-sm">{patient.triage.symptoms}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showActions && (
-        <div className="flex items-center justify-end space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
-            onClick={() => onCall(patient)}
-          >
-            Chamar
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
-            onClick={() => onCancel(patient)}
-          >
-            <X className="h-4 w-4 mr-1" />
-            Desistência
-          </Button>
-          <Button
-            size="sm"
-            className="bg-teal-500 text-white hover:bg-teal-600"
-            onClick={() => onAttend(patient)}
-          >
-            <Stethoscope className="h-4 w-4 mr-1" />
-            {variant === 'observation' ? 'Avaliar' : 'Atender'}
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

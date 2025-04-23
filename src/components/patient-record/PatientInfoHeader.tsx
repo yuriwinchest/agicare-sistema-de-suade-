@@ -8,6 +8,7 @@ interface PatientInfoProps {
   patientInfo: {
     id: string;
     name: string;
+    protocol_number?: number;
     age?: number;
     birthdate?: string;
     gender?: string;
@@ -30,7 +31,11 @@ const PatientInfoHeader: React.FC<PatientInfoProps> = ({ patientInfo }) => {
             <h1 className="text-2xl font-semibold tracking-tight mb-1">{patientInfo.name}</h1>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
               <div className="flex items-center">
-                <span className="font-medium mr-1">Registro:</span> {patientInfo.id}
+                <span className="font-medium mr-1">Registro:</span> 
+                {patientInfo.protocol_number 
+                  ? String(patientInfo.protocol_number).padStart(3, "0") 
+                  : patientInfo.id
+                }
               </div>
               {patientInfo.age && (
                 <div className="flex items-center">
