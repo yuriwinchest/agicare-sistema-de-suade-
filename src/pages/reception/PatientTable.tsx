@@ -46,17 +46,17 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
           ) : (
             <TooltipProvider>
               <Table>
-                <TableHeader className="bg-gradient-to-r from-teal-50/50 to-cyan-50/50">
+                <TableHeader className="bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500">
                   <TableRow>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Protocolo</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Paciente</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">CPF</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Recepção</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Data / Hora</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Especialidade</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Telefone</TableHead>
-                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Status</TableHead>
-                    <TableHead className="text-right text-teal-700 font-bold uppercase tracking-wider">Ações</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Protocolo</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Paciente</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">CPF</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Recepção</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Data / Hora</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Especialidade</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Telefone</TableHead>
+                    <TableHead className="text-white font-bold uppercase tracking-wider">Status</TableHead>
+                    <TableHead className="text-right text-white font-bold uppercase tracking-wider">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
