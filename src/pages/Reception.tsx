@@ -11,6 +11,8 @@ import PatientTable from "./reception/PatientTable";
 import ReceptionShortcuts from "./reception/ReceptionShortcuts";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
 
+const PAGE_BACKGROUND = "bg-gradient-to-br from-[#e8f4fc] via-[#d2e8fc] to-[#f5fcff] dark:from-[#1a1f2c] dark:via-[#23293a] dark:to-[#181b26]";
+
 const Reception = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -57,7 +59,7 @@ const Reception = () => {
   });
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#f0f7ff] via-[#f5f9ff] to-[#e8f4ff] dark:from-[#1a2432] dark:via-[#1c2836] dark:to-[#1e2c3a] transition-colors">
+    <div className={`min-h-screen w-full ${PAGE_BACKGROUND} transition-colors`}>
       <Layout>
         <div className="page-container">
           <div className="flex flex-col space-y-6">
@@ -95,3 +97,4 @@ const Reception = () => {
 };
 
 export default Reception;
+
