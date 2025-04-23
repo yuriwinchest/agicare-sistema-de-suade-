@@ -199,13 +199,15 @@ const Reception = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredPatients.map((patient) => (
+                      {filteredPatients.map((patient, idx) => (
                         <TableRow 
                           key={patient.id} 
                           className="cursor-pointer hover:bg-teal-50/50"
                           onClick={() => handlePatientClick(patient)}
                         >
-                          <TableCell className="font-medium">{patient.id}</TableCell>
+                          <TableCell className="font-medium">
+                            {String(idx + 1).padStart(3, "0")}
+                          </TableCell>
                           <TableCell>
                             <div className="flex flex-col">
                               <span className="font-medium">{patient.name}</span>
