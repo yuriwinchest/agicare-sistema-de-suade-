@@ -27,7 +27,7 @@ export interface Patient {
   gender?: string;
   mother_name?: string;
   father_name?: string;
-  protocol_number?: number; // Added protocol_number field
+  protocol_number?: number; // Ensure protocol_number is present
 }
 
 export interface PatientDraft {

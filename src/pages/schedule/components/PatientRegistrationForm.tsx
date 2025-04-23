@@ -25,12 +25,12 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
   const { value: birthDate, handleDateChange } = useDateMask();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const generateId = () => {
-    return uuidv4();
-  };
-  
+  const generateId = () => uuidv4();
+  const generateProtocolNumber = () => Math.floor(100 + Math.random() * 900);
+
   const defaultPatientData = {
     id: generateId(),
+    protocol_number: generateProtocolNumber(),
     name: "",
     cpf: "",
     phone: "",
@@ -117,7 +117,8 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
           : patientData.address || "",
         birth_date: formattedBirthDate || "",
         gender: patientData.gender || "",
-        status: patientData.status || "Agendado"
+        status: patientData.status || "Agendado",
+        protocol_number: patientData.protocol_number,
       };
       
       const savedPatient = await savePatient(patientToSave);
@@ -128,7 +129,13 @@ const PatientRegistrationForm: React.FC<PatientRegistrationFormProps> = ({ onSuc
           description: "Os dados do paciente foram salvos com sucesso."
         });
         
-        setPatientData(defaultPatientData);
+        setPatientData({
+          ...defaultPatientData,
+          id: generateId(),
+          protocol_number: generateProtocolNumber(),
+        });
+        
+        handleDateChange({ target: { value: "" } });
         
         if (onSuccess) {
           onSuccess(patientData.name);
