@@ -36,7 +36,7 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
   }
 
   return (
-    <Card className="system-card">
+    <Card className="system-card border-2 border-teal-50 shadow-lg">
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           {patients.length === 0 ? (
@@ -46,17 +46,17 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
           ) : (
             <TooltipProvider>
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-teal-50/50">
                   <TableRow>
-                    <TableHead>Protocolo</TableHead>
-                    <TableHead>Paciente</TableHead>
-                    <TableHead>CPF</TableHead>
-                    <TableHead>Recepção</TableHead>
-                    <TableHead>Data / Hora</TableHead>
-                    <TableHead>Especialidade</TableHead>
-                    <TableHead>Telefone</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Protocolo</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Paciente</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">CPF</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Recepção</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Data / Hora</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Especialidade</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Telefone</TableHead>
+                    <TableHead className="text-teal-700 font-bold uppercase tracking-wider">Status</TableHead>
+                    <TableHead className="text-right text-teal-700 font-bold uppercase tracking-wider">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -66,28 +66,28 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
                     return (
                       <TableRow 
                         key={patient.id} 
-                        className="cursor-pointer hover:bg-teal-50/50"
+                        className="cursor-pointer hover:bg-teal-50/30 transition-colors duration-200 group"
                         onClick={() => handlePatientClick(patient)}
                       >
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium text-gray-700 group-hover:text-teal-600">
                           {patient.protocol_number 
                             ? String(patient.protocol_number).padStart(3, "0")
                             : "--"
                           }
                         </TableCell>
                         <TableCell>
-                          <span className="font-medium">{patient.name}</span>
+                          <span className="font-medium text-gray-800 group-hover:text-teal-700">{patient.name}</span>
                         </TableCell>
                         <TableCell>
                           {patient.cpf ? (
-                            <span>{patient.cpf}</span>
+                            <span className="text-gray-600 group-hover:text-teal-600">{patient.cpf}</span>
                           ) : (
                             <span className="text-xs text-muted-foreground">Não informado</span>
                           )}
                         </TableCell>
-                        <TableCell>{patient.reception || 'Não definida'}</TableCell>
+                        <TableCell className="text-gray-700 group-hover:text-teal-600">{patient.reception || 'Não definida'}</TableCell>
                         <TableCell>
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-600 group-hover:text-teal-600">
                             <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
                             <span>{patient.date ? patient.date : 'Não agendado'}</span>
                             <Clock className="ml-3 mr-2 h-4 w-4 text-muted-foreground" />
@@ -96,13 +96,13 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
                         </TableCell>
                         <TableCell>
                           {patient.specialty ? (
-                            <span>{patient.specialty}</span>
+                            <span className="text-gray-700 group-hover:text-teal-600">{patient.specialty}</span>
                           ) : (
                             <span className="text-xs text-muted-foreground">Não definida</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center">
+                          <div className="flex items-center text-gray-600 group-hover:text-teal-600">
                             <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
                             <span>{patient.phone || 'Não informado'}</span>
                           </div>
@@ -111,26 +111,24 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
                           {displayStatus === "Pendente" ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className={statusClass + " cursor-help"}>
+                                <span className={`${statusClass} cursor-help group-hover:scale-105 transition-transform`}>
                                   {displayStatus}
                                 </span>
                               </TooltipTrigger>
-                              <TooltipContent>
+                              <TooltipContent className="bg-amber-50 text-amber-800 border border-amber-200">
                                 {PENDENTE_TOOLTIP}
                               </TooltipContent>
                             </Tooltip>
                           ) : (
-                            <span className={statusClass}>
-                              {displayStatus}
-                            </span>
+                            <span className={statusClass}>{displayStatus}</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
                             <Button 
                               size="sm" 
                               variant="ghost" 
-                              className="teal-hover"
+                              className="teal-hover text-gray-500 hover:text-teal-600"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/patient/${patient.id}`);
@@ -142,7 +140,7 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
                             <Button 
                               size="sm" 
                               variant="ghost"
-                              className="teal-hover"
+                              className="teal-hover text-gray-500 hover:text-teal-600"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleCheckIn(patient);
