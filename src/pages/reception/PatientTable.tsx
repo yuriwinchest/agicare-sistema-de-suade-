@@ -37,7 +37,7 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
 
   return (
     <Card className="system-card border-2 border-transparent shadow-lg bg-gradient-to-br from-teal-500/10 via-cyan-500/10 to-blue-500/10 p-1">
-      <CardContent className="p-0 bg-white/90 rounded-lg overflow-hidden backdrop-blur-sm">
+      <CardContent className="p-0 rounded-lg overflow-hidden bg-gradient-to-br from-teal-500/5 via-cyan-500/5 to-blue-500/5 backdrop-blur-xl">
         <div className="overflow-x-auto">
           {patients.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
@@ -45,7 +45,7 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
             </div>
           ) : (
             <TooltipProvider>
-              <Table>
+              <Table className="bg-transparent">
                 <TableHeader className="bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500 shadow-md">
                   <TableRow>
                     <TableHead className="text-white font-bold uppercase tracking-wider">Protocolo</TableHead>
@@ -165,3 +165,4 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
 };
 
 export default PatientTable;
+
