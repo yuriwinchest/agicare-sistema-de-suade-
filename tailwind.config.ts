@@ -52,11 +52,33 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Theme colors for dental clinics
+				// Theme colors for clinical systems
+				teal: {
+					400: '#2DD4BF',
+					500: '#14B8A6',
+					600: '#0D9488',
+					700: '#0F766E',
+				},
+				cyan: {
+					400: '#22D3EE',
+					500: '#06B6D4',
+					600: '#0891B2',
+				},
 				blue: {
+					500: '#3B82F6',
 					600: '#2563EB',
 					700: '#1D4ED8',
 				},
+				emerald: {
+					600: '#059669',
+					700: '#047857',
+				},
+				clinic: {
+					DEFAULT: 'hsl(174, 100%, 39%)',
+					light: 'hsl(174, 100%, 49%)',
+					dark: 'hsl(174, 100%, 29%)',
+				},
+				// Keep these colors for backward compatibility
 				indigo: {
 					500: '#6366F1',
 					600: '#4F46E5',
@@ -70,17 +92,6 @@ export default {
 					DEFAULT: 'hsl(230, 100%, 50%)',
 					light: 'hsl(230, 100%, 60%)',
 					dark: 'hsl(230, 100%, 40%)',
-				},
-				// Keep existing emerald and teal colors for backward compatibility
-				emerald: {
-					600: '#059669',
-					700: '#047857',
-				},
-				teal: {
-					400: '#2DD4BF',
-					500: '#14B8A6',
-					600: '#0D9488',
-					700: '#0F766E',
 				},
 				medgray: {
 					50: 'hsl(210, 20%, 99%)',
