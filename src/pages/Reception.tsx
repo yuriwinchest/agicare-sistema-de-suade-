@@ -191,6 +191,7 @@ const Reception = () => {
                       <TableRow>
                         <TableHead>Protocolo</TableHead>
                         <TableHead>Paciente</TableHead>
+                        <TableHead>CPF</TableHead>
                         <TableHead>Recepção</TableHead>
                         <TableHead>Data / Hora</TableHead>
                         <TableHead>Telefone</TableHead>
@@ -212,12 +213,14 @@ const Reception = () => {
                             }
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{patient.name}</span>
-                              {patient.cpf && (
-                                <span className="text-xs text-muted-foreground">{patient.cpf}</span>
-                              )}
-                            </div>
+                            <span className="font-medium">{patient.name}</span>
+                          </TableCell>
+                          <TableCell>
+                            {patient.cpf ? (
+                              <span>{patient.cpf}</span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Não informado</span>
+                            )}
                           </TableCell>
                           <TableCell>{patient.reception || 'Não definida'}</TableCell>
                           <TableCell>
