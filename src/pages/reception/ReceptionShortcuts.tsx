@@ -35,7 +35,8 @@ const ReceptionShortcuts = () => (
         </div>
       </CardContent>
     </Card>
-    <Card className={`system-card ${CARD_BG}`}>
+    <Card className={`system-card ${CARD_BG} h-full`}>
+      {/* Forçar mesma altura pelo CSS responsivo */}
       <CardHeader className="pb-2">
         <CardTitle className="text-md flex items-center gap-2 text-gray-800 dark:text-gray-100">
           <AlertCircle className="h-5 w-5 text-amber-500" />

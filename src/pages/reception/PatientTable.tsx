@@ -6,21 +6,37 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Phone, User, CheckCircle2 } from "lucide-react";
 import { getStatusClass, getDisplayStatus } from "./patientStatusUtils";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
-// Larguras fixas/específicas para colunas da tabela, melhorando layout de acordo com conteúdo
+// Ajuste das larguras das colunas conforme quantidade de informação
 const columnClasses = [
-  "w-24 min-w-[60px] max-w-[70px]",      // Protocolo
-  "w-48 min-w-[120px] max-w-[180px]",    // Paciente
-  "w-36 min-w-[70px] max-w-[120px]",     // CPF
-  "w-40 min-w-[90px] max-w-[120px]",     // Recepção
-  "w-52 min-w-[110px] max-w-[160px]",    // Data / Hora
-  "w-40 min-w-[90px] max-w-[120px]",     // Especialidade
-  "w-44 min-w-[110px] max-w-[170px]",    // Telefone
-  "w-32 min-w-[60px] max-w-[90px]",      // Status
+  "w-20 min-w-[55px] max-w-[60px]",         // Protocolo (mais compacta)
+  "w-64 min-w-[140px] max-w-[220px]",      // Paciente (mais larga)
+  "w-36 min-w-[70px] max-w-[120px]",       // CPF
+  "w-40 min-w-[90px] max-w-[120px]",       // Recepção
+  "w-52 min-w-[110px] max-w-[160px]",      // Data / Hora
+  "w-40 min-w-[90px] max-w-[120px]",       // Especialidade
+  "w-44 min-w-[110px] max-w-[170px]",      // Telefone
+  "w-32 min-w-[60px] max-w-[90px]",        // Status
   "w-24 min-w-[60px] max-w-[80px] text-right" // Ações
 ];
 
 const PENDENTE_TOOLTIP = "O status será alterado para 'Confirmado' quando a especialidade, data e horário forem preenchidos no perfil deste paciente.";
+
+// Card orientativo ao pairar sobre nome do paciente pendente
+const PendingNameHoverCard = ({ children }) => (
+  <HoverCard openDelay={100}>
+    <HoverCardTrigger asChild>
+      <span className="font-medium text-gray-800 group-hover:text-teal-800 cursor-pointer">{children}</span>
+    </HoverCardTrigger>
+    <HoverCardContent className="p-3 rounded-lg bg-[#F6FDFF] dark:bg-[#282d3c] border border-teal-100 dark:border-[#282d3c] shadow-lg max-w-xs text-xs text-teal-900 dark:text-teal-100">
+      <div className="font-semibold text-teal-700 dark:text-teal-300 mb-1">Finalização do Cadastro</div>
+      <div className="text-xs opacity-80">
+        Preencha a <b>especialidade</b>, <b>data</b> e <b>horário</b> no perfil deste paciente para alterar o status para <span className="font-medium text-blue-600 dark:text-blue-300">Confirmado</span>.
+      </div>
+    </HoverCardContent>
+  </HoverCard>
+);
 
 const PatientTable = ({ patients, isLoading }) => {
   const navigate = useNavigate();
@@ -71,11 +87,21 @@ const PatientTable = ({ patients, isLoading }) => {
                   {patients.map((patient) => {
                     const displayStatus = getDisplayStatus(patient);
                     const statusClass = getStatusClass(displayStatus);
+
+                    // Quando o mouse está sobre o nome, impedir hover na linha
+                    const [rowHovered, setRowHovered] = [false, () => {}]; // simulando desabilitado
+
                     return (
-                      <TableRow 
-                        key={patient.id} 
-                        className="cursor-pointer hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-colors duration-200 group"
+                      <TableRow
+                        key={patient.id}
+                        className={
+                          `group transition-colors duration-200 ` +
+                          `[&:hover]:bg-blue-50/70 dark:[&:hover]:bg-slate-800 ` +
+                          `hover:!bg-transparent` // forçado: anular hover se houver hover-card
+                        }
+                        // Removemos a navegação pelo row se sobre o nome tiver hover, usando pointer-events abaixo
                         onClick={() => handlePatientClick(patient)}
+                        style={{ transition: "background 0.2s" }}
                       >
                         <TableCell className={columnClasses[0] + " font-bold text-gray-700 group-hover:text-teal-700 px-3 py-2"}>
                           {patient.protocol_number 
@@ -84,7 +110,18 @@ const PatientTable = ({ patients, isLoading }) => {
                           }
                         </TableCell>
                         <TableCell className={columnClasses[1] + " px-3 py-2"}>
-                          <span className="font-medium text-gray-800 group-hover:text-teal-800">{patient.name}</span>
+                          {displayStatus === "Pendente" ? (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-fit"
+                            >
+                              <PendingNameHoverCard>
+                                {patient.name}
+                              </PendingNameHoverCard>
+                            </div>
+                          ) : (
+                            <span className="font-medium text-gray-800 group-hover:text-teal-800">{patient.name}</span>
+                          )}
                         </TableCell>
                         <TableCell className={columnClasses[2] + " px-3 py-2"}>
                           {patient.cpf ? (
