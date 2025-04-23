@@ -1,9 +1,12 @@
+
 export interface AppUser {
   id: string;
   name: string;
   email: string;
   role: string;
   avatar_url?: string;
+  unit?: string;
+  room?: string;
 }
 
 export interface UserProfile {
@@ -22,7 +25,7 @@ export interface AuthContextType {
   isLoading: boolean;
   signin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signout: () => Promise<void>;
-  updateUserSettings: (settings: any) => Promise<boolean>;
+  updateUserSettings: (settings: Partial<AppUser>) => Promise<boolean>;
 }
 
 export interface AuthProviderProps {
