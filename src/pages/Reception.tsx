@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -11,7 +10,6 @@ import PatientTable from "./reception/PatientTable";
 import ReceptionShortcuts from "./reception/ReceptionShortcuts";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
 
-// Gradiente aprimorado: mais suave e menos contraste para clareza de dados
 const PAGE_BACKGROUND = "bg-gradient-to-br from-[#F6FDFF] via-[#D0F0FA] to-[#F3FAF8] dark:from-[#1d2332] dark:via-[#222a3a] dark:to-[#171b26]";
 
 const Reception = () => {
@@ -31,12 +29,11 @@ const Reception = () => {
       console.log("Loaded patients:", patientsData);
       setPatients(patientsData);
       
-      // Extract unique reception values from patients data
       const uniqueReceptions = Array.from(
         new Set(
           patientsData
             .map(patient => patient.reception)
-            .filter(reception => reception) // Filter out null/undefined values
+            .filter(reception => reception)
         )
       ) as string[];
       
@@ -56,13 +53,10 @@ const Reception = () => {
   };
 
   useEffect(() => {
-    // Load patients when component mounts
     loadPatientList();
     
-    // Set up event listeners to reload data when window gains focus
     window.addEventListener('focus', loadPatientList);
     
-    // Clean up event listeners
     return () => {
       window.removeEventListener('focus', loadPatientList);
     };
