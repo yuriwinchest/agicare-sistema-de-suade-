@@ -76,36 +76,6 @@ const ComplementaryDataForm: React.FC<ComplementaryDataFormProps> = ({ data, onU
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Cidade Atual</label>
-        <Input
-          value={additionalData.city || ""}
-          onChange={(e) => handleChange("city", e.target.value)}
-          placeholder="Digite a cidade atual"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Estado Atual</label>
-        <div className="grid grid-cols-4 gap-4 mt-2">
-          {brazilianStates.map((state) => (
-            <div key={`current-${state}`} className="flex items-center space-x-2">
-              <Checkbox
-                id={`current-state-${state}`}
-                checked={additionalData.state === state}
-                onCheckedChange={() => handleChange("state", state)}
-              />
-              <label
-                htmlFor={`current-state-${state}`}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {state}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Ocupação</label>
         <Input
           value={additionalData.occupation || ""}
