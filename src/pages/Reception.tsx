@@ -79,18 +79,18 @@ const Reception = () => {
       <Layout>
         <div className="page-container">
           <div className="flex flex-col space-y-6">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-                Controle de Atendimento Ambulatorial
-              </h1>
+            <div className="flex justify-start items-center">
               <Button 
                 variant="teal" 
-                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all ml-auto" 
+                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all mr-auto" 
                 onClick={() => navigate("/patient-registration")}
               >
                 <UserPlus size={18} />
                 Cadastrar Paciente
               </Button>
+              <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 ml-4">
+                Controle de Atendimento Ambulatorial
+              </h1>
             </div>
             <ReceptionFilters
               searchTerm={searchTerm}
