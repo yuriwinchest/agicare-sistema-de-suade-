@@ -1,14 +1,12 @@
-
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Calendar, Phone, User, CheckCircle2 } from "lucide-react";
 import { getStatusClass, getDisplayStatus } from "./patientStatusUtils";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
-// Adjust column widths for better content display
 const columnClasses = [
   "w-20 min-w-[55px] max-w-[60px]",      // Protocolo
   "w-64 min-w-[140px] max-w-[220px]",    // Paciente
@@ -24,7 +22,6 @@ const columnClasses = [
 
 const PENDENTE_TOOLTIP = "O status será alterado para 'Confirmado' quando a especialidade, data e horário forem preenchidos no perfil deste paciente.";
 
-// Card orientativo ao pairar sobre nome do paciente pendente
 const PendingNameHoverCard = ({ children }) => (
   <HoverCard openDelay={100}>
     <HoverCardTrigger asChild>
@@ -43,7 +40,7 @@ const PatientTable = ({ patients, isLoading }) => {
   const navigate = useNavigate();
 
   const handlePatientClick = (patient) => {
-    navigate(`/patient-reception/${patient.id}`);
+    navigate(`/patient/${patient.id}`);
   };
 
   const handleCheckIn = (patient) => {
