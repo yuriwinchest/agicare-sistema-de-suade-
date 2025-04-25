@@ -1,10 +1,11 @@
+
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Calendar, Phone, User, CheckCircle2 } from "lucide-react";
 import { getStatusClass, getDisplayStatus } from "./patientStatusUtils";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
 const columnClasses = [
