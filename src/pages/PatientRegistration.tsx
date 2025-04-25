@@ -4,13 +4,15 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { saveCompletePatient } from "@/services/patientService";
+import { saveCompletePatient } from "@/services/patients/mutations/completeMutations";
 import MultiStepRegistrationDialog from "@/components/patient-registration/MultiStepRegistrationDialog";
+import { Toaster } from "@/components/ui/toaster";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleGoBack = () => {
     navigate(-1);
@@ -18,6 +20,7 @@ const PatientRegistration = () => {
 
   const handleComplete = async (formData: any) => {
     try {
+      setIsSubmitting(true);
       console.log("Saving patient data:", formData);
       
       const patientData = {
@@ -38,7 +41,11 @@ const PatientRegistration = () => {
           title: "Cadastro Salvo",
           description: "Os dados do paciente foram salvos com sucesso."
         });
-        navigate("/reception");
+        
+        // Wait a moment before navigating away to ensure toast is visible
+        setTimeout(() => {
+          navigate("/reception");
+        }, 1500);
       } else {
         toast({
           title: "Erro ao salvar",
@@ -53,6 +60,8 @@ const PatientRegistration = () => {
         description: "Ocorreu um erro ao processar a requisição.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -73,7 +82,10 @@ const PatientRegistration = () => {
           isOpen={isDialogOpen}
           onClose={() => navigate("/reception")}
           onComplete={handleComplete}
+          isSubmitting={isSubmitting}
         />
+        
+        <Toaster />
       </div>
     </Layout>
   );

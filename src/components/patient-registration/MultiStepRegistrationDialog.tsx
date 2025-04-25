@@ -1,6 +1,8 @@
+
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import PersonalInfoForm from "./steps/PersonalInfoForm";
 import ContactForm from "./steps/ContactForm";
 import ComplementaryDataForm from "./steps/ComplementaryDataForm";
@@ -13,6 +15,7 @@ interface MultiStepRegistrationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (data: any) => void;
+  isSubmitting?: boolean;
 }
 
 const steps = [
@@ -28,6 +31,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   isOpen,
   onClose,
   onComplete,
+  isSubmitting = false,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<any>({
@@ -143,12 +147,28 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
           <Button
             variant="outline"
             onClick={handleBack}
-            disabled={currentStep === 0}
+            disabled={currentStep === 0 || isSubmitting}
           >
             Voltar
           </Button>
-          <Button onClick={handleNext}>
-            {currentStep === steps.length - 1 ? "Finalizar" : "Próximo"}
+          <Button 
+            onClick={handleNext} 
+            disabled={isSubmitting}
+          >
+            {currentStep === steps.length - 1 ? (
+              <>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Finalizar"
+                )}
+              </>
+            ) : (
+              "Próximo"
+            )}
           </Button>
         </div>
       </DialogContent>
