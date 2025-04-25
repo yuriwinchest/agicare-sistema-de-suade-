@@ -26,7 +26,7 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
 
     console.log("Updating patient with ID:", id);
     
-    // Updating the patient with all data
+    // Update patient record excluding the attendance_type field that doesn't exist in the schema
     const { data, error } = await supabase
       .from('patients')
       .update({
@@ -38,7 +38,6 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
         reception: "Ambulatório",
         health_plan: healthPlan,
         health_card_number: healthCardNumber,
-        attendance_type: attendanceType,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -52,12 +51,35 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
 
     console.log("Patient update successful:", data);
 
+    // Save attendance type in patient_notes if needed
+    if (attendanceType) {
+      try {
+        console.log("Saving attendance type info:", attendanceType);
+        
+        const { error: typeError } = await supabase
+          .from('patient_notes')
+          .insert({
+            patient_id: id,
+            notes: `Tipo de atendimento: ${attendanceType}`,
+            created_by: "Recepção"
+          });
+
+        if (typeError) {
+          console.error("Error saving attendance type:", typeError);
+        } else {
+          console.log("Attendance type saved successfully");
+        }
+      } catch (typeError) {
+        console.error("Exception when saving attendance type:", typeError);
+      }
+    }
+
     // Registering the log
     try {
       await addPatientLog({
         patient_id: id,
         action: "Consulta Registrada",
-        description: `Paciente encaminhado para ${status || "Enfermagem"} - ${specialty} com ${professional}`,
+        description: `Paciente encaminhado para ${status || "Enfermagem"} - ${specialty} com ${professional}. Tipo: ${attendanceType}`,
         performed_by: "Recepção"
       });
       
