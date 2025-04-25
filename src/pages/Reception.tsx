@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -84,7 +85,7 @@ const Reception = () => {
               </h1>
               <Button 
                 variant="teal" 
-                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all" 
+                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all ml-auto" 
                 onClick={() => navigate("/patient-registration")}
               >
                 <UserPlus size={18} />
