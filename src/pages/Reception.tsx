@@ -19,6 +19,8 @@ const Reception = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [receptionFilter, setReceptionFilter] = useState("");
+  const [specialtyFilter, setSpecialtyFilter] = useState("");
+  const [professionalFilter, setProfessionalFilter] = useState("");
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [receptionOptions, setReceptionOptions] = useState<string[]>([]);
@@ -71,7 +73,10 @@ const Reception = () => {
     const patientDisplayStatus = getDisplayStatus(patient);
     const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
     const matchesReception = receptionFilter ? patient.reception === receptionFilter : true;
-    return matchesSearch && matchesStatus && matchesReception;
+    const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
+    const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
+    
+    return matchesSearch && matchesStatus && matchesReception && matchesSpecialty && matchesProfessional;
   });
 
   return (
@@ -100,6 +105,10 @@ const Reception = () => {
               receptionFilter={receptionFilter}
               setReceptionFilter={setReceptionFilter}
               receptionOptions={receptionOptions}
+              specialtyFilter={specialtyFilter}
+              setSpecialtyFilter={setSpecialtyFilter}
+              professionalFilter={professionalFilter}
+              setProfessionalFilter={setProfessionalFilter}
             />
             <PatientTable
               patients={filteredPatients}

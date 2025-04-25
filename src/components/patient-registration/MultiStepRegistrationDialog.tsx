@@ -74,6 +74,10 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         status: "Agendado",
         // Default reception if not set
         reception: formData.reception || "Recepção Central",
+        // Ensure specialized fields are correctly mapped
+        specialty: formData.specialty,
+        professional: formData.professional,
+        health_plan: formData.healthPlan,
       };
       
       // Remove empty values from addressDetails to keep data clean

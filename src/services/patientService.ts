@@ -1,4 +1,3 @@
-
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -61,7 +60,11 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
           ...patient,
           id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
           status: 'Agendado (Demo)',
-          protocol_number: Math.floor(Math.random() * 900) + 100
+          protocol_number: Math.floor(Math.random() * 900) + 100,
+          reception: patient.reception || "RECEPÇÃO CENTRAL",
+          specialty: patient.specialty || null,
+          professional: patient.professional || null,
+          health_plan: patient.healthPlan || null
         };
       }
       throw new Error("Usuário não autenticado");
@@ -75,8 +78,11 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       return {
         ...patient,
         id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
-        status: 'Agendado (Demo)',
-        protocol_number: Math.floor(Math.random() * 900) + 100
+        status: 'Agendado',
+        protocol_number: Math.floor(Math.random() * 900) + 100,
+        specialty: patient.specialty || null,
+        professional: patient.professional || null,
+        health_plan: patient.healthPlan || null
       };
     }
     throw error;

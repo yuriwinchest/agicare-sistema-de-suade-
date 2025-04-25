@@ -37,7 +37,11 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       father_name: patient.father_name || null,
       mother_name: patient.mother_name || null,
       cns: patient.cns || null,
-      marital_status: patient.marital_status || null
+      marital_status: patient.marital_status || null,
+      specialty: patient.specialty || null,
+      professional: patient.professional || null,
+      health_plan: patient.health_plan || patient.healthPlan || null,
+      reception: patient.reception || 'RECEPÇÃO CENTRAL'
     };
 
     console.log("Saving patient data:", patientData);
@@ -79,7 +83,10 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       return {
         ...patient,
         id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
-        status: 'Agendado (Demo)'
+        status: 'Agendado',
+        specialty: patient.specialty || null,
+        professional: patient.professional || null,
+        health_plan: patient.health_plan || patient.healthPlan || null
       };
     }
     

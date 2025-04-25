@@ -1,4 +1,3 @@
-
 export interface Patient {
   id: string;
   name: string;
@@ -29,7 +28,13 @@ export interface Patient {
   mother_name?: string;
   father_name?: string;
   protocol_number?: number; 
-  reception?: string; // Added reception field to the Patient interface
+  reception?: string;
+  specialty?: string;
+  professional?: string;
+  health_plan?: string;
+  healthPlan?: string; // Propriedade alternativa para health_plan
+  date?: string; // Data da consulta
+  appointmentTime?: string; // Hora da consulta
 }
 
 export interface PatientDraft {

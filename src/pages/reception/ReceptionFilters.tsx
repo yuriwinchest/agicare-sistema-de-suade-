@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import { specialties, professionals } from "@/components/patient-reception/constants";
 
 interface ReceptionFiltersProps {
   searchTerm: string;
@@ -19,6 +20,10 @@ interface ReceptionFiltersProps {
   receptionFilter: string;
   setReceptionFilter: (v: string) => void;
   receptionOptions: string[];
+  specialtyFilter: string;
+  setSpecialtyFilter: (v: string) => void;
+  professionalFilter: string;
+  setProfessionalFilter: (v: string) => void;
 }
 
 const ReceptionFilters = ({
@@ -28,14 +33,18 @@ const ReceptionFilters = ({
   setStatusFilter,
   receptionFilter,
   setReceptionFilter,
-  receptionOptions = []
+  receptionOptions = [],
+  specialtyFilter,
+  setSpecialtyFilter,
+  professionalFilter,
+  setProfessionalFilter
 }: ReceptionFiltersProps) => (
   <Card className="backdrop-blur-sm bg-white/40 dark:bg-slate-900/40 border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
     <CardHeader className="pb-3">
       <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-100">Filtros</CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="patient-search" className="text-gray-700 dark:text-gray-300">Paciente / CPF</Label>
           <div className="relative">
@@ -83,6 +92,34 @@ const ReceptionFilters = ({
               <SelectItem value="Confirmado">Confirmado</SelectItem>
               <SelectItem value="Aguardando">Aguardando</SelectItem>
               <SelectItem value="Atendido">Atendido</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="specialty-filter" className="text-gray-700 dark:text-gray-300">Especialidade</Label>
+          <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+            <SelectTrigger id="specialty-filter" className="bg-white/80 dark:bg-slate-800/80 border border-gray-200/50 dark:border-gray-700/50">
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas</SelectItem>
+              {specialties.map((specialty) => (
+                <SelectItem key={specialty.id} value={specialty.id}>{specialty.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="professional-filter" className="text-gray-700 dark:text-gray-300">Profissional</Label>
+          <Select value={professionalFilter} onValueChange={setProfessionalFilter}>
+            <SelectTrigger id="professional-filter" className="bg-white/80 dark:bg-slate-800/80 border border-gray-200/50 dark:border-gray-700/50">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
+              {professionals.map((professional) => (
+                <SelectItem key={professional.id} value={professional.id}>{professional.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

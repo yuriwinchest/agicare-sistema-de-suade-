@@ -27,8 +27,13 @@ const PatientRegistration = () => {
       const patientData = {
         ...formData,
         status: "Agendado",
-        // Set a default reception if not provided
-        reception: formData.reception || "RECEPÇÃO CENTRAL"
+        reception: formData.reception || "RECEPÇÃO CENTRAL",
+        specialty: formData.specialty,
+        professional: formData.professional,
+        health_plan: formData.healthPlan,
+        // Garantir que a data e hora da consulta sejam salvas
+        date: formData.date,
+        appointmentTime: formData.appointmentTime
       };
 
       const success = await saveCompletePatient(
