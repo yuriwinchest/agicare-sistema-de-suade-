@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -69,6 +68,20 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         // Ensure we have the proper structure for saving
         status: "Agendado",
       };
+      
+      // Remove empty values from addressDetails to keep data clean
+      if (finalData.addressDetails) {
+        Object.keys(finalData.addressDetails).forEach(key => {
+          if (!finalData.addressDetails[key]) {
+            delete finalData.addressDetails[key];
+          }
+        });
+        
+        // If addressDetails is empty after removing empty values, set it to an empty object
+        if (Object.keys(finalData.addressDetails).length === 0) {
+          finalData.addressDetails = {};
+        }
+      }
       
       // Add today's date if appointment date is not set
       if (!finalData.date) {

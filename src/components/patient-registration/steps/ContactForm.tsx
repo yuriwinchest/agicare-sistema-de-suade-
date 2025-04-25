@@ -53,7 +53,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ data, onUpdate }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+          <span>Complemento</span>
+          <span className="text-xs text-gray-500 ml-2">(opcional)</span>
+        </label>
         <Input
           value={(data.addressDetails?.complement) || ""}
           onChange={(e) => handleChange("addressDetails.complement", e.target.value)}
