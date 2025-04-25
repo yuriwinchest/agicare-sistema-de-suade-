@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -84,14 +83,6 @@ const PatientReception = () => {
       const attendanceTypeObj = attendanceTypes.find(a => a.id === formData.attendanceType);
       const healthPlanObj = healthPlans.find(h => h.id === formData.healthPlan);
       
-      console.log("Submitting form data:", { 
-        formData, 
-        professional: professionalObj,
-        specialty: specialtyObj,
-        attendanceType: attendanceTypeObj,
-        healthPlan: healthPlanObj
-      });
-      
       const appointmentData = {
         ...formData,
         professional: professionalObj?.name || "",
@@ -108,7 +99,7 @@ const PatientReception = () => {
               title: "Atendimento registrado",
               description: "O paciente foi encaminhado para a enfermagem.",
             });
-            navigate("/ambulatory");
+            navigate("/reception", { replace: true });
           } else {
             toast({
               title: "Erro ao registrar atendimento",

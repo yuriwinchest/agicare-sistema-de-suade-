@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,6 +89,8 @@ const PatientTable = ({ patients, isLoading }) => {
                   {patients.map((patient) => {
                     const displayStatus = getDisplayStatus(patient);
                     const statusClass = getStatusClass(displayStatus);
+                    const appointmentTime = patient.appointmentTime || 'Não definido';
+                    const appointmentDate = patient.date || 'Não agendado';
 
                     return (
                       <TableRow
@@ -119,9 +122,9 @@ const PatientTable = ({ patients, isLoading }) => {
                         <TableCell className={`${columnClasses[4]} px-3 py-2`}>
                           <div className="flex items-center text-gray-600 group-hover:text-teal-600 gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>{patient.date || 'Não agendado'}</span>
+                            <span>{appointmentDate}</span>
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>{patient.appointmentTime || 'Não definido'}</span>
+                            <span>{appointmentTime}</span>
                           </div>
                         </TableCell>
                         <TableCell className={`${columnClasses[5]} px-3 py-2`}>
