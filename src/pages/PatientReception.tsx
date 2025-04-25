@@ -8,6 +8,7 @@ import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
 import { getPatientById, confirmPatientAppointment } from "@/services/patientService";
 import { PatientReceptionForm } from "@/components/patient-reception/PatientReceptionForm";
 import { InformationCard } from "@/components/patient-reception/InformationCard";
+import { specialties, professionals, healthPlans, attendanceTypes } from "@/components/patient-reception/constants";
 
 const PatientReception = () => {
   const navigate = useNavigate();
@@ -77,12 +78,19 @@ const PatientReception = () => {
     setIsSubmitting(true);
     
     if (id) {
-      const { professionals, specialties, attendanceTypes, healthPlans } = require("./components/patient-reception/constants");
-      
+      // Find the respective objects based on selected IDs
       const professionalObj = professionals.find(p => p.id === formData.professional);
       const specialtyObj = specialties.find(s => s.id === formData.specialty);
       const attendanceTypeObj = attendanceTypes.find(a => a.id === formData.attendanceType);
       const healthPlanObj = healthPlans.find(h => h.id === formData.healthPlan);
+      
+      console.log("Submitting form data:", { 
+        formData, 
+        professional: professionalObj,
+        specialty: specialtyObj,
+        attendanceType: attendanceTypeObj,
+        healthPlan: healthPlanObj
+      });
       
       const appointmentData = {
         ...formData,
@@ -113,7 +121,7 @@ const PatientReception = () => {
           console.error("Error confirming appointment:", error);
           toast({
             title: "Erro ao registrar atendimento",
-            description: "Ocorreu um erro ao processar a requisição.",
+            description: "Ocorreu um erro ao processar a requisição: " + (error.message || "Erro desconhecido"),
             variant: "destructive",
           });
         })

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, ClipboardList } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardList, Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -56,6 +56,7 @@ export const PatientReceptionForm = ({
               <Select
                 value={formData.attendanceType}
                 onValueChange={(value) => handleChange("attendanceType", value)}
+                disabled={isSubmitting}
               >
                 <SelectTrigger id="attendanceType" className="border-teal-500/20 focus-visible:ring-teal-500/30">
                   <SelectValue placeholder="Selecione o tipo de atendimento" />
@@ -77,6 +78,7 @@ export const PatientReceptionForm = ({
               <Select
                 value={formData.specialty}
                 onValueChange={(value) => handleChange("specialty", value)}
+                disabled={isSubmitting}
               >
                 <SelectTrigger id="specialty" className="border-teal-500/20 focus-visible:ring-teal-500/30">
                   <SelectValue placeholder="Selecione a especialidade" />
@@ -100,6 +102,7 @@ export const PatientReceptionForm = ({
               <Select
                 value={formData.professional}
                 onValueChange={(value) => handleChange("professional", value)}
+                disabled={isSubmitting}
               >
                 <SelectTrigger id="professional" className="border-teal-500/20 focus-visible:ring-teal-500/30">
                   <SelectValue placeholder="Selecione o profissional" />
@@ -121,6 +124,7 @@ export const PatientReceptionForm = ({
               <Select
                 value={formData.healthPlan}
                 onValueChange={(value) => handleChange("healthPlan", value)}
+                disabled={isSubmitting}
               >
                 <SelectTrigger id="healthPlan" className="border-teal-500/20 focus-visible:ring-teal-500/30">
                   <SelectValue placeholder="Selecione o convênio" />
@@ -146,6 +150,7 @@ export const PatientReceptionForm = ({
                 value={formData.healthCardNumber}
                 onChange={(e) => handleChange("healthCardNumber", e.target.value)}
                 className="border-teal-500/20 focus-visible:ring-teal-500/30"
+                disabled={isSubmitting}
               />
             </div>
 
@@ -159,6 +164,7 @@ export const PatientReceptionForm = ({
                 value={formData.appointmentTime}
                 onChange={(e) => handleChange("appointmentTime", e.target.value)}
                 className="border-teal-500/20 focus-visible:ring-teal-500/30"
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -173,6 +179,7 @@ export const PatientReceptionForm = ({
               onChange={(e) => handleChange("observations", e.target.value)}
               className="min-h-32 border-teal-500/20 focus-visible:ring-teal-500/30"
               placeholder="Insira informações adicionais sobre o atendimento, se necessário."
+              disabled={isSubmitting}
             />
           </div>
 
@@ -182,6 +189,7 @@ export const PatientReceptionForm = ({
               variant="outline"
               onClick={goBack}
               className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
+              disabled={isSubmitting}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
@@ -192,8 +200,17 @@ export const PatientReceptionForm = ({
               className="bg-teal-500 text-white hover:bg-teal-600"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Processando..." : "Confirmar Atendimento"}
-              {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  Confirmar Atendimento
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         </form>

@@ -5,17 +5,28 @@ import { addPatientLog } from "@/services/patients/patientAdditionalDataService"
 
 export const confirmPatientAppointment = async (id: string, appointmentData: any) => {
   try {
-    // Extraindo os dados
+    // Log the incoming data for debugging
+    console.log("Confirming appointment with data:", { id, appointmentData });
+
+    // Extracting the data
     const { 
       attendanceType, professional, specialty, healthPlan, 
       healthCardNumber, observations, appointmentTime, status 
     } = appointmentData;
 
-    // Formatando a data atual para exibição
+    // Validate required data
+    if (!attendanceType || !professional || !specialty) {
+      console.error("Missing required appointment data:", { attendanceType, professional, specialty });
+      throw new Error("Dados de atendimento incompletos");
+    }
+
+    // Formatting the date for display
     const today = new Date();
     const formattedDate = format(today, "dd/MM/yyyy");
 
-    // Atualizando o paciente com todos os dados de atendimento
+    console.log("Updating patient with ID:", id);
+    
+    // Updating the patient with all data
     const { data, error } = await supabase
       .from('patients')
       .update({
@@ -23,7 +34,7 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
         specialty: specialty,
         professional: professional,
         date: formattedDate,
-        time: appointmentTime,
+        time: appointmentTime || format(today, "HH:mm"),
         reception: "Ambulatório",
         health_plan: healthPlan,
         health_card_number: healthCardNumber,
@@ -35,11 +46,13 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
       .single();
 
     if (error) {
-      console.error("Erro ao confirmar atendimento:", error);
+      console.error("Error updating patient in Supabase:", error);
       throw error;
     }
 
-    // Registrando o log do paciente
+    console.log("Patient update successful:", data);
+
+    // Registering the log
     try {
       await addPatientLog({
         patient_id: id,
@@ -47,14 +60,18 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
         description: `Paciente encaminhado para ${status || "Enfermagem"} - ${specialty} com ${professional}`,
         performed_by: "Recepção"
       });
+      
+      console.log("Patient log added successfully");
     } catch (logError) {
-      console.error("Erro ao registrar log:", logError);
-      // Continuar mesmo se o log falhar
+      console.error("Error registering log:", logError);
+      // Continue even if logging fails
     }
 
-    // Registrando observações se houver
+    // Register observations if provided
     if (observations) {
       try {
+        console.log("Saving observations:", observations);
+        
         const { error: notesError } = await supabase
           .from('patient_notes')
           .insert({
@@ -64,16 +81,18 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
           });
 
         if (notesError) {
-          console.error("Erro ao salvar observações:", notesError);
+          console.error("Error saving observations:", notesError);
+        } else {
+          console.log("Observations saved successfully");
         }
       } catch (notesError) {
-        console.error("Erro ao registrar observações:", notesError);
+        console.error("Exception when saving observations:", notesError);
       }
     }
 
     return data;
   } catch (error) {
-    console.error("Erro em confirmPatientAppointment:", error);
+    console.error("Exception in confirmPatientAppointment:", error);
     throw error;
   }
 };
