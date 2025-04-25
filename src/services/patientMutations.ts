@@ -47,7 +47,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       person_type: patient.person_type || null,
       gender: patient.gender || null,
       father_name: patient.father_name || null,
-      mother_name: patient.mother_name || null
+      mother_name: patient.mother_name || null,
+      reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is always set
     };
 
     console.log("Saving patient data:", patientData);
@@ -63,7 +64,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         ...patient,
         id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
         status: 'Agendado',
-        protocol_number: Math.floor(Math.random() * 900) + 100
+        protocol_number: Math.floor(Math.random() * 900) + 100,
+        reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is set in demo mode
       };
       
       // Save mock patient to localStorage
@@ -133,7 +135,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
           ...patient,
           id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
           status: 'Agendado',
-          protocol_number: Math.floor(Math.random() * 900) + 100
+          protocol_number: Math.floor(Math.random() * 900) + 100,
+          reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is set for demo fallbacks
         };
         
         try {
@@ -180,7 +183,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         ...patient,
         id: patient.id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
         status: 'Agendado',
-        protocol_number: Math.floor(Math.random() * 900) + 100
+        protocol_number: Math.floor(Math.random() * 900) + 100,
+        reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is set for fallbacks
       };
       
       // Save mock patient to localStorage

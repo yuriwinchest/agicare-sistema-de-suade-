@@ -28,6 +28,7 @@ export interface Patient {
   mother_name?: string;
   father_name?: string;
   protocol_number?: number; // Ensure protocol_number is present
+  reception?: string; // Added reception field to the Patient interface
 }
 
 export interface PatientDraft {
