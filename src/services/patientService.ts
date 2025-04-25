@@ -111,14 +111,38 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
 
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
+    // Check if in demo mode
+    if (await isDemoMode()) {
+      console.log("Demo mode detected - using local storage for patients");
+      // In demo mode, try to get patients from local storage
+      try {
+        const storedPatients = localStorage.getItem('demo_patients');
+        if (storedPatients) {
+          return JSON.parse(storedPatients);
+        }
+      } catch (error) {
+        console.error("Error reading from localStorage:", error);
+      }
+    }
+    
+    // Attempt to fetch from Supabase
     const { data, error } = await supabase
       .from('patients')
       .select('*')
-      .order('name', { ascending: true });
+      .order('created_at', { ascending: false });
       
     if (error) {
       console.error("Error fetching patients:", error);
       return [];
+    }
+    
+    // Store in local storage for demo mode
+    if (await isDemoMode() && data) {
+      try {
+        localStorage.setItem('demo_patients', JSON.stringify(data));
+      } catch (storageError) {
+        console.error("Error storing in localStorage:", storageError);
+      }
     }
     
     return data || [];

@@ -23,26 +23,33 @@ const Reception = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const loadPatientList = async () => {
+    setIsLoading(true);
+    try {
+      const patientsData = await getAllPatients();
+      console.log("Loaded patients:", patientsData);
+      setPatients(patientsData);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error loading patients:", error);
+      toast({
+        title: "Erro ao carregar pacientes",
+        description: "Não foi possível carregar a lista de pacientes.",
+        variant: "destructive"
+      });
+      setPatients([]);
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadPatientList = async () => {
-      setIsLoading(true);
-      try {
-        const patientsData = await getAllPatients();
-        setPatients(patientsData);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error loading patients:", error);
-        toast({
-          title: "Erro ao carregar pacientes",
-          description: "Não foi possível carregar a lista de pacientes.",
-          variant: "destructive"
-        });
-        setPatients([]);
-        setIsLoading(false);
-      }
-    };
+    // Load patients when component mounts
     loadPatientList();
+    
+    // Set up event listeners to reload data when window gains focus
     window.addEventListener('focus', loadPatientList);
+    
+    // Clean up event listeners
     return () => {
       window.removeEventListener('focus', loadPatientList);
     };

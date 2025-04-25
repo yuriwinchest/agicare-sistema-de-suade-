@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, PatientDraft } from "@/services/patients/types";
 import { 
@@ -53,6 +52,42 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
 
     console.log("Saving patient data:", patientData);
 
+    // Check if we're in demo mode
+    const { data: session } = await supabase.auth.getSession();
+    const isAuthenticated = !!session?.session;
+    
+    if (!isAuthenticated) {
+      console.log("No authentication - using demo mode");
+      // Demo mode - create a mock patient
+      const mockPatient = {
+        ...patient,
+        id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
+        status: 'Agendado',
+        protocol_number: Math.floor(Math.random() * 900) + 100
+      };
+      
+      // Save mock patient to localStorage
+      try {
+        const existingPatients = JSON.parse(localStorage.getItem('demo_patients') || '[]');
+        const existingIndex = existingPatients.findIndex((p: any) => p.id === mockPatient.id);
+        
+        if (existingIndex >= 0) {
+          // Update existing patient
+          existingPatients[existingIndex] = mockPatient;
+        } else {
+          // Add new patient
+          existingPatients.push(mockPatient);
+        }
+        
+        localStorage.setItem('demo_patients', JSON.stringify(existingPatients));
+        console.log("Patient saved to local storage:", mockPatient);
+      } catch (localStorageError) {
+        console.error("Error saving to localStorage:", localStorageError);
+      }
+      
+      return mockPatient;
+    }
+
     // First check if the patient exists by ID, if using an existing ID
     if (patientData.id) {
       const { data: existingPatient, error: checkError } = await supabase
@@ -97,7 +132,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         const mockPatient = {
           ...patient,
           id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
-          status: 'Agendado'
+          status: 'Agendado',
+          protocol_number: Math.floor(Math.random() * 900) + 100
         };
         
         try {
@@ -140,11 +176,23 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     // For demo purposes: if entire process fails, create a mock response
     if (patient.name) {
       console.log("Creating fallback mock patient");
-      return {
+      const mockPatient = {
         ...patient,
         id: patient.id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
-        status: 'Agendado (Demo)'
+        status: 'Agendado',
+        protocol_number: Math.floor(Math.random() * 900) + 100
       };
+      
+      // Save mock patient to localStorage
+      try {
+        const existingPatients = JSON.parse(localStorage.getItem('demo_patients') || '[]');
+        existingPatients.push(mockPatient);
+        localStorage.setItem('demo_patients', JSON.stringify(existingPatients));
+      } catch (localStorageError) {
+        console.error("Error saving to localStorage:", localStorageError);
+      }
+      
+      return mockPatient;
     }
     
     return null;

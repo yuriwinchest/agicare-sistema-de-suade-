@@ -37,7 +37,8 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   const [formData, setFormData] = useState<any>({
     id: uuidv4(),
     status: "Agendado",
-    addressDetails: {} // Initialize the nested object
+    addressDetails: {}, // Initialize the nested object
+    reception: "Recepção Central" // Default reception value
   });
 
   const handleUpdateFormData = (data: any) => {
@@ -71,6 +72,8 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         ...formData,
         // Ensure we have the proper structure for saving
         status: "Agendado",
+        // Default reception if not set
+        reception: formData.reception || "Recepção Central",
       };
       
       // Remove empty values from addressDetails to keep data clean

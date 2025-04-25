@@ -23,6 +23,7 @@ const PatientRegistration = () => {
       setIsSubmitting(true);
       console.log("Saving patient data:", formData);
       
+      // Make sure the status is set correctly for the reception page to display properly
       const patientData = {
         ...formData,
         status: "Agendado"
