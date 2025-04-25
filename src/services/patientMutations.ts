@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Patient, PatientDraft } from "@/services/patients/types";
 import { 
@@ -48,7 +49,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       gender: patient.gender || null,
       father_name: patient.father_name || null,
       mother_name: patient.mother_name || null,
-      reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is always set
+      reception: patient.reception || "RECEPÇÃO CENTRAL" // Set default reception
     };
 
     console.log("Saving patient data:", patientData);
@@ -65,7 +66,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
         status: 'Agendado',
         protocol_number: Math.floor(Math.random() * 900) + 100,
-        reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is set in demo mode
+        reception: patient.reception || "RECEPÇÃO CENTRAL" // Set reception in demo mode
       };
       
       // Save mock patient to localStorage
@@ -184,7 +185,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         id: patient.id || `fallback-${Math.random().toString(36).substring(2, 9)}`,
         status: 'Agendado',
         protocol_number: Math.floor(Math.random() * 900) + 100,
-        reception: patient.reception || "RECEPÇÃO CENTRAL" // Ensure reception is set for fallbacks
+        reception: patient.reception || "RECEPÇÃO CENTRAL" // Set reception for fallbacks
       };
       
       // Save mock patient to localStorage
