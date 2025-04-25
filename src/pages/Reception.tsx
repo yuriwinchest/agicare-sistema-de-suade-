@@ -78,10 +78,7 @@ const Reception = () => {
       <Layout>
         <div className="page-container">
           <div className="flex flex-col space-y-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-                Controle de Atendimento Ambulatorial
-              </h1>
+            <div className="flex items-center justify-end">
               <Button 
                 variant="teal" 
                 className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all" 
@@ -91,6 +88,9 @@ const Reception = () => {
                 Cadastrar Paciente
               </Button>
             </div>
+            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 -mt-4 mb-4">
+              Controle de Atendimento Ambulatorial
+            </h1>
             <ReceptionFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
