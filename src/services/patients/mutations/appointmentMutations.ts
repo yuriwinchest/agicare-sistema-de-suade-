@@ -26,18 +26,15 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
 
     console.log("Updating patient with ID:", id);
     
-    // Update patient record - removing the 'date' field that doesn't exist in the schema
+    // Update patient record with fields that exist in the patients table
     const { data, error } = await supabase
       .from('patients')
       .update({
         status: status || "Enfermagem",
         specialty: specialty,
         professional: professional,
-        // Removed 'date' field that was causing the error
         time: appointmentTime || format(today, "HH:mm"),
         reception: "Ambulatório",
-        health_plan: healthPlan,
-        health_card_number: healthCardNumber,
         attendance_type: attendanceType,
         updated_at: new Date().toISOString()
       })
@@ -51,6 +48,50 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
     }
 
     console.log("Patient update successful:", data);
+
+    // Update health plan and health card number in patient_additional_data table
+    if (healthPlan || healthCardNumber) {
+      try {
+        // First check if a record already exists
+        const { data: existingData } = await supabase
+          .from('patient_additional_data')
+          .select('id')
+          .eq('id', id)
+          .single();
+
+        if (existingData) {
+          // Update existing record
+          const { error: additionalError } = await supabase
+            .from('patient_additional_data')
+            .update({
+              health_plan: healthPlan || null,
+              health_card_number: healthCardNumber || null,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+          if (additionalError) {
+            console.error("Error updating patient additional data:", additionalError);
+          }
+        } else {
+          // Insert new record
+          const { error: additionalError } = await supabase
+            .from('patient_additional_data')
+            .insert({
+              id: id,
+              health_plan: healthPlan || null,
+              health_card_number: healthCardNumber || null
+            });
+
+          if (additionalError) {
+            console.error("Error inserting patient additional data:", additionalError);
+          }
+        }
+      } catch (additionalDataError) {
+        console.error("Error handling patient additional data:", additionalDataError);
+        // Continue even if this part fails
+      }
+    }
 
     // Registering the log
     try {
