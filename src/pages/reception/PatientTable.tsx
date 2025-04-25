@@ -1,24 +1,24 @@
-
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Phone, User, CheckCircle2 } from "lucide-react";
+import { Clock, Calendar, Phone, User, CheckCircle2 } from "lucide-react";
 import { getStatusClass, getDisplayStatus } from "./patientStatusUtils";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
-// Ajuste das larguras das colunas conforme quantidade de informação
+// Adjust column widths for better content display
 const columnClasses = [
-  "w-20 min-w-[55px] max-w-[60px]",         // Protocolo (mais compacta)
-  "w-64 min-w-[140px] max-w-[220px]",      // Paciente (mais larga)
-  "w-36 min-w-[70px] max-w-[120px]",       // CPF
-  "w-40 min-w-[90px] max-w-[120px]",       // Recepção
-  "w-52 min-w-[110px] max-w-[160px]",      // Data / Hora
-  "w-40 min-w-[90px] max-w-[120px]",       // Especialidade
-  "w-44 min-w-[110px] max-w-[170px]",      // Telefone
-  "w-32 min-w-[60px] max-w-[90px]",        // Status
-  "w-24 min-w-[60px] max-w-[80px] text-right" // Ações
+  "w-20 min-w-[55px] max-w-[60px]",      // Protocolo
+  "w-64 min-w-[140px] max-w-[220px]",    // Paciente
+  "w-36 min-w-[70px] max-w-[120px]",     // CPF
+  "w-40 min-w-[90px] max-w-[120px]",     // Recepção
+  "w-52 min-w-[110px] max-w-[160px]",    // Data / Hora
+  "w-40 min-w-[90px] max-w-[120px]",     // Especialidade
+  "w-44 min-w-[110px] max-w-[170px]",    // Profissional
+  "w-40 min-w-[90px] max-w-[120px]",     // Convênio
+  "w-32 min-w-[60px] max-w-[90px]",      // Status
+  "w-24 min-w-[60px] max-w-[80px]"       // Ações
 ];
 
 const PENDENTE_TOOLTIP = "O status será alterado para 'Confirmado' quando a especialidade, data e horário forem preenchidos no perfil deste paciente.";
@@ -72,15 +72,16 @@ const PatientTable = ({ patients, isLoading }) => {
               <Table className="bg-transparent">
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 shadow-md text-white">
-                    <TableHead className={columnClasses[0] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Protocolo</TableHead>
-                    <TableHead className={columnClasses[1] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Paciente</TableHead>
-                    <TableHead className={columnClasses[2] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>CPF</TableHead>
-                    <TableHead className={columnClasses[3] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Recepção</TableHead>
-                    <TableHead className={columnClasses[4] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Data / Hora</TableHead>
-                    <TableHead className={columnClasses[5] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Especialidade</TableHead>
-                    <TableHead className={columnClasses[6] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Telefone</TableHead>
-                    <TableHead className={columnClasses[7] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Status</TableHead>
-                    <TableHead className={columnClasses[8] + " text-white font-bold uppercase tracking-wider px-3 py-2"}>Ações</TableHead>
+                    <TableHead className={`${columnClasses[0]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Protocolo</TableHead>
+                    <TableHead className={`${columnClasses[1]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Paciente</TableHead>
+                    <TableHead className={`${columnClasses[2]} text-white font-bold uppercase tracking-wider px-3 py-2`}>CPF</TableHead>
+                    <TableHead className={`${columnClasses[3]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Recepção</TableHead>
+                    <TableHead className={`${columnClasses[4]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Data / Hora</TableHead>
+                    <TableHead className={`${columnClasses[5]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Especialidade</TableHead>
+                    <TableHead className={`${columnClasses[6]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Profissional</TableHead>
+                    <TableHead className={`${columnClasses[7]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Convênio</TableHead>
+                    <TableHead className={`${columnClasses[8]} text-white font-bold uppercase tracking-wider px-3 py-2`}>Status</TableHead>
+                    <TableHead className={`${columnClasses[9]} text-white font-bold uppercase tracking-wider px-3 py-2 text-right`}>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -88,73 +89,51 @@ const PatientTable = ({ patients, isLoading }) => {
                     const displayStatus = getDisplayStatus(patient);
                     const statusClass = getStatusClass(displayStatus);
 
-                    // Quando o mouse está sobre o nome, impedir hover na linha
-                    const [rowHovered, setRowHovered] = [false, () => {}]; // simulando desabilitado
-
                     return (
                       <TableRow
                         key={patient.id}
-                        className={
-                          `group transition-colors duration-200 ` +
-                          `[&:hover]:bg-blue-50/70 dark:[&:hover]:bg-slate-800 ` +
-                          `hover:!bg-transparent` // forçado: anular hover se houver hover-card
-                        }
-                        // Removemos a navegação pelo row se sobre o nome tiver hover, usando pointer-events abaixo
+                        className="group transition-colors duration-200 hover:bg-blue-50/70 dark:hover:bg-slate-800"
                         onClick={() => handlePatientClick(patient)}
-                        style={{ transition: "background 0.2s" }}
                       >
-                        <TableCell className={columnClasses[0] + " font-bold text-gray-700 group-hover:text-teal-700 px-3 py-2"}>
+                        <TableCell className={`${columnClasses[0]} font-bold text-gray-700 group-hover:text-teal-700 px-3 py-2`}>
                           {patient.protocol_number 
                             ? String(patient.protocol_number).padStart(3, "0")
                             : "--"
                           }
                         </TableCell>
-                        <TableCell className={columnClasses[1] + " px-3 py-2"}>
+                        <TableCell className={`${columnClasses[1]} px-3 py-2`}>
                           {displayStatus === "Pendente" ? (
-                            <div
-                              onClick={(e) => e.stopPropagation()}
-                              className="w-fit"
-                            >
-                              <PendingNameHoverCard>
-                                {patient.name}
-                              </PendingNameHoverCard>
+                            <div onClick={(e) => e.stopPropagation()} className="w-fit">
+                              <PendingNameHoverCard>{patient.name}</PendingNameHoverCard>
                             </div>
                           ) : (
                             <span className="font-medium text-gray-800 group-hover:text-teal-800">{patient.name}</span>
                           )}
                         </TableCell>
-                        <TableCell className={columnClasses[2] + " px-3 py-2"}>
-                          {patient.cpf ? (
-                            <span className="text-gray-600 group-hover:text-teal-600">{patient.cpf}</span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">Não informado</span>
-                          )}
+                        <TableCell className={`${columnClasses[2]} px-3 py-2`}>
+                          {patient.cpf || <span className="text-xs text-muted-foreground">Não informado</span>}
                         </TableCell>
-                        <TableCell className={columnClasses[3] + " px-3 py-2 text-gray-700 group-hover:text-teal-700"}>
+                        <TableCell className={`${columnClasses[3]} px-3 py-2`}>
                           {patient.reception || 'Não definida'}
                         </TableCell>
-                        <TableCell className={columnClasses[4] + " px-3 py-2"}>
+                        <TableCell className={`${columnClasses[4]} px-3 py-2`}>
                           <div className="flex items-center text-gray-600 group-hover:text-teal-600 gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>{patient.date ? patient.date : 'Não agendado'}</span>
+                            <span>{patient.date || 'Não agendado'}</span>
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>{patient.time ? patient.time : 'Não definido'}</span>
+                            <span>{patient.appointmentTime || 'Não definido'}</span>
                           </div>
                         </TableCell>
-                        <TableCell className={columnClasses[5] + " px-3 py-2"}>
-                          {patient.specialty ? (
-                            <span className="text-gray-700 group-hover:text-teal-600">{patient.specialty}</span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">Não definida</span>
-                          )}
+                        <TableCell className={`${columnClasses[5]} px-3 py-2`}>
+                          {patient.specialty || <span className="text-xs text-muted-foreground">Não definida</span>}
                         </TableCell>
-                        <TableCell className={columnClasses[6] + " px-3 py-2"}>
-                          <div className="flex items-center text-gray-600 group-hover:text-teal-700 gap-2">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span>{patient.phone || 'Não informado'}</span>
-                          </div>
+                        <TableCell className={`${columnClasses[6]} px-3 py-2`}>
+                          {patient.professional || <span className="text-xs text-muted-foreground">Não definido</span>}
                         </TableCell>
-                        <TableCell className={columnClasses[7] + " px-3 py-2"}>
+                        <TableCell className={`${columnClasses[7]} px-3 py-2`}>
+                          {patient.health_plan || <span className="text-xs text-muted-foreground">Não informado</span>}
+                        </TableCell>
+                        <TableCell className={`${columnClasses[8]} px-3 py-2`}>
                           {displayStatus === "Pendente" ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -170,8 +149,8 @@ const PatientTable = ({ patients, isLoading }) => {
                             <span className={statusClass}>{displayStatus}</span>
                           )}
                         </TableCell>
-                        <TableCell className={columnClasses[8] + " px-3 py-2"}>
-                          <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+                        <TableCell className={`${columnClasses[9]} px-3 py-2`}>
+                          <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <Button 
                               size="sm" 
                               variant="ghost" 
