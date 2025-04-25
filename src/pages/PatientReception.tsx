@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -57,6 +58,7 @@ const PatientReception = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [patient, setPatient] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     attendanceType: "",
@@ -116,6 +118,8 @@ const PatientReception = () => {
       return;
     }
     
+    setIsSubmitting(true);
+    
     if (id) {
       const professionalObj = professionals.find(p => p.id === formData.professional);
       const specialtyObj = specialties.find(s => s.id === formData.specialty);
@@ -154,6 +158,9 @@ const PatientReception = () => {
             description: "Ocorreu um erro ao processar a requisição.",
             variant: "destructive",
           });
+        })
+        .finally(() => {
+          setIsSubmitting(false);
         });
     }
   };
@@ -321,9 +328,10 @@ const PatientReception = () => {
                       <Button 
                         type="submit"
                         className="bg-teal-500 text-white hover:bg-teal-600"
+                        disabled={isSubmitting}
                       >
-                        Confirmar Atendimento
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        {isSubmitting ? "Processando..." : "Confirmar Atendimento"}
+                        {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
                       </Button>
                     </div>
                   </form>
