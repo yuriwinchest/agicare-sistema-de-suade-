@@ -9,7 +9,17 @@ interface ContactFormProps {
 
 const ContactForm: React.FC<ContactFormProps> = ({ data, onUpdate }) => {
   const handleChange = (field: string, value: string) => {
-    onUpdate({ [field]: value });
+    if (field.includes('.')) {
+      const [parentField, childField] = field.split('.');
+      onUpdate({ 
+        [parentField]: { 
+          ...(data[parentField] || {}), 
+          [childField]: value 
+        } 
+      });
+    } else {
+      onUpdate({ [field]: value });
+    }
   };
 
   return (
@@ -45,7 +55,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ data, onUpdate }) => {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
         <Input
-          value={data.addressDetails?.complement || ""}
+          value={(data.addressDetails?.complement) || ""}
           onChange={(e) => handleChange("addressDetails.complement", e.target.value)}
           placeholder="Complemento (apartamento, bloco, etc)"
         />

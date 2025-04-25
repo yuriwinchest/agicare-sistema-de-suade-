@@ -33,11 +33,30 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<any>({
     id: uuidv4(),
-    status: "Agendado"
+    status: "Agendado",
+    addressDetails: {} // Initialize the nested object
   });
 
   const handleUpdateFormData = (data: any) => {
-    setFormData((prev: any) => ({ ...prev, ...data }));
+    setFormData((prev: any) => {
+      // Handle deep merging of nested objects
+      const newData = { ...prev };
+      
+      Object.entries(data).forEach(([key, value]) => {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          // For objects, merge with existing values
+          newData[key] = {
+            ...(newData[key] || {}),
+            ...value
+          };
+        } else {
+          // For primitive values, just update
+          newData[key] = value;
+        }
+      });
+      
+      return newData;
+    });
   };
 
   const handleNext = () => {
