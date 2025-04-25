@@ -179,10 +179,42 @@ export const getAmbulatoryPatients = async (): Promise<Patient[]> => {
 
 export const getActiveAppointments = async (): Promise<any[]> => {
   try {
+    // Check if in demo mode
+    if (await isDemoMode()) {
+      console.log("Demo mode detected - returning mock appointment data");
+      // Return mock data for demo purposes
+      return [
+        {
+          id: "1",
+          patient: { name: "Maria Silva" },
+          date: new Date().toISOString().split('T')[0],
+          time: "09:00:00",
+          status: "confirmed",
+          notes: "Primeira consulta",
+          specialty: "Cardiologia",
+          professional: "Dr. João Santos",
+          health_plan: "Unimed"
+        },
+        {
+          id: "2",
+          patient: { name: "Pedro Oliveira" },
+          date: new Date().toISOString().split('T')[0],
+          time: "10:30:00",
+          status: "scheduled",
+          notes: "Retorno",
+          specialty: "Ortopedia",
+          professional: "Dra. Ana Lima",
+          health_plan: "SulAmérica"
+        }
+      ];
+    }
+    
+    // Attempt to fetch from Supabase
     const { data, error } = await supabase
-      .from('appointments')
-      .select('*, patient:patients(name)')
-      .eq('status', 'scheduled')
+      .from('patients')
+      .select('id, name, specialty, professional, health_plan, date, appointmentTime, status')
+      .not('appointmentTime', 'is', null)
+      .not('date', 'is', null)
       .order('date', { ascending: true });
       
     if (error) {
@@ -190,7 +222,21 @@ export const getActiveAppointments = async (): Promise<any[]> => {
       return [];
     }
     
-    return data || [];
+    // Transform patient data to appointment format
+    const appointments = data.map(patient => ({
+      id: patient.id,
+      patient: { name: patient.name },
+      date: patient.date,
+      time: patient.appointmentTime,
+      status: 'scheduled',
+      notes: "",
+      specialty: patient.specialty,
+      professional: patient.professional,
+      health_plan: patient.health_plan
+    }));
+    
+    console.log("Transformed appointments:", appointments);
+    return appointments || [];
   } catch (error) {
     console.error("Error in getActiveAppointments:", error);
     return [];
