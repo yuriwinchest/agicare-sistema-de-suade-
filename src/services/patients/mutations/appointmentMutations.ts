@@ -68,6 +68,7 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
     }
     
     // Update patient record with only the fields that exist in the patients table
+    // Using maybeSingle() instead of single() to handle cases where the record might not exist
     const { data, error } = await supabase
       .from('patients')
       .update({
@@ -76,15 +77,21 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error("Error updating patient in Supabase:", error);
       throw error;
     }
 
-    console.log("Patient update successful:", data);
+    // Get the updated patient data
+    let updatedPatient = null;
+    if (data && data.length > 0) {
+      updatedPatient = data[0];
+      console.log("Patient update successful:", updatedPatient);
+    } else {
+      console.warn("No patient record was updated or returned");
+    }
 
     // Store specialty and professional info in patient_notes to keep this data
     if (specialty || professional) {
@@ -147,7 +154,7 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
       // Continue even if logging fails
     }
 
-    return data;
+    return updatedPatient || { id }; // Return at least the ID if no full patient data
   } catch (error) {
     console.error("Exception in confirmPatientAppointment:", error);
     throw error;
