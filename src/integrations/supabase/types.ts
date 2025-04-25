@@ -651,6 +651,7 @@ export type Database = {
       patients: {
         Row: {
           address: string | null
+          attendance_type: string | null
           birth_date: string | null
           cns: string | null
           cpf: string | null
@@ -670,6 +671,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          attendance_type?: string | null
           birth_date?: string | null
           cns?: string | null
           cpf?: string | null
@@ -689,6 +691,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          attendance_type?: string | null
           birth_date?: string | null
           cns?: string | null
           cpf?: string | null
