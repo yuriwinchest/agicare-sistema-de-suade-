@@ -1,3 +1,4 @@
+
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -7,8 +8,10 @@ import {
   saveDraftPatient as saveDraftPatientMutation,
   loadDraftPatient as loadDraftPatientMutation,
   clearDraftPatient as clearDraftPatientMutation,
-  confirmPatientAppointment as confirmPatientAppointmentMutation
 } from "./patients/patientMutations";
+
+// Import the confirmPatientAppointment from the correct path
+import { confirmPatientAppointment as confirmPatientAppointmentMutation } from "./patients/mutations/appointmentMutations";
 
 export const formatDateForDatabase = (dateString: string | null): string | null => {
   if (!dateString) return null;

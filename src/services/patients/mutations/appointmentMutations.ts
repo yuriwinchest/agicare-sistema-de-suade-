@@ -20,25 +20,25 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
       throw new Error("Dados de atendimento incompletos");
     }
 
-    // Formatting the date for display
+    // Formatting the date for display in logs and descriptions only
     const today = new Date();
     const formattedDate = format(today, "dd/MM/yyyy");
 
     console.log("Updating patient with ID:", id);
     
-    // Update patient record now including the attendance_type
+    // Update patient record - removing the 'date' field that doesn't exist in the schema
     const { data, error } = await supabase
       .from('patients')
       .update({
         status: status || "Enfermagem",
         specialty: specialty,
         professional: professional,
-        date: formattedDate,
+        // Removed 'date' field that was causing the error
         time: appointmentTime || format(today, "HH:mm"),
         reception: "Ambulatório",
         health_plan: healthPlan,
         health_card_number: healthCardNumber,
-        attendance_type: attendanceType, // Added this line to save attendance_type
+        attendance_type: attendanceType,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
@@ -57,7 +57,7 @@ export const confirmPatientAppointment = async (id: string, appointmentData: any
       await addPatientLog({
         patient_id: id,
         action: "Consulta Registrada",
-        description: `Paciente encaminhado para ${status || "Enfermagem"} - ${specialty} com ${professional}. Tipo: ${attendanceType}`,
+        description: `Paciente encaminhado para ${status || "Enfermagem"} - ${specialty} com ${professional}. Tipo: ${attendanceType} - Data: ${formattedDate}`,
         performed_by: "Recepção"
       });
       
