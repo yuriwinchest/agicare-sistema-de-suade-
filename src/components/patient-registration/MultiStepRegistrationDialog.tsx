@@ -2,15 +2,13 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { attendanceTypes, specialties, professionals, healthPlans } from "@/components/patient-reception/constants";
 import PersonalInfoForm from "./steps/PersonalInfoForm";
 import ContactForm from "./steps/ContactForm";
 import ComplementaryDataForm from "./steps/ComplementaryDataForm";
 import DocumentsForm from "./steps/DocumentsForm";
 import AllergiesForm from "./steps/AllergiesForm";
 import AppointmentDetailsForm from "./steps/AppointmentDetailsForm";
+import { v4 as uuidv4 } from "uuid";
 
 interface MultiStepRegistrationDialogProps {
   isOpen: boolean;
@@ -33,7 +31,10 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   onComplete,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>({
+    id: uuidv4(),
+    status: "Agendado"
+  });
 
   const handleUpdateFormData = (data: any) => {
     setFormData((prev: any) => ({ ...prev, ...data }));
@@ -43,7 +44,21 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      onComplete(formData);
+      // Final step - complete registration
+      const finalData = {
+        ...formData,
+        // Ensure we have the proper structure for saving
+        status: "Agendado",
+      };
+      
+      // Add today's date if appointment date is not set
+      if (!finalData.date) {
+        const today = new Date();
+        finalData.date = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+      }
+      
+      console.log("Completing registration with data:", finalData);
+      onComplete(finalData);
     }
   };
 

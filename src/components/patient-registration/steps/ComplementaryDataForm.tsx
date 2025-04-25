@@ -9,10 +9,12 @@ interface ComplementaryDataFormProps {
 }
 
 const ComplementaryDataForm: React.FC<ComplementaryDataFormProps> = ({ data, onUpdate }) => {
+  const additionalData = data.additionalData || {};
+  
   const handleChange = (field: string, value: string) => {
     onUpdate({
       additionalData: {
-        ...(data.additionalData || {}),
+        ...additionalData,
         [field]: value
       }
     });
@@ -23,7 +25,7 @@ const ComplementaryDataForm: React.FC<ComplementaryDataFormProps> = ({ data, onU
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Nacionalidade</label>
         <Select
-          value={data.additionalData?.nationality}
+          value={additionalData.nationality || ""}
           onValueChange={(value) => handleChange("nationality", value)}
         >
           <SelectTrigger>
@@ -39,16 +41,25 @@ const ComplementaryDataForm: React.FC<ComplementaryDataFormProps> = ({ data, onU
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Naturalidade</label>
         <Input
-          value={data.additionalData?.place_of_birth || ""}
+          value={additionalData.place_of_birth || ""}
           onChange={(e) => handleChange("place_of_birth", e.target.value)}
           placeholder="Cidade de nascimento"
         />
       </div>
 
       <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Estado de Nascimento</label>
+        <Input
+          value={additionalData.place_of_birth_state || ""}
+          onChange={(e) => handleChange("place_of_birth_state", e.target.value)}
+          placeholder="Estado de nascimento"
+        />
+      </div>
+
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Ocupação</label>
         <Input
-          value={data.additionalData?.occupation || ""}
+          value={additionalData.occupation || ""}
           onChange={(e) => handleChange("occupation", e.target.value)}
           placeholder="Digite a ocupação"
         />

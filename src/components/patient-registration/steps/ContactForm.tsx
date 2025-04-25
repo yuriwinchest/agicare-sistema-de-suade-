@@ -41,6 +41,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ data, onUpdate }) => {
           placeholder="Digite o endereço completo"
         />
       </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+        <Input
+          value={data.addressDetails?.complement || ""}
+          onChange={(e) => handleChange("addressDetails.complement", e.target.value)}
+          placeholder="Complemento (apartamento, bloco, etc)"
+        />
+      </div>
     </div>
   );
 };

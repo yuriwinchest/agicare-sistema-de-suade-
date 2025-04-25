@@ -18,6 +18,8 @@ const PatientRegistration = () => {
 
   const handleComplete = async (formData: any) => {
     try {
+      console.log("Saving patient data:", formData);
+      
       const patientData = {
         ...formData,
         status: "Agendado"
