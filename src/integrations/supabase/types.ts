@@ -451,6 +451,7 @@ export type Database = {
       }
       patient_additional_data: {
         Row: {
+          city: string | null
           created_at: string | null
           education_level: string | null
           ethnicity: string | null
@@ -461,9 +462,11 @@ export type Database = {
           occupation: string | null
           place_of_birth: string | null
           place_of_birth_state: string | null
+          state: string | null
           updated_at: string | null
         }
         Insert: {
+          city?: string | null
           created_at?: string | null
           education_level?: string | null
           ethnicity?: string | null
@@ -474,9 +477,11 @@ export type Database = {
           occupation?: string | null
           place_of_birth?: string | null
           place_of_birth_state?: string | null
+          state?: string | null
           updated_at?: string | null
         }
         Update: {
+          city?: string | null
           created_at?: string | null
           education_level?: string | null
           ethnicity?: string | null
@@ -487,6 +492,7 @@ export type Database = {
           occupation?: string | null
           place_of_birth?: string | null
           place_of_birth_state?: string | null
+          state?: string | null
           updated_at?: string | null
         }
         Relationships: [
