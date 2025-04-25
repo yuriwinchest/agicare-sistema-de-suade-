@@ -22,6 +22,14 @@ export const saveCompletePatient = async (
       return false;
     }
     
+    console.log("Iniciando salvamento do paciente com dados:", {
+      patientData: patient,
+      additionalData,
+      documents,
+      allergies,
+      notes
+    });
+    
     // 1. Save basic patient data first and ensure it has been saved
     const savedPatient = await savePatient(patient);
     
@@ -30,7 +38,7 @@ export const saveCompletePatient = async (
       return false;
     }
     
-    console.log("Paciente salvo com sucesso:", savedPatient);
+    console.log("Dados básicos do paciente salvos com sucesso:", savedPatient);
     
     // Ensure we have a valid ID
     const patientId = savedPatient.id;
@@ -51,8 +59,8 @@ export const saveCompletePatient = async (
             id: patientId,
             ...additionalData
           };
-          await savePatientAdditionalData(patientAdditionalData);
-          console.log("Dados complementares salvos com sucesso");
+          const savedAdditionalData = await savePatientAdditionalData(patientAdditionalData);
+          console.log("Dados complementares salvos:", savedAdditionalData);
         } catch (error) {
           console.error("Erro ao salvar dados complementares:", error);
         }
@@ -63,14 +71,16 @@ export const saveCompletePatient = async (
     if (documents && documents.length > 0) {
       operations.push(async () => {
         try {
+          const savedDocuments = [];
           for (const doc of documents) {
-            if (!doc) continue; // Skip empty documents
-            await savePatientDocument({
+            if (!doc) continue;
+            const savedDoc = await savePatientDocument({
               ...doc,
               patient_id: patientId
             });
+            savedDocuments.push(savedDoc);
           }
-          console.log("Documentos salvos com sucesso");
+          console.log("Documentos salvos:", savedDocuments);
         } catch (error) {
           console.error("Erro ao salvar documentos:", error);
         }
@@ -81,14 +91,16 @@ export const saveCompletePatient = async (
     if (allergies && allergies.length > 0) {
       operations.push(async () => {
         try {
+          const savedAllergies = [];
           for (const allergy of allergies) {
-            if (!allergy) continue; // Skip empty allergies
-            await savePatientAllergy({
+            if (!allergy) continue;
+            const savedAllergy = await savePatientAllergy({
               ...allergy,
               patient_id: patientId
             });
+            savedAllergies.push(savedAllergy);
           }
-          console.log("Alergias salvas com sucesso");
+          console.log("Alergias salvas:", savedAllergies);
         } catch (error) {
           console.error("Erro ao salvar alergias:", error);
         }
@@ -99,12 +111,12 @@ export const saveCompletePatient = async (
     if (notes) {
       operations.push(async () => {
         try {
-          await savePatientNote({
+          const savedNote = await savePatientNote({
             patient_id: patientId,
             notes: notes,
             created_by: "Sistema"
           });
-          console.log("Notas salvas com sucesso");
+          console.log("Notas salvas:", savedNote);
         } catch (error) {
           console.error("Erro ao salvar notas:", error);
         }
@@ -116,6 +128,7 @@ export const saveCompletePatient = async (
       await operation();
     }
     
+    console.log("Processo de salvamento completo para o paciente:", patientId);
     return true;
   } catch (error) {
     console.error("Erro em saveCompletePatient:", error);
