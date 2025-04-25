@@ -18,6 +18,7 @@ interface ReceptionFiltersProps {
   setStatusFilter: (v: string) => void;
   receptionFilter: string;
   setReceptionFilter: (v: string) => void;
+  receptionOptions: string[];
 }
 
 const ReceptionFilters = ({
@@ -26,7 +27,8 @@ const ReceptionFilters = ({
   statusFilter,
   setStatusFilter,
   receptionFilter,
-  setReceptionFilter
+  setReceptionFilter,
+  receptionOptions = []
 }: ReceptionFiltersProps) => (
   <Card className="backdrop-blur-sm bg-white/40 dark:bg-slate-900/40 border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
     <CardHeader className="pb-3">
@@ -55,9 +57,17 @@ const ReceptionFilters = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Todas</SelectItem>
-              <SelectItem value="RECEPÇÃO CENTRAL">RECEPÇÃO CENTRAL</SelectItem>
-              <SelectItem value="RECEPÇÃO PEDIATRIA">RECEPÇÃO PEDIATRIA</SelectItem>
-              <SelectItem value="RECEPÇÃO ORTOPEDIA">RECEPÇÃO ORTOPEDIA</SelectItem>
+              {receptionOptions.length > 0 ? (
+                receptionOptions.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))
+              ) : (
+                <>
+                  <SelectItem value="RECEPÇÃO CENTRAL">RECEPÇÃO CENTRAL</SelectItem>
+                  <SelectItem value="RECEPÇÃO PEDIATRIA">RECEPÇÃO PEDIATRIA</SelectItem>
+                  <SelectItem value="RECEPÇÃO ORTOPEDIA">RECEPÇÃO ORTOPEDIA</SelectItem>
+                </>
+              )}
             </SelectContent>
           </Select>
         </div>

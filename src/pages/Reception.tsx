@@ -22,6 +22,7 @@ const Reception = () => {
   const [receptionFilter, setReceptionFilter] = useState("");
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [receptionOptions, setReceptionOptions] = useState<string[]>([]);
 
   const loadPatientList = async () => {
     setIsLoading(true);
@@ -29,6 +30,18 @@ const Reception = () => {
       const patientsData = await getAllPatients();
       console.log("Loaded patients:", patientsData);
       setPatients(patientsData);
+      
+      // Extract unique reception values from patients data
+      const uniqueReceptions = Array.from(
+        new Set(
+          patientsData
+            .map(patient => patient.reception)
+            .filter(reception => reception) // Filter out null/undefined values
+        )
+      ) as string[];
+      
+      console.log("Unique reception options:", uniqueReceptions);
+      setReceptionOptions(uniqueReceptions);
       setIsLoading(false);
     } catch (error) {
       console.error("Error loading patients:", error);
@@ -91,6 +104,7 @@ const Reception = () => {
               setStatusFilter={setStatusFilter}
               receptionFilter={receptionFilter}
               setReceptionFilter={setReceptionFilter}
+              receptionOptions={receptionOptions}
             />
             <PatientTable
               patients={filteredPatients}

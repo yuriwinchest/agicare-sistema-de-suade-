@@ -19,6 +19,11 @@ export const saveCompletePatient = async (
   try {
     console.log("Starting saveCompletePatient with data:", { patient, additionalData, documents, allergies, notes });
     
+    // Ensure reception field is set, if not provided, set a default value
+    if (!patient.reception) {
+      patient.reception = "RECEPÇÃO CENTRAL";
+    }
+    
     // 1. Salvar dados básicos do paciente
     const savedPatient = await savePatient(patient);
     
@@ -75,6 +80,14 @@ export const saveCompletePatient = async (
         created_by: "Sistema"
       });
     }
+    
+    // 6. Log the successful registration
+    await addPatientLog({
+      patient_id: savedPatient.id,
+      action: "Cadastro",
+      description: `Paciente cadastrado na ${patient.reception || 'recepção'}.`,
+      performed_by: "Sistema"
+    });
     
     console.log("Successfully saved complete patient data");
     return true;

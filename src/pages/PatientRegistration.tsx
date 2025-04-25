@@ -26,7 +26,9 @@ const PatientRegistration = () => {
       // Make sure the status is set correctly for the reception page to display properly
       const patientData = {
         ...formData,
-        status: "Agendado"
+        status: "Agendado",
+        // Set a default reception if not provided
+        reception: formData.reception || "RECEPÇÃO CENTRAL"
       };
 
       const success = await saveCompletePatient(
