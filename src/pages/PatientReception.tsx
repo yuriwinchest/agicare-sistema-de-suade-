@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -66,6 +65,7 @@ const PatientReception = () => {
     healthPlan: "",
     healthCardNumber: "",
     observations: "",
+    appointmentTime: ""
   });
   
   useEffect(() => {
@@ -131,7 +131,6 @@ const PatientReception = () => {
         status: "Enfermagem"
       };
       
-      // Fix function call to use two arguments
       confirmPatientAppointment(id, appointmentData)
         .then(updatedPatient => {
           if (updatedPatient) {
@@ -277,6 +276,19 @@ const PatientReception = () => {
                           id="healthCardNumber"
                           value={formData.healthCardNumber}
                           onChange={(e) => handleChange("healthCardNumber", e.target.value)}
+                          className="border-teal-500/20 focus-visible:ring-teal-500/30"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="appointmentTime" className="text-muted-foreground">
+                          Horário
+                        </Label>
+                        <Input
+                          id="appointmentTime"
+                          type="time"
+                          value={formData.appointmentTime}
+                          onChange={(e) => handleChange("appointmentTime", e.target.value)}
                           className="border-teal-500/20 focus-visible:ring-teal-500/30"
                         />
                       </div>
