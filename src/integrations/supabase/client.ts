@@ -32,3 +32,15 @@ export const supabase = createClient<Database>(
     },
   }
 );
+
+// Add helper function to check authentication state
+export const isAuthenticated = async (): Promise<boolean> => {
+  const { data } = await supabase.auth.getSession();
+  return !!data.session;
+};
+
+// Add helper to get current user ID
+export const getCurrentUserId = async (): Promise<string | null> => {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user?.id || null;
+};

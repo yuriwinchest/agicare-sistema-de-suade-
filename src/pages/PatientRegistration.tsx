@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isAuthenticated } from "@/integrations/supabase/client";
 import MultiStepRegistrationDialog from "@/components/patient-registration/MultiStepRegistrationDialog";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -12,27 +13,37 @@ import { isValidBirthDate, formatDateForDatabase } from "@/services/patients/uti
 const PatientRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated: authContextAuthenticated } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authConfirmed, setAuthConfirmed] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Acesso Negado",
-        description: "Você precisa estar logado para registrar pacientes.",
-        variant: "destructive",
-      });
-      navigate("/login");
-    }
-  }, [isAuthenticated, navigate, toast]);
+    const checkAuthentication = async () => {
+      const authenticated = await isAuthenticated();
+      setAuthConfirmed(authenticated);
+      
+      if (!authenticated) {
+        toast({
+          title: "Acesso Negado",
+          description: "Você precisa estar logado para registrar pacientes.",
+          variant: "destructive",
+        });
+        navigate("/login");
+      }
+    };
+    
+    checkAuthentication();
+  }, [navigate, toast]);
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
   const handleComplete = async (formData: any) => {
-    if (!isAuthenticated) {
+    // Double-check authentication right before saving
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
       toast({
         title: "Erro ao salvar",
         description: "Você precisa estar logado para registrar pacientes.",
@@ -79,6 +90,14 @@ const PatientRegistration = () => {
       };
 
       console.log("Formatted data for Supabase:", patientData);
+      
+      // Check session again just before the insert operation
+      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("Current session before insert:", sessionData?.session ? "Active" : "Not active");
+      
+      if (!sessionData?.session) {
+        throw new Error("Sessão de autenticação perdida. Faça login novamente.");
+      }
       
       // Insert directly into Supabase
       const { data: savedPatient, error } = await supabase
@@ -172,7 +191,7 @@ const PatientRegistration = () => {
       console.error("Error saving patient:", error);
       toast({
         title: "Erro ao salvar",
-        description: "Ocorreu um erro ao processar a requisição.",
+        description: error.message || "Ocorreu um erro ao processar a requisição.",
         variant: "destructive"
       });
     } finally {
@@ -180,8 +199,8 @@ const PatientRegistration = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return null; // Don't render anything while redirecting
+  if (!authConfirmed) {
+    return null; // Don't render anything while checking authentication
   }
 
   return (

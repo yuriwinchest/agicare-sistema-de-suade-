@@ -12,8 +12,9 @@ export const useSession = () => {
   const notification = useNotification();
 
   useEffect(() => {
+    // First set up the auth listener to react to auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Evento de autenticação:", event, session ? "Sessão presente" : "Sem sessão");
+      console.log("Auth state change event:", event, session ? "Session present" : "No session");
       
       if (event === 'SIGNED_IN' && session) {
         try {
@@ -23,16 +24,19 @@ export const useSession = () => {
             handleUserData(userData.user);
           }
         } catch (error) {
-          console.error("Erro ao obter dados do usuário após login:", error);
+          console.error("Error getting user data after login:", error);
         } finally {
           setIsLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
         handleSignOut();
         setIsLoading(false);
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log("Token refreshed successfully");
       }
     });
     
+    // Then check for existing session after setting up listener
     checkExistingSession();
     
     return () => {
@@ -51,6 +55,7 @@ export const useSession = () => {
     setUser(appUser);
     setIsAuthenticated(true);
     localStorage.setItem("user", JSON.stringify(appUser));
+    console.log("User authenticated:", appUser);
   };
 
   const handleSignOut = () => {
@@ -58,27 +63,33 @@ export const useSession = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("user");
     localStorage.removeItem("user_prefs");
+    console.log("User signed out");
   };
 
   const checkExistingSession = async () => {
     try {
+      console.log("Checking for existing session...");
       const { data: sessionData } = await supabase.auth.getSession();
       
       if (sessionData && sessionData.session) {
+        console.log("Existing session found");
         const { data: userData } = await supabase.auth.getUser();
         if (userData && userData.user) {
           handleUserData(userData.user);
         }
       } else {
+        console.log("No existing session found");
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
-          const parsedUser = JSON.parse(storedUser) as AppUser;
-          setUser(parsedUser);
-          setIsAuthenticated(true);
+          console.log("Found user in localStorage, but no active session");
+          // If we have a user in localStorage but no active session,
+          // we should clear the local storage to prevent auth mismatch
+          localStorage.removeItem("user");
+          localStorage.removeItem("user_prefs");
         }
       }
     } catch (error) {
-      console.error("Erro ao verificar sessão:", error);
+      console.error("Error checking session:", error);
     } finally {
       setIsLoading(false);
     }
