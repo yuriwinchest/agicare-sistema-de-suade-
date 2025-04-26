@@ -25,7 +25,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
 
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
-    const { data, error } = await supabase
+    const { data: patients, error } = await supabase
       .from('patients')
       .select('*')
       .order('created_at', { ascending: false });
@@ -35,7 +35,8 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       return [];
     }
 
-    const transformedData = data?.map(patient => ({
+    // Transform data to include additional fields
+    const transformedData = patients?.map(patient => ({
       ...patient,
       specialty: patient.attendance_type || "Não definida",
       professional: patient.father_name || "Não definido", 
