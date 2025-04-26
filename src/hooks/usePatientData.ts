@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { getPatientById } from "@/services/patientService";
 import { supabase } from "@/integrations/supabase/client";

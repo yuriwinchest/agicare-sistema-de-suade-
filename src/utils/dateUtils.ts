@@ -1,5 +1,5 @@
+
 import { format, parse, isValid } from 'date-fns';
-import { differenceInYears, parseISO } from 'date-fns';
 
 export const formatDateForDatabase = (dateString: string | null): string | null => {
   if (!dateString) return null;
@@ -81,15 +81,5 @@ export const isValidBirthDate = (dateString: string | null): boolean => {
     
   } catch {
     return false;
-  }
-};
-
-export const calculateAge = (birthDate: string): number => {
-  try {
-    const date = parseISO(birthDate);
-    return differenceInYears(new Date(), date);
-  } catch (error) {
-    console.error('Error calculating age:', error);
-    return 0;
   }
 };

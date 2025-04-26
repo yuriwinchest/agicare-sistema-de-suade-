@@ -44,118 +44,12 @@ const isDemoMode = async () => {
   }
 };
 
-export const savePatient = async (patient: Patient): Promise<Patient | null> => {
-  try {
-    if (patient.birth_date) {
-      patient.birth_date = formatDateForDatabase(patient.birth_date);
-    }
-
-    // Extract fields that don't belong in patients table
-    const { 
-      reception, 
-      professional, 
-      healthPlan, 
-      health_plan, 
-      specialty,
-      ...basicPatientData 
-    } = patient;
-
-    const patientData = {
-      id: basicPatientData.id || undefined,
-      name: basicPatientData.name,
-      cpf: basicPatientData.cpf || null,
-      phone: basicPatientData.phone || null,
-      email: basicPatientData.email || null,
-      address: typeof basicPatientData.address === 'object' ? JSON.stringify(basicPatientData.address) : basicPatientData.address,
-      birth_date: basicPatientData.birth_date ? formatDateForDatabase(basicPatientData.birth_date) : null,
-      status: basicPatientData.status || 'Agendado',
-      person_type: basicPatientData.person_type || null,
-      gender: basicPatientData.gender || null,
-      father_name: basicPatientData.father_name || null,
-      mother_name: basicPatientData.mother_name || null,
-      marital_status: basicPatientData.marital_status || null
-    };
-
-    console.log("Saving patient data:", patientData);
-
-    if (patientData.id) {
-      const { data: existingPatient, error: checkError } = await supabase
-        .from('patients')
-        .select('id')
-        .eq('id', patientData.id)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-
-      if (existingPatient) {
-        const { data, error } = await supabase
-          .from('patients')
-          .update(patientData)
-          .eq('id', patientData.id)
-          .select();
-
-        if (error) throw error;
-        return data[0] as Patient;
-      }
-    }
-
-    const { data, error } = await supabase
-      .from('patients')
-      .insert(patientData)
-      .select();
-
-    if (error) throw error;
-
-    const savedPatient = data[0] as Patient;
-    console.log("Patient saved successfully:", savedPatient);
-
-    // Save additional data separately
-    if (reception || professional || healthPlan || health_plan || specialty) {
-      const additionalData = {
-        id: savedPatient.id,
-        reception: reception || "RECEPÇÃO CENTRAL",
-        professional: professional || null,
-        health_plan: healthPlan || health_plan || null,
-        specialty: specialty || null
-      };
-
-      await supabase
-        .from('patient_additional_data')
-        .upsert(additionalData);
-    }
-
-    return savedPatient;
-  } catch (error) {
-    console.error("Error in savePatient:", error);
-    throw error;
-  }
-};
-
+export const savePatient = savePatientMutation;
 export const saveCompletePatient = saveCompletePatientMutation;
 export const saveDraftPatient = saveDraftPatientMutation;
 export const loadDraftPatient = loadDraftPatientMutation;
 export const clearDraftPatient = clearDraftPatientMutation;
 export const confirmPatientAppointment = confirmPatientAppointmentMutation;
-
-export const getPatientById = async (id: string): Promise<Patient | null> => {
-  try {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
-      
-    if (error) {
-      console.error("Error fetching patient:", error);
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error("Error in getPatientById:", error);
-    return null;
-  }
-};
 
 // Define interfaces for nested data objects to fix TypeScript errors
 interface PatientAdditionalDataType {
@@ -248,6 +142,26 @@ export const getAllPatients = async (): Promise<Patient[]> => {
   } catch (error) {
     console.error("Error in getAllPatients:", error);
     return [];
+  }
+};
+
+export const getPatientById = async (id: string): Promise<Patient | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+      
+    if (error) {
+      console.error("Error fetching patient:", error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in getPatientById:", error);
+    return null;
   }
 };
 
