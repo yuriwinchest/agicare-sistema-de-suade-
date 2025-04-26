@@ -46,37 +46,48 @@ export const usePatientRegistrationPage = () => {
     try {
       setIsSubmitting(true);
       
-      // Prepare data for saving
-      const finalData = {
-        ...formData,
-        status: "Agendado",
-        reception: formData.reception || "RECEPÇÃO CENTRAL",
-        specialty: formData.specialty || null,
-        professional: formData.professional || null,
-        health_plan: formData.healthPlan || null,
-        birth_date: formData.birth_date || null,
-        appointmentTime: formData.appointmentTime || null,
-        address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
-          ? JSON.stringify(formData.addressDetails) 
-          : null
-      };
-
-      // Check session again just before the insert operation
       const { data: sessionData } = await supabase.auth.getSession();
       
       if (!sessionData?.session) {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
-      
-      // Insert into Supabase
-      const { data: savedPatient, error } = await supabase
+
+      // First save the basic patient data
+      const { data: savedPatient, error: patientError } = await supabase
         .from('patients')
-        .insert(finalData)
+        .insert({
+          id: formData.id,
+          name: formData.name,
+          cpf: formData.cpf,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          birth_date: formData.birth_date,
+          status: formData.status,
+          person_type: formData.person_type,
+          gender: formData.gender,
+          mother_name: formData.mother_name,
+          father_name: formData.father_name,
+          marital_status: formData.marital_status,
+          attendance_type: formData.attendance_type
+        })
         .select()
         .single();
       
-      if (error) {
-        throw error;
+      if (patientError) {
+        throw patientError;
+      }
+
+      // Then save the additional data
+      if (formData.additionalData) {
+        const { error: additionalDataError } = await supabase
+          .from('patient_additional_data')
+          .insert(formData.additionalData);
+
+        if (additionalDataError) {
+          console.error("Error saving additional data:", additionalDataError);
+          throw new Error("Erro ao salvar dados adicionais do paciente");
+        }
       }
       
       toast({

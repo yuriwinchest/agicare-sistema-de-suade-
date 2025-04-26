@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -37,24 +36,21 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   const [formData, setFormData] = useState<any>({
     id: uuidv4(),
     status: "Agendado",
-    addressDetails: {}, // Initialize nested object
-    reception: "RECEPÇÃO CENTRAL" // Default reception value - will be stored in patient_additional_data
+    addressDetails: {},
+    reception: "RECEPÇÃO CENTRAL",
   });
 
   const handleUpdateFormData = (data: any) => {
     setFormData((prev: any) => {
-      // Deep merge handling for nested objects
       const newData = { ...prev };
       
       Object.entries(data).forEach(([key, value]) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // For objects, merge with existing values
           newData[key] = {
             ...(newData[key] || {}),
             ...value
           };
         } else {
-          // For primitive values, just update
           newData[key] = value;
         }
       });
@@ -67,41 +63,33 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - complete registration
-      // Prepare data for saving
-      const finalData = {
-        ...formData,
-        // Ensure we have the proper structure for saving
-        status: "Agendado",
-        // Make sure these fields are correctly passed along to be saved in patient_additional_data
-        reception: formData.reception || "RECEPÇÃO CENTRAL",
-        specialty: formData.specialty || null,
-        professional: formData.professional || null,
-        health_plan: formData.healthPlan || null,
-        birth_date: formData.birth_date || null,
-        // appointmentTime is saved separately
-        appointmentTime: formData.appointmentTime || null,
-        // Prepare address data in expected format
-        address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
-          ? JSON.stringify(formData.addressDetails) 
-          : null
-      };
-      
-      // Format documents if available
-      if (formData.documents && formData.documents.length > 0) {
-        finalData.documents = formData.documents;
-      }
-      
-      // Format allergies if available
-      if (formData.allergies && formData.allergies.length > 0) {
-        finalData.allergies = formData.allergies;
-      }
+      // Prepare data for saving by separating basic and additional data
+      const {
+        specialty,
+        professional,
+        health_plan,
+        reception,
+        additionalData,
+        addressDetails,
+        ...basicData
+      } = formData;
 
-      // Additional data
-      if (formData.additionalData) {
-        finalData.additionalData = formData.additionalData;
-      }
-      
+      // Create the final data structure
+      const finalData = {
+        ...basicData,
+        address: addressDetails && Object.keys(addressDetails).length > 0 
+          ? JSON.stringify(addressDetails) 
+          : null,
+        additionalData: {
+          id: basicData.id, // This is crucial - both tables need the same ID
+          specialty: specialty || null,
+          professional: professional || null,
+          health_plan: health_plan || null,
+          reception: reception || "RECEPÇÃO CENTRAL",
+          ...additionalData
+        }
+      };
+
       console.log("Finalizing registration with data:", finalData);
       onComplete(finalData);
     }
