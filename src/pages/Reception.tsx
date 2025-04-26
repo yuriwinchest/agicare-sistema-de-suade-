@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -80,6 +81,10 @@ const Reception = () => {
     const patientDisplayStatus = getDisplayStatus(patient);
     const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
     
+    // Filtros de especialidade e profissional
+    const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
+    const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
+    
     // Filtros de data
     let matchesDateRange = true;
     if (patient.date && (startDate || endDate)) {
@@ -114,10 +119,6 @@ const Reception = () => {
         matchesDateRange = true;
       }
     }
-    
-    // Filtros de especialidade e profissional
-    const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
-    const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
     
     return matchesSearch && matchesStatus && matchesDateRange && matchesSpecialty && matchesProfessional;
   });
@@ -155,59 +156,7 @@ const Reception = () => {
               setProfessionalFilter={setProfessionalFilter}
             />
             <PatientTable
-              patients={patients.filter((patient) => {
-                if (!patient) return false;
-                
-                // Filtro de nome ou CPF
-                const matchesSearch =
-                  (patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-                  (patient.cpf?.includes(searchTerm) || false);
-
-                // Filtro de status
-                const patientDisplayStatus = getDisplayStatus(patient);
-                const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
-                
-                // Filtros de data
-                let matchesDateRange = true;
-                if (patient.date && (startDate || endDate)) {
-                  try {
-                    let appointmentDate = null;
-                    try {
-                      appointmentDate = parseISO(patient.date);
-                    } catch (e) {
-                      console.warn("Date parse error:", e);
-                      matchesDateRange = true;
-                      return matchesDateRange && matchesSearch && matchesStatus && 
-                             matchesSpecialty && matchesProfessional;
-                    }
-                    
-                    if (startDate && endDate) {
-                      // Ambas as datas fornecidas - verificar se o agendamento está entre elas
-                      const start = startOfDay(startDate);
-                      const end = startOfDay(endDate);
-                      matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) && 
-                                         (isBefore(appointmentDate, end) || isEqual(appointmentDate, end));
-                    } else if (startDate) {
-                      // Apenas data inicial - verificar se o agendamento é igual ou posterior
-                      matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) || 
-                                         isEqual(appointmentDate, startOfDay(startDate));
-                    } else if (endDate) {
-                      // Apenas data final - verificar se o agendamento é igual ou anterior
-                      matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) || 
-                                         isEqual(appointmentDate, startOfDay(endDate));
-                    }
-                  } catch (error) {
-                    console.error("Erro ao filtrar por data:", error);
-                    matchesDateRange = true;
-                  }
-                }
-                
-                // Filtros de especialidade e profissional
-                const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
-                const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
-                
-                return matchesSearch && matchesStatus && matchesDateRange && matchesSpecialty && matchesProfessional;
-              })}
+              patients={filteredPatients}
               isLoading={isLoading}
             />
 

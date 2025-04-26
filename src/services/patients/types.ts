@@ -23,6 +23,7 @@ export interface Patient {
   health_plan?: string;
   date?: string;
   appointmentTime?: string;
+  attendance_type?: string;
 }
 
 export interface PatientDraft {
@@ -42,6 +43,7 @@ export interface PatientAdditionalData {
   specialty?: string;
   reception?: string;
   professional?: string;
+  appointmentTime?: string;
 }
 
 export interface PatientDocument {
