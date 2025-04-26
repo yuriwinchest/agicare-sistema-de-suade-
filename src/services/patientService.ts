@@ -10,7 +10,8 @@ export {
   saveDraftPatient,
   loadDraftPatient,
   clearDraftPatient,
-  confirmPatientAppointment
+  confirmPatientAppointment,
+  saveCompletePatient
 } from './patients';
 
 export { formatDateForDatabase, ensureProperDateFormat } from './patients/utils/dateUtils';

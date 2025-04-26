@@ -1,11 +1,12 @@
 
-import { Patient } from "../types";
 import { savePatient } from "./basicMutations";
+import { Patient } from "../types";
 import { 
   savePatientAdditionalData, 
   savePatientDocument, 
   savePatientAllergy, 
-  savePatientNote 
+  savePatientNote,
+  addPatientLog
 } from "../patientAdditionalDataService";
 
 export const saveCompletePatient = async (
@@ -23,42 +24,36 @@ export const saveCompletePatient = async (
       return false;
     }
     
-    // 2. Save additional data if provided
-    if (additionalData) {
-      const patientAdditionalData = {
-        id: savedPatient.id,
-        ...additionalData
-      };
-      await savePatientAdditionalData(patientAdditionalData);
-    }
+    // 2. Save additional data
+    const patientAdditionalData = {
+      id: savedPatient.id,
+      specialty: patient.specialty,
+      professional: patient.professional,
+      health_plan: patient.health_plan,
+      reception: patient.reception || "RECEPÇÃO CENTRAL",
+      appointmentTime: patient.appointmentTime || null,
+      ...(additionalData || {})
+    };
+    
+    await savePatientAdditionalData(patientAdditionalData);
     
     // 3. Save documents if provided
     if (documents && documents.length > 0) {
       for (const doc of documents) {
-        // Format document data correctly
-        const documentData = {
-          patient_id: savedPatient.id,
-          document_type: doc.document_type || doc.documentType,
-          document_number: doc.document_number || doc.documentNumber,
-          issuing_body: doc.issuing_body || doc.issuingBody || null,
-          issue_date: doc.issue_date || doc.issueDate || null
-        };
-        
-        await savePatientDocument(documentData);
+        await savePatientDocument({
+          ...doc,
+          patient_id: savedPatient.id
+        });
       }
     }
     
     // 4. Save allergies if provided
     if (allergies && allergies.length > 0) {
       for (const allergy of allergies) {
-        const allergyData = {
-          patient_id: savedPatient.id,
-          allergy_type: allergy.allergy_type || allergy.allergyType,
-          description: allergy.description,
-          severity: allergy.severity || "Média"
-        };
-        
-        await savePatientAllergy(allergyData);
+        await savePatientAllergy({
+          ...allergy,
+          patient_id: savedPatient.id
+        });
       }
     }
     
@@ -70,6 +65,14 @@ export const saveCompletePatient = async (
         created_by: "Sistema"
       });
     }
+
+    // Log the complete patient registration
+    await addPatientLog({
+      patient_id: savedPatient.id,
+      action: "Cadastro Completo",
+      description: "Paciente registrado com todos os dados",
+      performed_by: "Sistema"
+    });
     
     return true;
   } catch (error) {

@@ -5,7 +5,8 @@ import { formatDateForDatabase, ensureProperDateFormat } from "../utils/dateUtil
 
 export const getPatientById = async (id: string): Promise<Patient | null> => {
   try {
-    const { data, error } = await supabase
+    // First get basic patient data
+    const { data: patientData, error } = await supabase
       .from('patients')
       .select('*')
       .eq('id', id)
@@ -16,7 +17,28 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       return null;
     }
     
-    return data;
+    if (!patientData) {
+      return null;
+    }
+
+    // Then get patient additional data
+    const { data: additionalData } = await supabase
+      .from('patient_additional_data')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    
+    // Combine the data
+    const fullPatientData: Patient = {
+      ...patientData,
+      specialty: additionalData?.specialty || patientData.attendance_type || "Não definida",
+      professional: additionalData?.professional || patientData.father_name || "Não definido",
+      health_plan: additionalData?.health_plan || "Não informado",
+      reception: additionalData?.reception || "RECEPÇÃO CENTRAL",
+      appointmentTime: additionalData?.appointmentTime || null
+    };
+    
+    return fullPatientData;
   } catch (error) {
     console.error("Error in getPatientById:", error);
     return null;
@@ -25,6 +47,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
 
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
+    // First get all patients
     const { data: patients, error } = await supabase
       .from('patients')
       .select('*')
@@ -35,14 +58,40 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       return [];
     }
 
-    // Transform data to include additional fields
-    const transformedData = patients?.map(patient => ({
-      ...patient,
-      specialty: patient.attendance_type || "Não definida",
-      professional: patient.father_name || "Não definido", 
-      health_plan: "Não informado"
-    })) || [];
+    if (!patients || patients.length === 0) {
+      return [];
+    }
 
+    // Get all additional data for patients in one query
+    const patientIds = patients.map(p => p.id);
+    const { data: additionalDataArray } = await supabase
+      .from('patient_additional_data')
+      .select('*')
+      .in('id', patientIds);
+
+    // Create a map for quick lookup
+    const additionalDataMap = (additionalDataArray || []).reduce((acc, data) => {
+      acc[data.id] = data;
+      return acc;
+    }, {} as Record<string, any>);
+
+    // Transform data to include additional fields
+    const transformedData = patients.map(patient => {
+      const additionalData = additionalDataMap[patient.id] || {};
+      
+      return {
+        ...patient,
+        specialty: additionalData.specialty || patient.attendance_type || "Não definida",
+        professional: additionalData.professional || patient.father_name || "Não definido", 
+        health_plan: additionalData.health_plan || "Não informado",
+        reception: additionalData.reception || "RECEPÇÃO CENTRAL",
+        appointmentTime: additionalData.appointmentTime || null,
+        // Ensure date is properly formatted for display
+        date: patient.date || (patient.created_at ? ensureProperDateFormat(patient.created_at.split('T')[0]) : "Não agendado")
+      };
+    });
+
+    console.log("Transformed patient data:", transformedData);
     return transformedData;
   } catch (error) {
     console.error("Error in getAllPatients:", error);

@@ -1,105 +1,66 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { isDemoMode } from "../utils/demoUtils";
+import { ensureProperDateFormat } from "../utils/dateUtils";
 
 export const getActiveAppointments = async () => {
   try {
-    const demoMode = await isDemoMode();
-    
-    if (demoMode) {
-      // Return mock appointments in demo mode
-      return [
-        {
-          id: "demo-1",
-          patient: { name: "João Silva" },
-          date: new Date().toISOString().split('T')[0],
-          time: "09:00:00",
-          specialty: "Clínica Médica",
-          professional: "Dr. Carlos Santos",
-          health_plan: "Unimed",
-          status: "confirmed",
-          notes: "Retorno após exames"
-        },
-        {
-          id: "demo-2",
-          patient: { name: "Maria Oliveira" },
-          date: new Date().toISOString().split('T')[0],
-          time: "10:30:00",
-          specialty: "Cardiologia",
-          professional: "Dra. Ana Sousa",
-          health_plan: "Amil",
-          status: "scheduled",
-          notes: "Primeira consulta"
-        },
-        {
-          id: "demo-3",
-          patient: { name: "Pedro Costa" },
-          date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
-          time: "14:00:00",
-          specialty: "Ortopedia",
-          professional: "Dr. Roberto Almeida",
-          health_plan: "SulAmérica",
-          status: "confirmed",
-          notes: null
-        }
-      ];
-    }
-
-    // Get appointments with patient information
     const { data, error } = await supabase
       .from('appointments')
       .select(`
         *,
-        patient:patient_id(id, name)
+        patients(*)
       `)
       .in('status', ['scheduled', 'confirmed'])
-      .order('date', { ascending: true });
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
 
     if (error) {
-      console.error("Error fetching appointments:", error);
+      console.error("Error fetching active appointments:", error);
       return [];
     }
 
-    return data || [];
+    // Format dates and transform data
+    return (data || []).map(appointment => {
+      const patient = appointment.patients || {};
+      return {
+        id: appointment.id,
+        patient_id: appointment.patient_id,
+        date: ensureProperDateFormat(appointment.date) || "Não agendado",
+        time: appointment.time || "Não definido",
+        name: patient.name || "Paciente",
+        specialty: patient.specialty || "Não definida",
+        professional: patient.professional || "Não definido",
+        health_plan: patient.health_plan || "Não informado",
+        status: appointment.status || "scheduled"
+      };
+    });
   } catch (error) {
     console.error("Error in getActiveAppointments:", error);
     return [];
   }
 };
 
-// Get appointments for a specific patient
 export const getPatientAppointments = async (patientId: string) => {
   try {
-    const demoMode = await isDemoMode();
-    
-    if (demoMode) {
-      // Return mock appointments for this patient in demo mode
-      return [
-        {
-          id: "demo-appt-1",
-          date: new Date().toISOString().split('T')[0],
-          time: "09:00:00",
-          specialty: "Clínica Médica",
-          professional: "Dr. Carlos Santos",
-          status: "confirmed"
-        }
-      ];
-    }
-
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
       .eq('patient_id', patientId)
-      .order('date', { ascending: false });
+      .order('date', { ascending: false })
+      .order('time', { ascending: true });
 
     if (error) {
-      console.error("Error fetching patient appointments:", error);
+      console.error(`Error fetching appointments for patient ${patientId}:`, error);
       return [];
     }
 
-    return data || [];
+    // Format dates for display
+    return (data || []).map(appointment => ({
+      ...appointment,
+      date: ensureProperDateFormat(appointment.date)
+    }));
   } catch (error) {
-    console.error("Error in getPatientAppointments:", error);
+    console.error(`Error in getPatientAppointments for ${patientId}:`, error);
     return [];
   }
 };

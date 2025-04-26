@@ -27,6 +27,10 @@ export {
   savePatient
 } from './mutations/basicMutations';
 
+export {
+  saveCompletePatient
+} from './mutations/completeMutations';
+
 // Export types
 export type {
   Patient,

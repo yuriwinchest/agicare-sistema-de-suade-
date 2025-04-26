@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -30,8 +29,22 @@ const Reception = () => {
     try {
       console.log("Iniciando carregamento de pacientes...");
       const patientsData = await getAllPatients();
-      console.log("Pacientes carregados:", patientsData);
-      setPatients(patientsData);
+      console.log("Dados brutos dos pacientes:", patientsData);
+      
+      const processedPatients = patientsData.map(patient => {
+        return {
+          ...patient,
+          specialty: patient.specialty || patient.attendance_type || "Não definida",
+          professional: patient.professional || patient.father_name || "Não definido",
+          health_plan: patient.health_plan || "Não informado",
+          reception: patient.reception || "RECEPÇÃO CENTRAL",
+          date: patient.date || (patient.created_at ? patient.created_at.split('T')[0] : "Não agendado"),
+          appointmentTime: patient.appointmentTime || "Não definido",
+        };
+      });
+      
+      console.log("Pacientes processados:", processedPatients);
+      setPatients(processedPatients);
     } catch (error) {
       console.error("Erro ao carregar pacientes:", error);
       toast({
@@ -71,7 +84,15 @@ const Reception = () => {
     let matchesDateRange = true;
     if (patient.date && (startDate || endDate)) {
       try {
-        const appointmentDate = parseISO(patient.date);
+        let appointmentDate = null;
+        try {
+          appointmentDate = parseISO(patient.date);
+        } catch (e) {
+          console.warn("Date parse error:", e);
+          matchesDateRange = true;
+          return matchesDateRange && matchesSearch && matchesStatus && 
+                 matchesSpecialty && matchesProfessional;
+        }
         
         if (startDate && endDate) {
           // Ambas as datas fornecidas - verificar se o agendamento está entre elas
@@ -134,14 +155,69 @@ const Reception = () => {
               setProfessionalFilter={setProfessionalFilter}
             />
             <PatientTable
-              patients={filteredPatients}
+              patients={patients.filter((patient) => {
+                if (!patient) return false;
+                
+                // Filtro de nome ou CPF
+                const matchesSearch =
+                  (patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+                  (patient.cpf?.includes(searchTerm) || false);
+
+                // Filtro de status
+                const patientDisplayStatus = getDisplayStatus(patient);
+                const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
+                
+                // Filtros de data
+                let matchesDateRange = true;
+                if (patient.date && (startDate || endDate)) {
+                  try {
+                    let appointmentDate = null;
+                    try {
+                      appointmentDate = parseISO(patient.date);
+                    } catch (e) {
+                      console.warn("Date parse error:", e);
+                      matchesDateRange = true;
+                      return matchesDateRange && matchesSearch && matchesStatus && 
+                             matchesSpecialty && matchesProfessional;
+                    }
+                    
+                    if (startDate && endDate) {
+                      // Ambas as datas fornecidas - verificar se o agendamento está entre elas
+                      const start = startOfDay(startDate);
+                      const end = startOfDay(endDate);
+                      matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) && 
+                                         (isBefore(appointmentDate, end) || isEqual(appointmentDate, end));
+                    } else if (startDate) {
+                      // Apenas data inicial - verificar se o agendamento é igual ou posterior
+                      matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) || 
+                                         isEqual(appointmentDate, startOfDay(startDate));
+                    } else if (endDate) {
+                      // Apenas data final - verificar se o agendamento é igual ou anterior
+                      matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) || 
+                                         isEqual(appointmentDate, startOfDay(endDate));
+                    }
+                  } catch (error) {
+                    console.error("Erro ao filtrar por data:", error);
+                    matchesDateRange = true;
+                  }
+                }
+                
+                // Filtros de especialidade e profissional
+                const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
+                const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
+                
+                return matchesSearch && matchesStatus && matchesDateRange && matchesSpecialty && matchesProfessional;
+              })}
               isLoading={isLoading}
             />
 
             {/* Contador de pacientes para depuração */}
             <div className="text-xs text-gray-500">
               Total de pacientes carregados: {patients.length} | 
-              Após filtros: {filteredPatients.length}
+              Filtros aplicados: {searchTerm ? `Busca: "${searchTerm}"` : "Sem busca"}, 
+              {statusFilter ? `Status: "${statusFilter}"` : "Sem filtro de status"},
+              {specialtyFilter ? `Especialidade: "${specialtyFilter}"` : "Sem filtro de especialidade"},
+              {professionalFilter ? `Profissional: "${professionalFilter}"` : "Sem filtro de profissional"}
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +9,6 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { calculateAge } from "@/utils/dateUtils";
 import PatientActionsDialog from "@/components/electronic-record/PatientActionsDialog";
 
 const columnClasses = [
@@ -77,14 +77,6 @@ const PatientTable = ({ patients, isLoading }) => {
     }
   };
 
-  const getStatusColor = (id: string) => {
-    const lastDigit = parseInt(id.charAt(id.length - 1));
-    
-    if (lastDigit % 3 === 0) return "bg-yellow-400";
-    if (lastDigit % 3 === 1) return "bg-red-500";
-    return "bg-blue-500";
-  };
-
   const handlePatientCall = (patient: any) => {
     toast({
       title: "Paciente Chamado",
@@ -96,6 +88,29 @@ const PatientTable = ({ patients, isLoading }) => {
     navigate(`/patient/${patient.id}`);
   };
 
+  // Helper to safely format date/time for display
+  const formatDateTime = (date?: string, time?: string) => {
+    let formattedDate = "Não agendado";
+    let formattedTime = "Não definido";
+    
+    if (date) {
+      // Format date if it's in ISO format (YYYY-MM-DD)
+      if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
+        const [year, month, day] = date.split('-');
+        formattedDate = `${day}/${month}/${year}`;
+      } else {
+        formattedDate = date;
+      }
+    }
+    
+    // Use the provided time or default
+    if (time) {
+      formattedTime = time;
+    }
+    
+    return { formattedDate, formattedTime };
+  };
+
   if (isLoading) {
     return (
       <Card className="system-card">
@@ -105,6 +120,9 @@ const PatientTable = ({ patients, isLoading }) => {
       </Card>
     );
   }
+
+  // Log the patients received by the component for debugging
+  console.log("PatientTable rendering with patients:", patients);
 
   return (
     <Card className="system-card border-2 border-transparent shadow-lg bg-gradient-to-br from-teal-100/60 via-cyan-100/60 to-blue-50/40 p-1">
@@ -133,10 +151,15 @@ const PatientTable = ({ patients, isLoading }) => {
                 </TableHeader>
                 <TableBody>
                   {patients.map((patient) => {
+                    // Handle possible null/undefined patient
+                    if (!patient) return null;
+                    
+                    // Make sure we have valid values
                     const displayStatus = getDisplayStatus(patient);
                     const statusClass = getStatusClass(displayStatus);
-                    const appointmentTime = patient.appointmentTime || 'Não definido';
-                    const appointmentDate = patient.date || 'Não agendado';
+                    
+                    // Format date and time for display
+                    const { formattedDate, formattedTime } = formatDateTime(patient.date, patient.appointmentTime);
 
                     return (
                       <PatientActionsDialog
@@ -168,14 +191,14 @@ const PatientTable = ({ patients, isLoading }) => {
                             {patient.cpf || <span className="text-xs text-muted-foreground">Não informado</span>}
                           </TableCell>
                           <TableCell className={`${columnClasses[3]} px-3 py-2`}>
-                            {patient.reception || 'Não definida'}
+                            {patient.reception || <span className="text-xs text-muted-foreground">Não definida</span>}
                           </TableCell>
                           <TableCell className={`${columnClasses[4]} px-3 py-2`}>
                             <div className="flex items-center text-gray-600 group-hover:text-teal-600 gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
-                              <span>{appointmentDate}</span>
+                              <span>{formattedDate}</span>
                               <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span>{appointmentTime}</span>
+                              <span>{formattedTime}</span>
                             </div>
                           </TableCell>
                           <TableCell className={`${columnClasses[5]} px-3 py-2`}>
