@@ -1,11 +1,9 @@
+
 import * as React from "react"
 
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/ui/toast"
+import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
@@ -25,7 +23,7 @@ const actionTypes = {
 let count = 0
 
 function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  count = (count + 1) % Number.MAX_VALUE
   return count.toString()
 }
 
@@ -142,11 +140,14 @@ type Toast = Omit<ToasterToast, "id">
 function toast({ ...props }: Toast) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
+  // Set default variant to warning (orange) if not provided
+  const variant = props.variant || "warning";
+
+  const update = (props: ToasterToast) => dispatch({
+    type: "UPDATE_TOAST",
+    toast: { ...props, id },
+  })
+
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
   dispatch({
@@ -154,6 +155,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
+      variant, // Use the orange variant by default
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()

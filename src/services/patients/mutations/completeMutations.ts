@@ -19,14 +19,15 @@ export const saveCompletePatient = async (
   try {
     console.log("Starting saveCompletePatient with data:", { patient, additionalData, documents, allergies, notes });
     
-    // Ensure reception field is defined
-    if (!patient.reception) {
-      patient.reception = "RECEPÇÃO CENTRAL";
-    }
+    // Store reception separately to use with patient_additional_data
+    const reception = patient.reception || "RECEPÇÃO CENTRAL";
+    
+    // Remove reception from patient object as it's not in the patients table
+    const { reception: _, ...patientDataWithoutReception } = patient;
     
     // 1. Save patient basic data - Ensure data is properly formatted
     const patientData = {
-      ...patient,
+      ...patientDataWithoutReception,
       // Important properties
       name: patient.name,
       cpf: patient.cpf || null,
@@ -43,7 +44,7 @@ export const saveCompletePatient = async (
       mother_name: patient.mother_name || null,
       specialty: patient.specialty || null,
       attendance_type: patient.specialty || null,
-      // Remove professional and health_plan as they're not in the patients table schema
+      // Remove professional, health_plan and reception as they're not in the patients table schema
     };
     
     // Store health_plan and professional separately to use with patient_additional_data
@@ -80,11 +81,12 @@ export const saveCompletePatient = async (
     }
     
     // 2. Save complementary data if provided
-    if (healthPlan || professional || additionalData) {
+    if (healthPlan || professional || reception || additionalData) {
       const patientAdditionalData = {
         id: savedPatient.id,
         health_plan: healthPlan,
         professional: professional,
+        reception: reception, // Add reception to additional data
         ...(additionalData || {})
       };
       await savePatientAdditionalData(patientAdditionalData);
@@ -134,7 +136,7 @@ export const saveCompletePatient = async (
     await addPatientLog({
       patient_id: savedPatient.id,
       action: "Cadastro",
-      description: `Paciente cadastrado na ${patient.reception || 'recepção'}.`,
+      description: `Paciente cadastrado.`,
       performed_by: "Sistema"
     });
     

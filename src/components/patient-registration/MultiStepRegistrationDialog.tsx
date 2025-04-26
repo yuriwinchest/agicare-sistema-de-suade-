@@ -38,7 +38,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
     id: uuidv4(),
     status: "Agendado",
     addressDetails: {}, // Initialize nested object
-    reception: "Recepção Central" // Default reception value
+    reception: "RECEPÇÃO CENTRAL" // Default reception value - will be stored in patient_additional_data
   });
 
   const handleUpdateFormData = (data: any) => {
@@ -74,7 +74,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         // Ensure we have the proper structure for saving
         status: "Agendado",
         // Default reception if not defined
-        reception: formData.reception || "Recepção Central",
+        reception: formData.reception || "RECEPÇÃO CENTRAL",
         // Ensure specialized fields are properly mapped
         specialty: formData.specialty || null,
         professional: formData.professional || null,

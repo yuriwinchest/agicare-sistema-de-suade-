@@ -23,7 +23,10 @@ const PatientRegistration = () => {
       setIsSubmitting(true);
       console.log("Saving patient data:", formData);
       
-      // Format basic patient data
+      // Store reception separately
+      const reception = formData.reception || "RECEPÇÃO CENTRAL";
+      
+      // Format basic patient data - excluding fields not in patients table
       const patientData = {
         name: formData.name,
         cpf: formData.cpf || null,
@@ -35,11 +38,10 @@ const PatientRegistration = () => {
         mother_name: formData.mother_name || null,
         address: formData.address || null,
         status: "Agendado",
-        reception: formData.reception || "RECEPÇÃO CENTRAL",
         specialty: formData.specialty || null,
         attendance_type: formData.specialty || null,
         person_type: formData.person_type || null,
-        // Remove professional and health_plan fields as they're not in the patients table
+        // Remove professional, health_plan and reception fields as they're not in the patients table
       };
 
       console.log("Formatted data for Supabase:", patientData);
@@ -100,11 +102,12 @@ const PatientRegistration = () => {
       }
       
       // Save complementary data if provided
-      if (formData.healthPlan || formData.professional || formData.additionalData) {
+      if (formData.healthPlan || formData.professional || reception || formData.additionalData) {
         const additionalData = {
           id: patientId,
           health_plan: formData.healthPlan || null,
-          professional: formData.professional || null
+          professional: formData.professional || null,
+          reception: reception
         };
         
         if (formData.additionalData) {

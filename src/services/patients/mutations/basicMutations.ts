@@ -40,8 +40,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       marital_status: patient.marital_status || null,
       specialty: patient.specialty || null,
       attendance_type: patient.specialty || null,
-      reception: patient.reception || 'RECEPÇÃO CENTRAL'
-      // Remove professional and health_plan fields as they should be saved in additional data
+      // Remove reception field as it's not in the patients table schema
     };
 
     console.log("Saving patient data:", patientData);
@@ -60,15 +59,17 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     
     const savedPatient = data as Patient;
     
-    // Save the health plan and professional in patient_additional_data
-    if (patient.health_plan || patient.healthPlan || patient.professional) {
+    // Save the health plan, professional and reception in patient_additional_data
+    if (patient.health_plan || patient.healthPlan || patient.professional || patient.reception) {
       try {
         await supabase
           .from('patient_additional_data')
           .upsert({
             id: savedPatient.id,
             health_plan: patient.health_plan || patient.healthPlan || null,
-            professional: patient.professional || null
+            professional: patient.professional || null,
+            // Store reception in additional data
+            reception: patient.reception || "RECEPÇÃO CENTRAL"
           });
       } catch (additionalDataError) {
         console.error("Error saving additional data:", additionalDataError);
@@ -101,7 +102,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
         status: 'Agendado',
         specialty: patient.specialty || null
-        // professional and health_plan are stored in additional data
+        // professional, health_plan and reception are stored in additional data
       };
     }
     

@@ -1,3 +1,4 @@
+
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -49,22 +50,24 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       patient.birth_date = formatDateForDatabase(patient.birth_date);
     }
 
+    // Extract fields that don't belong in patients table
+    const { reception, professional, healthPlan, health_plan, ...basicPatientData } = patient;
+
     const patientData = {
-      id: patient.id || undefined,
-      name: patient.name,
-      cpf: patient.cpf || null,
-      phone: patient.phone || null,
-      email: patient.email || null,
-      address: typeof patient.address === 'object' ? JSON.stringify(patient.address) : patient.address,
-      birth_date: patient.birth_date ? formatDateForDatabase(patient.birth_date) : null,
-      status: patient.status || 'Agendado',
-      person_type: patient.person_type || null,
-      gender: patient.gender || null,
-      father_name: patient.father_name || null,
-      mother_name: patient.mother_name || null,
-      marital_status: patient.marital_status || null,
-      reception: patient.reception || "RECEPÇÃO CENTRAL",
-      attendance_type: patient.specialty || null
+      id: basicPatientData.id || undefined,
+      name: basicPatientData.name,
+      cpf: basicPatientData.cpf || null,
+      phone: basicPatientData.phone || null,
+      email: basicPatientData.email || null,
+      address: typeof basicPatientData.address === 'object' ? JSON.stringify(basicPatientData.address) : basicPatientData.address,
+      birth_date: basicPatientData.birth_date ? formatDateForDatabase(basicPatientData.birth_date) : null,
+      status: basicPatientData.status || 'Agendado',
+      person_type: basicPatientData.person_type || null,
+      gender: basicPatientData.gender || null,
+      father_name: basicPatientData.father_name || null,
+      mother_name: basicPatientData.mother_name || null,
+      marital_status: basicPatientData.marital_status || null,
+      attendance_type: basicPatientData.specialty || null
     };
 
     console.log("Saving patient data:", patientData);
@@ -100,10 +103,13 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     const savedPatient = data[0] as Patient;
     console.log("Patient saved successfully:", savedPatient);
 
-    if (patient.healthPlan || patient.specialty || patient.professional) {
+    // Save additional data separately
+    if (reception || professional || healthPlan || health_plan) {
       const additionalData = {
         id: savedPatient.id,
-        health_plan: patient.healthPlan || null
+        reception: reception || "RECEPÇÃO CENTRAL",
+        professional: professional || null,
+        health_plan: healthPlan || health_plan || null
       };
 
       await supabase

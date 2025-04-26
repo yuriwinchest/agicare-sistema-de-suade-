@@ -29,7 +29,7 @@ export interface Patient {
   mother_name?: string;
   father_name?: string;
   protocol_number?: number; 
-  reception?: string;
+  reception?: string; // This will be saved in patient_additional_data
   specialty?: string;
   professional?: string; // This will be saved in patient_additional_data
   health_plan?: string; // This will be saved in patient_additional_data
@@ -115,6 +115,7 @@ export interface PatientAdditionalData {
   city?: string;
   state?: string;
   professional?: string; // Added professional field
+  reception?: string; // Added reception field
 }
 
 export interface PatientDocument {

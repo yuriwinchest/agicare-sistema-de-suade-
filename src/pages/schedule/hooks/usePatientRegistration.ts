@@ -103,6 +103,8 @@ export const usePatientRegistration = ({ onSuccess }: UsePatientRegistrationProp
         gender: patientData.gender || "",
         status: patientData.status || "Agendado",
         protocol_number: patientData.protocol_number,
+        // reception will be saved in patient_additional_data
+        reception: "RECEPÇÃO CENTRAL"
       };
 
       const savedPatient = await savePatient(patientToSave);
