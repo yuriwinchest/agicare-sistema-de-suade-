@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Add this import
 import Layout from "@/components/layout/Layout";
 import MultiStepRegistrationDialog from "@/components/patient-registration/MultiStepRegistrationDialog";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,6 +8,7 @@ import { usePatientRegistrationPage } from "./patient-registration/hooks/usePati
 import { PatientRegistrationHeader } from "./patient-registration/components/PatientRegistrationHeader";
 
 const PatientRegistration = () => {
+  const navigate = useNavigate(); // Add this line to initialize the navigate function
   const {
     isDialogOpen,
     isSubmitting,
