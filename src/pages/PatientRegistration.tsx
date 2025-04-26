@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -7,19 +6,42 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MultiStepRegistrationDialog from "@/components/patient-registration/MultiStepRegistrationDialog";
 import { Toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/components/auth/AuthContext";
 import { isValidBirthDate, formatDateForDatabase } from "@/services/patients/utils/dateUtils";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Acesso Negado",
+        description: "Você precisa estar logado para registrar pacientes.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate, toast]);
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
   const handleComplete = async (formData: any) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Você precisa estar logado para registrar pacientes.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log("Saving patient data:", formData);
@@ -146,7 +168,7 @@ const PatientRegistration = () => {
       setTimeout(() => {
         navigate("/reception");
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving patient:", error);
       toast({
         title: "Erro ao salvar",
@@ -157,6 +179,10 @@ const PatientRegistration = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null; // Don't render anything while redirecting
+  }
 
   return (
     <Layout>
