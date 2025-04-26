@@ -38,24 +38,24 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   const [formData, setFormData] = useState<any>({
     id: uuidv4(),
     status: "Agendado",
-    addressDetails: {}, // Initialize the nested object
-    reception: "Recepção Central" // Default reception value
+    addressDetails: {}, // Inicializa o objeto aninhado
+    reception: "Recepção Central" // Valor padrão para recepção
   });
 
   const handleUpdateFormData = (data: any) => {
     setFormData((prev: any) => {
-      // Handle deep merging of nested objects
+      // Tratamento para mesclagem profunda de objetos aninhados
       const newData = { ...prev };
       
       Object.entries(data).forEach(([key, value]) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // For objects, merge with existing values
+          // Para objetos, mesclar com valores existentes
           newData[key] = {
             ...(newData[key] || {}),
             ...value
           };
         } else {
-          // For primitive values, just update
+          // Para valores primitivos, apenas atualizar
           newData[key] = value;
         }
       });
@@ -68,29 +68,30 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - complete registration
+      // Etapa final - concluir registro
       const today = new Date();
-      const formattedDate = formData.date || format(today, 'dd/MM/yyyy');
+      const formattedDate = formData.date || format(today, 'yyyy-MM-dd');
       
-      // Prepare data for saving
+      // Preparar dados para salvar
       const finalData = {
         ...formData,
-        // Ensure we have the proper structure for saving
+        // Garantir que temos a estrutura adequada para salvar
         status: "Agendado",
-        // Default reception if not set
+        // Recepção padrão se não estiver definida
         reception: formData.reception || "Recepção Central",
-        // Ensure specialized fields are correctly mapped
-        specialty: formData.specialty || "",
-        professional: formData.professional || "",
-        health_plan: formData.healthPlan || "",
+        // Garantir que campos especializados sejam mapeados corretamente
+        specialty: formData.specialty || null,
+        professional: formData.professional || null,
+        health_plan: formData.healthPlan || null,
+        birth_date: formData.birth_date || null,
         date: formattedDate,
-        // Prepare address data in the expected format
+        // Preparar dados de endereço no formato esperado
         address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
           ? JSON.stringify(formData.addressDetails) 
           : null
       };
       
-      // Format documents if available
+      // Formatar documentos se disponíveis
       if (formData.documents && formData.documents.length > 0) {
         finalData.documents = formData.documents.map((doc: any) => ({
           document_type: doc.documentType,
@@ -100,7 +101,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         }));
       }
       
-      // Format allergies if available
+      // Formatar alergias se disponíveis
       if (formData.allergies && formData.allergies.length > 0) {
         finalData.allergies = formData.allergies.map((allergy: any) => ({
           allergy_type: allergy.allergyType,

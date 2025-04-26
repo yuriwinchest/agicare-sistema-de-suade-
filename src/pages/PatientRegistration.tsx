@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { saveCompletePatient } from "@/services/patients/mutations/completeMutations";
+import { supabase } from "@/integrations/supabase/client";
 import MultiStepRegistrationDialog from "@/components/patient-registration/MultiStepRegistrationDialog";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -23,50 +23,105 @@ const PatientRegistration = () => {
       setIsSubmitting(true);
       console.log("Salvando dados do paciente:", formData);
       
-      // Formatar dados do paciente para gravação adequada
+      // Formatar dados básicos do paciente
       const patientData = {
-        ...formData,
+        name: formData.name,
+        cpf: formData.cpf || null,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        gender: formData.gender || null,
+        birth_date: formData.birth_date || null,
+        father_name: formData.father_name || null,
+        mother_name: formData.mother_name || null,
+        address: formData.address || null,
         status: "Agendado",
         reception: formData.reception || "RECEPÇÃO CENTRAL",
         specialty: formData.specialty || null,
         professional: formData.professional || null,
         health_plan: formData.healthPlan || null,
+        attendance_type: formData.specialty || null,
         date: formData.date || null,
-        appointmentTime: formData.appointmentTime || null
+        person_type: formData.person_type || null,
       };
 
-      // Separar dados adicionais, documentos e alergias para gravação adequada
-      const additionalData = formData.additionalData || null;
-      const documents = formData.documents || null;
-      const allergies = formData.allergies || null;
-      const observations = formData.observations || null;
-
-      // Chamar a função de gravação completa
-      const success = await saveCompletePatient(
-        patientData,
-        additionalData,
-        documents,
-        allergies,
-        observations
-      );
-
-      if (success) {
-        toast({
-          title: "Cadastro Salvo",
-          description: "Os dados do paciente foram salvos com sucesso."
-        });
-        
-        // Aguardar um momento antes de navegar para garantir que o toast seja visível
-        setTimeout(() => {
-          navigate("/reception");
-        }, 1500);
-      } else {
+      console.log("Dados formatados para supabase:", patientData);
+      
+      // Inserir diretamente no supabase
+      const { data: savedPatient, error } = await supabase
+        .from('patients')
+        .insert(patientData)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Erro ao salvar paciente:", error);
         toast({
           title: "Erro ao salvar",
-          description: "Ocorreu um erro ao salvar os dados do paciente.",
+          description: `Ocorreu um erro: ${error.message}`,
           variant: "destructive"
         });
+        return;
       }
+      
+      const patientId = savedPatient.id;
+      console.log("Paciente salvo com ID:", patientId);
+      
+      // Salvar documentos se fornecidos
+      if (formData.documents && formData.documents.length > 0) {
+        for (const doc of formData.documents) {
+          const docData = {
+            patient_id: patientId,
+            document_type: doc.documentType,
+            document_number: doc.documentNumber,
+            issuing_body: doc.issuingBody || "",
+            issue_date: doc.issueDate || null
+          };
+          
+          await supabase.from('patient_documents').insert(docData);
+        }
+      }
+      
+      // Salvar alergias se fornecidas
+      if (formData.allergies && formData.allergies.length > 0) {
+        for (const allergy of formData.allergies) {
+          const allergyData = {
+            patient_id: patientId,
+            allergy_type: allergy.allergyType,
+            description: allergy.description,
+            severity: allergy.severity || "Média"
+          };
+          
+          await supabase.from('patient_allergies').insert(allergyData);
+        }
+      }
+      
+      // Salvar dados complementares se fornecidos
+      if (formData.healthPlan) {
+        const additionalData = {
+          id: patientId,
+          health_plan: formData.healthPlan
+        };
+        
+        await supabase.from('patient_additional_data').insert(additionalData);
+      }
+      
+      // Registrar log de cadastro
+      await supabase.from('patient_logs').insert({
+        patient_id: patientId,
+        action: "Cadastro",
+        description: `Paciente cadastrado via formulário completo.`,
+        performed_by: "Sistema"
+      });
+      
+      toast({
+        title: "Cadastro Salvo",
+        description: "Os dados do paciente foram salvos com sucesso."
+      });
+      
+      // Aguardar um momento antes de navegar para garantir que o toast seja visível
+      setTimeout(() => {
+        navigate("/reception");
+      }, 1500);
     } catch (error) {
       console.error("Erro ao salvar paciente:", error);
       toast({

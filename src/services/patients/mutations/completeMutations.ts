@@ -50,7 +50,17 @@ export const saveCompletePatient = async (
     };
     
     console.log("Dados formatados para salvar:", patientData);
-    const savedPatient = await savePatient(patientData);
+    
+    let { data: savedPatient, error } = await supabase
+      .from('patients')
+      .insert(patientData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Erro ao salvar paciente:", error);
+      return false;
+    }
     
     if (!savedPatient) {
       console.error("Falha ao salvar dados básicos do paciente");
