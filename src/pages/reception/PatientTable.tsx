@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -178,11 +179,11 @@ const PatientTable = ({ patients, isLoading }) => {
                           )}
                         </TableCell>
                         <TableCell className={`${columnClasses[9]} px-3 py-2`}>
-                          <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="flex justify-end space-x-2">
                             <Button 
                               size="sm" 
                               variant="ghost" 
-                              className="teal-hover text-gray-500 hover:text-teal-600"
+                              className="text-gray-500 hover:text-teal-600"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/patient/${patient.id}`);
@@ -194,7 +195,7 @@ const PatientTable = ({ patients, isLoading }) => {
                             <Button 
                               size="sm" 
                               variant="ghost"
-                              className="teal-hover text-gray-500 hover:text-teal-600"
+                              className="text-gray-500 hover:text-teal-600"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/patient-registration/${patient.id}`);
@@ -220,7 +221,7 @@ const PatientTable = ({ patients, isLoading }) => {
                             <Button 
                               size="sm" 
                               variant="ghost"
-                              className="teal-hover text-gray-500 hover:text-teal-600"
+                              className="text-gray-500 hover:text-teal-600"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleCheckIn(patient);
