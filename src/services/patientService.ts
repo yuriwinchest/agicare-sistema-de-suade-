@@ -157,6 +157,24 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
   }
 };
 
+// Define interfaces for nested data objects to fix TypeScript errors
+interface PatientAdditionalDataType {
+  health_plan?: string | null;
+  reception?: string | null;
+  specialty?: string | null;
+}
+
+interface AppointmentType {
+  date?: string | null;
+  time?: string | null;
+  status?: string | null;
+}
+
+interface PatientDocumentType {
+  document_type?: string;
+  document_number?: string;
+}
+
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
     if (await isDemoMode()) {
@@ -201,8 +219,10 @@ export const getAllPatients = async (): Promise<Patient[]> => {
 
     // Transform the data to include all required fields
     const transformedData = patients?.map(patient => {
-      const additionalData = patient.patient_additional_data?.[0] || {};
-      const latestAppointment = patient.appointments?.[0] || {};
+      // Use type assertions and proper null handling for nested objects
+      const additionalData = patient.patient_additional_data?.[0] as PatientAdditionalDataType || {};
+      const latestAppointment = patient.appointments?.[0] as AppointmentType || {};
+      const documentData = patient.patient_documents?.[0] as PatientDocumentType || {};
 
       return {
         ...patient,
