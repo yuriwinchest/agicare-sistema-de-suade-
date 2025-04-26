@@ -43,9 +43,12 @@ export const saveCompletePatient = async (
       mother_name: patient.mother_name || null,
       specialty: patient.specialty || null,
       professional: patient.professional || null,
-      health_plan: patient.health_plan || patient.healthPlan || null,
       attendance_type: patient.specialty || null,
+      // Remove health_plan from here as it's not in the patients table
     };
+    
+    // Store health_plan separately to use with patient_additional_data
+    const healthPlan = patient.health_plan || patient.healthPlan || null;
     
     console.log("Formatted data for saving:", patientData);
     
@@ -77,10 +80,11 @@ export const saveCompletePatient = async (
     }
     
     // 2. Save complementary data if provided
-    if (additionalData) {
+    if (healthPlan || additionalData) {
       const patientAdditionalData = {
         id: savedPatient.id,
-        ...additionalData
+        health_plan: healthPlan,
+        ...(additionalData || {})
       };
       await savePatientAdditionalData(patientAdditionalData);
     }

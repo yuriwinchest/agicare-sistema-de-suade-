@@ -38,9 +38,9 @@ const PatientRegistration = () => {
         reception: formData.reception || "RECEPÇÃO CENTRAL",
         specialty: formData.specialty || null,
         professional: formData.professional || null,
-        health_plan: formData.healthPlan || null,
         attendance_type: formData.specialty || null,
         person_type: formData.person_type || null,
+        // Remove health_plan from here as it's not in the patients table
       };
 
       console.log("Formatted data for Supabase:", patientData);
