@@ -17,17 +17,17 @@ export const saveCompletePatient = async (
   notes?: string
 ): Promise<boolean> => {
   try {
-    console.log("Iniciando saveCompletePatient com dados:", { patient, additionalData, documents, allergies, notes });
+    console.log("Starting saveCompletePatient with data:", { patient, additionalData, documents, allergies, notes });
     
-    // Garantir que campo reception esteja definido
+    // Ensure reception field is defined
     if (!patient.reception) {
       patient.reception = "RECEPÇÃO CENTRAL";
     }
     
-    // 1. Salvar dados básicos do paciente - Certifica que os dados são formatados corretamente
+    // 1. Save patient basic data - Ensure data is properly formatted
     const patientData = {
       ...patient,
-      // Propriedades importantes
+      // Important properties
       name: patient.name,
       cpf: patient.cpf || null,
       phone: patient.phone || null,
@@ -45,10 +45,10 @@ export const saveCompletePatient = async (
       professional: patient.professional || null,
       health_plan: patient.health_plan || patient.healthPlan || null,
       attendance_type: patient.specialty || null,
-      // Removendo o campo date que estava causando o erro
+      // Remove any date field that's causing errors
     };
     
-    console.log("Dados formatados para salvar:", patientData);
+    console.log("Formatted data for saving:", patientData);
     
     let { data: savedPatient, error } = await supabase
       .from('patients')
@@ -57,27 +57,27 @@ export const saveCompletePatient = async (
       .single();
     
     if (error) {
-      console.error("Erro ao salvar paciente:", error);
+      console.error("Error saving patient:", error);
       return false;
     }
     
     if (!savedPatient) {
-      console.error("Falha ao salvar dados básicos do paciente");
+      console.error("Failed to save patient basic data");
       return false;
     }
     
-    console.log("Dados básicos do paciente salvos com sucesso:", savedPatient);
+    console.log("Patient basic data saved successfully:", savedPatient);
     
-    // Verificar se está em modo de demonstração e tratar adequadamente
+    // Check if in demo mode and handle accordingly
     const { data: session } = await supabase.auth.getSession();
     const isAuthenticated = !!session?.session;
     
     if (!isAuthenticated) {
-      console.log("Modo de demonstração detectado - processando dados adicionais no modo demonstração");
-      return true; // Em modo de demonstração, apenas retorna sucesso
+      console.log("Demo mode detected - processing additional data in demo mode");
+      return true; // In demo mode, just return success
     }
     
-    // 2. Salvar dados complementares se fornecidos
+    // 2. Save complementary data if provided
     if (additionalData) {
       const patientAdditionalData = {
         id: savedPatient.id,
@@ -86,9 +86,9 @@ export const saveCompletePatient = async (
       await savePatientAdditionalData(patientAdditionalData);
     }
     
-    // 3. Salvar documentos se fornecidos
+    // 3. Save documents if provided
     if (documents && documents.length > 0) {
-      console.log("Salvando documentos:", documents);
+      console.log("Saving documents:", documents);
       for (const doc of documents) {
         if (doc && doc.documentType && doc.documentNumber) {
           await savePatientDocument({
@@ -102,9 +102,9 @@ export const saveCompletePatient = async (
       }
     }
     
-    // 4. Salvar alergias se fornecidas
+    // 4. Save allergies if provided
     if (allergies && allergies.length > 0) {
-      console.log("Salvando alergias:", allergies);
+      console.log("Saving allergies:", allergies);
       for (const allergy of allergies) {
         if (allergy && allergy.allergyType && allergy.description) {
           await savePatientAllergy({
@@ -117,7 +117,7 @@ export const saveCompletePatient = async (
       }
     }
     
-    // 5. Salvar notas se fornecidas
+    // 5. Save notes if provided
     if (notes) {
       await savePatientNote({
         patient_id: savedPatient.id,
@@ -126,7 +126,7 @@ export const saveCompletePatient = async (
       });
     }
     
-    // 6. Registrar log de cadastro bem-sucedido
+    // 6. Register log for successful registration
     await addPatientLog({
       patient_id: savedPatient.id,
       action: "Cadastro",
@@ -134,10 +134,10 @@ export const saveCompletePatient = async (
       performed_by: "Sistema"
     });
     
-    console.log("Dados completos do paciente salvos com sucesso");
+    console.log("Complete patient data saved successfully");
     return true;
   } catch (error) {
-    console.error("Erro em saveCompletePatient:", error);
+    console.error("Error in saveCompletePatient:", error);
     return false;
   }
 };

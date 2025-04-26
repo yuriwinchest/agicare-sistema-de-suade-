@@ -41,8 +41,8 @@ export const PatientReceptionForm = ({
   return (
     <Card className="col-span-full md:col-span-2 section-fade system-card">
       <CardHeader>
-        <CardTitle className="flex items-center text-lg">
-          <ClipboardList className="h-5 w-5 mr-2 text-teal-500" />
+        <CardTitle className="flex items-center text-lg text-primary">
+          <ClipboardList className="h-5 w-5 mr-2 text-secondary" />
           Dados do Atendimento
         </CardTitle>
       </CardHeader>
@@ -58,7 +58,7 @@ export const PatientReceptionForm = ({
                 onValueChange={(value) => handleChange("attendanceType", value)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="attendanceType" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                <SelectTrigger id="attendanceType" className="border-secondary-light/30 focus-visible:ring-secondary/30">
                   <SelectValue placeholder="Selecione o tipo de atendimento" />
                 </SelectTrigger>
                 <SelectContent>
@@ -80,7 +80,7 @@ export const PatientReceptionForm = ({
                 onValueChange={(value) => handleChange("specialty", value)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="specialty" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                <SelectTrigger id="specialty" className="border-secondary-light/30 focus-visible:ring-secondary/30">
                   <SelectValue placeholder="Selecione a especialidade" />
                 </SelectTrigger>
                 <SelectContent>
@@ -104,7 +104,7 @@ export const PatientReceptionForm = ({
                 onValueChange={(value) => handleChange("professional", value)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="professional" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                <SelectTrigger id="professional" className="border-secondary-light/30 focus-visible:ring-secondary/30">
                   <SelectValue placeholder="Selecione o profissional" />
                 </SelectTrigger>
                 <SelectContent>
@@ -126,7 +126,7 @@ export const PatientReceptionForm = ({
                 onValueChange={(value) => handleChange("healthPlan", value)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="healthPlan" className="border-teal-500/20 focus-visible:ring-teal-500/30">
+                <SelectTrigger id="healthPlan" className="border-secondary-light/30 focus-visible:ring-secondary/30">
                   <SelectValue placeholder="Selecione o convênio" />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,7 +149,7 @@ export const PatientReceptionForm = ({
                 id="healthCardNumber"
                 value={formData.healthCardNumber}
                 onChange={(e) => handleChange("healthCardNumber", e.target.value)}
-                className="border-teal-500/20 focus-visible:ring-teal-500/30"
+                className="border-secondary-light/30 focus-visible:ring-secondary/30"
                 disabled={isSubmitting}
               />
             </div>
@@ -163,7 +163,7 @@ export const PatientReceptionForm = ({
                 type="time"
                 value={formData.appointmentTime}
                 onChange={(e) => handleChange("appointmentTime", e.target.value)}
-                className="border-teal-500/20 focus-visible:ring-teal-500/30"
+                className="border-secondary-light/30 focus-visible:ring-secondary/30"
                 disabled={isSubmitting}
               />
             </div>
@@ -177,7 +177,7 @@ export const PatientReceptionForm = ({
               id="observations"
               value={formData.observations}
               onChange={(e) => handleChange("observations", e.target.value)}
-              className="min-h-32 border-teal-500/20 focus-visible:ring-teal-500/30"
+              className="min-h-32 border-secondary-light/30 focus-visible:ring-secondary/30"
               placeholder="Insira informações adicionais sobre o atendimento, se necessário."
               disabled={isSubmitting}
             />
@@ -188,7 +188,7 @@ export const PatientReceptionForm = ({
               type="button"
               variant="outline"
               onClick={goBack}
-              className="border-teal-500/20 text-teal-600 hover:bg-teal-50 hover:border-teal-500/30"
+              className="border-secondary/20 text-secondary hover:bg-secondary/10"
               disabled={isSubmitting}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -197,7 +197,7 @@ export const PatientReceptionForm = ({
 
             <Button
               type="submit"
-              className="bg-teal-500 text-white hover:bg-teal-600"
+              className="bg-secondary text-white hover:bg-secondary-dark"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

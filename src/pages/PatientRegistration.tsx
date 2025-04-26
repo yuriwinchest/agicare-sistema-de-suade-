@@ -21,9 +21,9 @@ const PatientRegistration = () => {
   const handleComplete = async (formData: any) => {
     try {
       setIsSubmitting(true);
-      console.log("Salvando dados do paciente:", formData);
+      console.log("Saving patient data:", formData);
       
-      // Formatar dados básicos do paciente
+      // Format basic patient data
       const patientData = {
         name: formData.name,
         cpf: formData.cpf || null,
@@ -41,12 +41,11 @@ const PatientRegistration = () => {
         health_plan: formData.healthPlan || null,
         attendance_type: formData.specialty || null,
         person_type: formData.person_type || null,
-        // Removido o campo date que não existe na tabela patients
       };
 
-      console.log("Dados formatados para supabase:", patientData);
+      console.log("Formatted data for Supabase:", patientData);
       
-      // Inserir diretamente no supabase
+      // Insert directly into Supabase
       const { data: savedPatient, error } = await supabase
         .from('patients')
         .insert(patientData)
@@ -54,7 +53,7 @@ const PatientRegistration = () => {
         .single();
       
       if (error) {
-        console.error("Erro ao salvar paciente:", error);
+        console.error("Error saving patient:", error);
         toast({
           title: "Erro ao salvar",
           description: `Ocorreu um erro: ${error.message}`,
@@ -64,12 +63,12 @@ const PatientRegistration = () => {
       }
       
       const patientId = savedPatient.id;
-      console.log("Paciente salvo com ID:", patientId);
+      console.log("Patient saved with ID:", patientId);
       
-      // Salvar documentos se fornecidos
+      // Save documents if provided
       if (formData.documents && formData.documents.length > 0) {
         for (const doc of formData.documents) {
-          // Verificar se o documento tem os campos necessários
+          // Check if document has required fields
           if (doc && doc.documentType && doc.documentNumber) {
             const docData = {
               patient_id: patientId,
@@ -84,10 +83,10 @@ const PatientRegistration = () => {
         }
       }
       
-      // Salvar alergias se fornecidas
+      // Save allergies if provided
       if (formData.allergies && formData.allergies.length > 0) {
         for (const allergy of formData.allergies) {
-          // Verificar se a alergia tem os campos necessários
+          // Check if allergy has required fields
           if (allergy && allergy.allergyType && allergy.description) {
             const allergyData = {
               patient_id: patientId,
@@ -101,7 +100,7 @@ const PatientRegistration = () => {
         }
       }
       
-      // Salvar dados complementares se fornecidos
+      // Save complementary data if provided
       if (formData.healthPlan || formData.additionalData) {
         const additionalData = {
           id: patientId,
@@ -115,7 +114,7 @@ const PatientRegistration = () => {
         await supabase.from('patient_additional_data').insert(additionalData);
       }
       
-      // Registrar log de cadastro
+      // Register registration log
       await supabase.from('patient_logs').insert({
         patient_id: patientId,
         action: "Cadastro",
@@ -128,12 +127,12 @@ const PatientRegistration = () => {
         description: "Os dados do paciente foram salvos com sucesso."
       });
       
-      // Aguardar um momento antes de navegar para garantir que o toast seja visível
+      // Wait a moment before navigating to ensure the toast is visible
       setTimeout(() => {
         navigate("/reception");
       }, 1500);
     } catch (error) {
-      console.error("Erro ao salvar paciente:", error);
+      console.error("Error saving patient:", error);
       toast({
         title: "Erro ao salvar",
         description: "Ocorreu um erro ao processar a requisição.",
@@ -148,10 +147,10 @@ const PatientRegistration = () => {
     <Layout>
       <div className="page-container">
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" size="sm" onClick={handleGoBack}>
+          <Button variant="ghost" size="sm" onClick={handleGoBack} className="text-primary hover:bg-primary-light/10">
             Voltar
           </Button>
-          <div className="text-xl font-semibold text-teal-700">
+          <div className="text-xl font-semibold text-primary-dark">
             Cadastro do Paciente
           </div>
           <div> </div>

@@ -10,7 +10,6 @@ import DocumentsForm from "./steps/DocumentsForm";
 import AllergiesForm from "./steps/AllergiesForm";
 import AppointmentDetailsForm from "./steps/AppointmentDetailsForm";
 import { v4 as uuidv4 } from "uuid";
-import { format } from "date-fns";
 
 interface MultiStepRegistrationDialogProps {
   isOpen: boolean;
@@ -38,24 +37,24 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
   const [formData, setFormData] = useState<any>({
     id: uuidv4(),
     status: "Agendado",
-    addressDetails: {}, // Inicializa o objeto aninhado
-    reception: "Recepção Central" // Valor padrão para recepção
+    addressDetails: {}, // Initialize nested object
+    reception: "Recepção Central" // Default reception value
   });
 
   const handleUpdateFormData = (data: any) => {
     setFormData((prev: any) => {
-      // Tratamento para mesclagem profunda de objetos aninhados
+      // Deep merge handling for nested objects
       const newData = { ...prev };
       
       Object.entries(data).forEach(([key, value]) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          // Para objetos, mesclar com valores existentes
+          // For objects, merge with existing values
           newData[key] = {
             ...(newData[key] || {}),
             ...value
           };
         } else {
-          // Para valores primitivos, apenas atualizar
+          // For primitive values, just update
           newData[key] = value;
         }
       });
@@ -68,45 +67,43 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Etapa final - concluir registro
-      // Não usamos mais o campo date na tabela patients
-      
-      // Preparar dados para salvar
+      // Final step - complete registration
+      // Prepare data for saving
       const finalData = {
         ...formData,
-        // Garantir que temos a estrutura adequada para salvar
+        // Ensure we have the proper structure for saving
         status: "Agendado",
-        // Recepção padrão se não estiver definida
+        // Default reception if not defined
         reception: formData.reception || "Recepção Central",
-        // Garantir que campos especializados sejam mapeados corretamente
+        // Ensure specialized fields are properly mapped
         specialty: formData.specialty || null,
         professional: formData.professional || null,
         health_plan: formData.healthPlan || null,
         birth_date: formData.birth_date || null,
-        // appointmentTime é salvo separadamente
+        // appointmentTime is saved separately
         appointmentTime: formData.appointmentTime || null,
-        // Preparar dados de endereço no formato esperado
+        // Prepare address data in expected format
         address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
           ? JSON.stringify(formData.addressDetails) 
           : null
       };
       
-      // Formatar documentos se disponíveis
+      // Format documents if available
       if (formData.documents && formData.documents.length > 0) {
         finalData.documents = formData.documents;
       }
       
-      // Formatar alergias se disponíveis
+      // Format allergies if available
       if (formData.allergies && formData.allergies.length > 0) {
         finalData.allergies = formData.allergies;
       }
 
-      // Dados adicionais
+      // Additional data
       if (formData.additionalData) {
         finalData.additionalData = formData.additionalData;
       }
       
-      console.log("Finalizando cadastro com dados:", finalData);
+      console.log("Finalizing registration with data:", finalData);
       onComplete(finalData);
     }
   };
@@ -138,9 +135,11 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] system-modal bg-white dark:bg-slate-800">
         <DialogHeader>
-          <DialogTitle>Cadastro de Paciente - {steps[currentStep].title}</DialogTitle>
+          <DialogTitle className="text-primary-dark dark:text-white">
+            Cadastro de Paciente - {steps[currentStep].title}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="flex mb-4">
@@ -148,7 +147,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
             <div
               key={step.id}
               className={`h-2 flex-1 mx-1 rounded ${
-                index <= currentStep ? "bg-teal-500" : "bg-gray-200"
+                index <= currentStep ? "bg-secondary" : "bg-gray-200 dark:bg-gray-600"
               }`}
             />
           ))}
@@ -161,12 +160,14 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
             variant="outline"
             onClick={handleBack}
             disabled={currentStep === 0 || isSubmitting}
+            className="border-secondary text-secondary hover:bg-secondary/10"
           >
             Voltar
           </Button>
           <Button 
             onClick={handleNext} 
             disabled={isSubmitting}
+            className="bg-primary text-white hover:bg-primary-light"
           >
             {currentStep === steps.length - 1 ? (
               <>

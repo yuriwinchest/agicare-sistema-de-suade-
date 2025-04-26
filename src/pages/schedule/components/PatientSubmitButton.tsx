@@ -10,7 +10,7 @@ interface PatientSubmitButtonProps {
 
 const PatientSubmitButton: React.FC<PatientSubmitButtonProps> = ({ onClick, isSubmitting }) => (
   <Button
-    className="gap-2 bg-teal-600 hover:bg-teal-700"
+    className="gap-2 bg-secondary hover:bg-secondary-light text-white"
     onClick={onClick}
     disabled={isSubmitting}
     type="button"
