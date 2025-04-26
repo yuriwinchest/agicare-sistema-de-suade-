@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +11,12 @@ interface PersonalInfoFieldsProps {
   onBirthDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ data, birthDate, onChange, onBirthDateChange }) => (
+const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ 
+  data, 
+  birthDate, 
+  onChange, 
+  onBirthDateChange 
+}) => (
   <div className="space-y-4">
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="col-span-2">
@@ -57,9 +61,9 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ data, birthDate
           className="border-teal-500/30 focus-visible:ring-teal-500/30"
           value={birthDate}
           onChange={(e) => {
-            onBirthDateChange(e);
-            onChange("birthDate", e.target.value);
-            onChange("birth_date", e.target.value);
+            const maskedValue = onBirthDateChange(e);
+            onChange("birthDate", maskedValue);
+            onChange("birth_date", maskedValue);
           }}
           maxLength={10}
         />

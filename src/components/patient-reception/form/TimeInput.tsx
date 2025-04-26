@@ -14,6 +14,29 @@ export const TimeInput: React.FC<TimeInputProps> = ({
   onChange,
   isDisabled = false,
 }) => {
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let timeValue = e.target.value.replace(/\D/g, '');
+    
+    // Limita a 4 dígitos (HHmm)
+    timeValue = timeValue.slice(0, 4);
+    
+    // Formata automaticamente HH:mm
+    if (timeValue.length >= 2) {
+      timeValue = timeValue.slice(0, 2) + ':' + timeValue.slice(2);
+    }
+    
+    // Simula um evento com o valor formatado
+    const newEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        value: timeValue
+      }
+    };
+    
+    onChange(newEvent);
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="appointmentTime" className="text-muted-foreground">
@@ -21,9 +44,11 @@ export const TimeInput: React.FC<TimeInputProps> = ({
       </Label>
       <Input
         id="appointmentTime"
-        type="time"
+        type="text" // Mudamos para text para ter mais controle sobre a formatação
         value={value}
-        onChange={onChange}
+        onChange={handleTimeChange}
+        placeholder="HH:mm"
+        maxLength={5}
         className="border-secondary-light/30 focus-visible:ring-secondary/30"
         disabled={isDisabled}
       />

@@ -5,26 +5,35 @@ export const useDateMask = (initialValue: string = '') => {
   const [value, setValue] = useState(initialValue);
 
   const maskDate = (input: string) => {
-    // Remove any non-digit characters
+    // Remove caracteres não numéricos
     let numbers = input.replace(/\D/g, '');
     
-    // Limit to 8 digits (ddmmyyyy)
+    // Limita a 8 dígitos (ddmmyyyy)
     numbers = numbers.slice(0, 8);
     
-    // Add slashes for date format
-    if (numbers.length > 4) {
-      numbers = numbers.slice(0, 2) + '/' + numbers.slice(2, 4) + '/' + numbers.slice(4, 8);
-    } else if (numbers.length > 2) {
-      numbers = numbers.slice(0, 2) + '/' + numbers.slice(2);
-    }
+    // Adiciona as barras automaticamente
+    let formattedDate = numbers;
     
-    return numbers;
+    if (numbers.length >= 2) {
+      formattedDate = numbers.slice(0, 2) + (numbers.length > 2 ? '/' : '');
+    }
+    if (numbers.length >= 4) {
+      formattedDate = formattedDate.slice(0, 5) + (numbers.length > 4 ? '/' : '') + numbers.slice(4);
+    }
+    if (numbers.length > 4) {
+      formattedDate = formattedDate.slice(0, 5) + numbers.slice(4, 6) + (numbers.length > 6 ? '/' : '');
+    }
+    if (numbers.length > 6) {
+      formattedDate = formattedDate.slice(0, 8) + numbers.slice(6, 8);
+    }
+
+    return formattedDate;
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const maskedValue = maskDate(e.target.value);
     setValue(maskedValue);
-    return maskedValue; // Return the masked value
+    return maskedValue;
   };
 
   return { value, handleDateChange };
