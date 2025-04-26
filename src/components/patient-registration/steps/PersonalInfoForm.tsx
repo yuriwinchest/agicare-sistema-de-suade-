@@ -2,6 +2,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ensureProperDateFormat } from "@/services/patients/utils/dateUtils";
 
 interface PersonalInfoFormProps {
   data: any;
@@ -11,6 +12,18 @@ interface PersonalInfoFormProps {
 const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) => {
   const handleChange = (field: string, value: string) => {
     onUpdate({ [field]: value });
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Format the date correctly as user types
+    const inputValue = e.target.value;
+    const formattedDate = ensureProperDateFormat(inputValue);
+    
+    // Update with the formatted value
+    handleChange("birth_date", formattedDate);
+    
+    // Return the formatted date to update the input value
+    return formattedDate;
   };
 
   return (
@@ -27,9 +40,10 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
         <Input
-          type="date"
           value={data.birth_date || ""}
-          onChange={(e) => handleChange("birth_date", e.target.value)}
+          onChange={handleDateChange}
+          placeholder="DD/MM/AAAA"
+          maxLength={10}
         />
       </div>
 

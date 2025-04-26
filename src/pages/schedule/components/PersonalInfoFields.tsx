@@ -61,6 +61,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ data, birthDate
             onChange("birthDate", e.target.value);
             onChange("birth_date", e.target.value);
           }}
+          maxLength={10}
         />
       </div>
       <div>

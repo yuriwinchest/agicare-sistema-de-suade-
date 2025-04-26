@@ -12,9 +12,9 @@ export const useDateMask = (initialValue: string = '') => {
     numbers = numbers.slice(0, 8);
     
     // Add slashes for date format
-    if (numbers.length >= 4) {
-      numbers = numbers.slice(0, 2) + '/' + numbers.slice(2, 4) + '/' + numbers.slice(4);
-    } else if (numbers.length >= 2) {
+    if (numbers.length > 4) {
+      numbers = numbers.slice(0, 2) + '/' + numbers.slice(2, 4) + '/' + numbers.slice(4, 8);
+    } else if (numbers.length > 2) {
       numbers = numbers.slice(0, 2) + '/' + numbers.slice(2);
     }
     

@@ -22,3 +22,27 @@ export const formatDateForDatabase = (dateString: string | null): string | null 
     return null;
   }
 };
+
+// Add a function to ensure proper date format for display
+export const ensureProperDateFormat = (dateString: string): string => {
+  // If the input is empty, return empty string
+  if (!dateString) return '';
+  
+  // Remove all non-digit characters
+  const digitsOnly = dateString.replace(/\D/g, '');
+  
+  // Limit to 8 digits total (DDMMYYYY)
+  const limitedDigits = digitsOnly.slice(0, 8);
+  
+  // Format with slashes
+  let formattedDate = '';
+  if (limitedDigits.length > 4) {
+    formattedDate = `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2, 4)}/${limitedDigits.slice(4, 8)}`;
+  } else if (limitedDigits.length > 2) {
+    formattedDate = `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2)}`;
+  } else {
+    formattedDate = limitedDigits;
+  }
+  
+  return formattedDate;
+};
