@@ -21,16 +21,17 @@ export const getActiveAppointments = async () => {
 
     // Format dates and transform data
     return (data || []).map(appointment => {
+      // Handle empty patient data by using a default object and optional chaining
       const patient = appointment.patients || {};
       return {
         id: appointment.id,
         patient_id: appointment.patient_id,
         date: ensureProperDateFormat(appointment.date) || "Não agendado",
         time: appointment.time || "Não definido",
-        name: patient.name || "Paciente",
-        specialty: patient.specialty || "Não definida",
-        professional: patient.professional || "Não definido",
-        health_plan: patient.health_plan || "Não informado",
+        name: patient?.name || "Paciente",
+        specialty: patient?.specialty || "Não definida",
+        professional: patient?.professional || "Não definido",
+        health_plan: patient?.health_plan || "Não informado",
         status: appointment.status || "scheduled"
       };
     });

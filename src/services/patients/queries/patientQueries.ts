@@ -28,9 +28,10 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       .eq('id', id)
       .maybeSingle();
     
-    // Combine the data
+    // Combine the data with safe access to properties
     const fullPatientData: Patient = {
       ...patientData,
+      // Use safe optional chaining and fallbacks
       specialty: additionalData?.specialty || patientData.attendance_type || "Não definida",
       professional: additionalData?.professional || patientData.father_name || "Não definido",
       health_plan: additionalData?.health_plan || "Não informado",
@@ -81,11 +82,11 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       
       return {
         ...patient,
-        specialty: additionalData.specialty || patient.attendance_type || "Não definida",
-        professional: additionalData.professional || patient.father_name || "Não definido", 
-        health_plan: additionalData.health_plan || "Não informado",
-        reception: additionalData.reception || "RECEPÇÃO CENTRAL",
-        appointmentTime: additionalData.appointmentTime || null,
+        specialty: additionalData?.specialty || patient.attendance_type || "Não definida",
+        professional: additionalData?.professional || patient.father_name || "Não definido", 
+        health_plan: additionalData?.health_plan || "Não informado",
+        reception: additionalData?.reception || "RECEPÇÃO CENTRAL",
+        appointmentTime: additionalData?.appointmentTime || null,
         // Ensure date is properly formatted for display
         date: patient.date || (patient.created_at ? ensureProperDateFormat(patient.created_at.split('T')[0]) : "Não agendado")
       };

@@ -44,6 +44,18 @@ export interface PatientAdditionalData {
   reception?: string;
   professional?: string;
   appointmentTime?: string;
+  // Add any other fields in patient_additional_data table
+  place_of_birth?: string;
+  place_of_birth_state?: string;
+  city?: string;
+  state?: string;
+  nationality?: string;
+  ethnicity?: string;
+  education_level?: string;
+  occupation?: string;
+  health_card_number?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PatientDocument {

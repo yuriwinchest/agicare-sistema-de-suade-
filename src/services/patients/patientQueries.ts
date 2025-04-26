@@ -1,9 +1,13 @@
+// This file is deprecated and is no longer being used
+// All query functions have been moved to ./queries/patientQueries.ts
+// Keeping this file for reference only
 
 import { Patient } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 
 // Export query functions for patients
 export const getPatientById = async (id: string): Promise<Patient | null> => {
+  console.warn("Using deprecated patientQueries.ts file. This should be updated to use ./queries/patientQueries.ts");
   try {
     const { data, error } = await supabase
       .from('patients')
@@ -24,6 +28,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
 };
 
 export const getAllPatients = async (): Promise<Patient[]> => {
+  console.warn("Using deprecated patientQueries.ts file. This should be updated to use ./queries/patientQueries.ts");
   try {
     const { data, error } = await supabase
       .from('patients')
