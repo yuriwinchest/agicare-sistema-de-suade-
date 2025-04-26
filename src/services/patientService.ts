@@ -121,7 +121,6 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     // Check if in demo mode
     if (await isDemoMode()) {
       console.log("Demo mode detected - using local storage for patients");
-      // In demo mode, try to get patients from local storage
       try {
         const storedPatients = localStorage.getItem('demo_patients');
         if (storedPatients) {
@@ -152,7 +151,15 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       }
     }
     
-    return data || [];
+    // Transform the data to include proper specialty, professional, and health plan
+    const transformedData = data?.map(patient => ({
+      ...patient,
+      specialty: patient.attendance_type || "Não definida",
+      professional: patient.professional || "Não definido",
+      health_plan: patient.health_plan || "Não informado"
+    })) || [];
+
+    return transformedData;
   } catch (error) {
     console.error("Error in getAllPatients:", error);
     return [];

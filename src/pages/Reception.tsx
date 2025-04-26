@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -8,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { getAllPatients } from "@/services/patientService";
 import ReceptionFilters from "./reception/ReceptionFilters";
 import PatientTable from "./reception/PatientTable";
-import ReceptionShortcuts from "./reception/ReceptionShortcuts";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
 import { parseISO, isAfter, isBefore, isEqual, startOfDay } from "date-fns";
 
@@ -130,7 +128,6 @@ const Reception = () => {
               patients={filteredPatients}
               isLoading={isLoading}
             />
-            <ReceptionShortcuts />
           </div>
         </div>
       </Layout>
