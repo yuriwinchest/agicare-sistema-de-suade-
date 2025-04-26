@@ -4,6 +4,7 @@ import { ensureProperDateFormat } from "../utils/dateUtils";
 
 export const getActiveAppointments = async () => {
   try {
+    console.log("Buscando agendamentos ativos...");
     const { data, error } = await supabase
       .from('appointments')
       .select(`
@@ -19,26 +20,34 @@ export const getActiveAppointments = async () => {
       return [];
     }
 
+    console.log(`Encontrados ${data?.length || 0} agendamentos ativos`);
+    console.log("Dados brutos:", data);
+
     // Format dates and transform data
-    return (data || []).map(appointment => {
+    const transformedAppointments = (data || []).map(appointment => {
       // Handle empty patient data by using a default object and optional chaining
       const patient = appointment.patients || {};
       
       // Tratamos explicitamente o objeto patient como qualquer (any) para evitar erros de tipo
       const patientAny = patient as any;
       
-      return {
+      const transformed = {
         id: appointment.id,
         patient_id: appointment.patient_id,
         date: ensureProperDateFormat(appointment.date) || "Não agendado",
         time: appointment.time || "Não definido",
         name: patientAny.name || "Paciente",
-        specialty: patientAny.specialty || "Não definida",
-        professional: patientAny.professional || "Não definido",
+        specialty: appointment.specialty || patientAny.specialty || patientAny.attendance_type || "Não definida",
+        professional: appointment.professional || patientAny.professional || patientAny.father_name || "Não definido",
         health_plan: patientAny.health_plan || "Não informado",
         status: appointment.status || "scheduled"
       };
+      
+      return transformed;
     });
+
+    console.log("Agendamentos transformados:", transformedAppointments);
+    return transformedAppointments;
   } catch (error) {
     console.error("Error in getActiveAppointments:", error);
     return [];
@@ -47,6 +56,7 @@ export const getActiveAppointments = async () => {
 
 export const getPatientAppointments = async (patientId: string) => {
   try {
+    console.log(`Buscando agendamentos para o paciente ${patientId}`);
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
@@ -59,11 +69,16 @@ export const getPatientAppointments = async (patientId: string) => {
       return [];
     }
 
+    console.log(`Encontrados ${data?.length || 0} agendamentos para o paciente ${patientId}`);
+    
     // Format dates for display
-    return (data || []).map(appointment => ({
+    const formattedAppointments = (data || []).map(appointment => ({
       ...appointment,
       date: ensureProperDateFormat(appointment.date)
     }));
+
+    console.log("Agendamentos formatados:", formattedAppointments);
+    return formattedAppointments;
   } catch (error) {
     console.error(`Error in getPatientAppointments for ${patientId}:`, error);
     return [];

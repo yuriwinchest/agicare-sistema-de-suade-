@@ -24,6 +24,7 @@ export interface Patient {
   date?: string;
   appointmentTime?: string;
   attendance_type?: string;
+  appointmentStatus?: string;
 }
 
 export interface PatientDraft {

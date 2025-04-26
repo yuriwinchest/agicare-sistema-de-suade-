@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -32,20 +31,7 @@ const Reception = () => {
       const patientsData = await getAllPatients();
       console.log("Dados brutos dos pacientes:", patientsData);
       
-      const processedPatients = patientsData.map(patient => {
-        return {
-          ...patient,
-          specialty: patient.specialty || patient.attendance_type || "Não definida",
-          professional: patient.professional || patient.father_name || "Não definido",
-          health_plan: patient.health_plan || "Não informado",
-          reception: patient.reception || "RECEPÇÃO CENTRAL",
-          date: patient.date || (patient.created_at ? patient.created_at.split('T')[0] : "Não agendado"),
-          appointmentTime: patient.appointmentTime || "Não definido",
-        };
-      });
-      
-      console.log("Pacientes processados:", processedPatients);
-      setPatients(processedPatients);
+      setPatients(patientsData);
     } catch (error) {
       console.error("Erro ao carregar pacientes:", error);
       toast({
