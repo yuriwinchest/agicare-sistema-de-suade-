@@ -108,15 +108,15 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     if (patientIds.length > 0) {
       try {
         // Buscar dados adicionais
-        const { data: patientAdditionalData, error: additionalDataError } = await supabase
+        const additionalDataResult = await supabase
           .from('patient_additional_data')
           .select('id, health_plan, specialty, reception, professional')
           .in('id', patientIds);
           
-        if (additionalDataError) {
-          console.error("Erro ao buscar dados adicionais dos pacientes:", additionalDataError);
-        } else if (patientAdditionalData) {
-          patientAdditionalData.forEach(item => {
+        if (additionalDataResult.error) {
+          console.error("Erro ao buscar dados adicionais dos pacientes:", additionalDataResult.error);
+        } else if (additionalDataResult.data) {
+          additionalDataResult.data.forEach(item => {
             additionalData[item.id] = {
               health_plan: item.health_plan,
               specialty: item.specialty,
@@ -131,15 +131,15 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       
       try {
         // Buscar agendamentos
-        const { data: patientAppointments, error: appointmentsError } = await supabase
+        const appointmentsResult = await supabase
           .from('appointments')
           .select('patient_id, date, time, status')
           .in('patient_id', patientIds);
           
-        if (appointmentsError) {
-          console.error("Erro ao buscar agendamentos dos pacientes:", appointmentsError);
-        } else if (patientAppointments) {
-          patientAppointments.forEach(item => {
+        if (appointmentsResult.error) {
+          console.error("Erro ao buscar agendamentos dos pacientes:", appointmentsResult.error);
+        } else if (appointmentsResult.data) {
+          appointmentsResult.data.forEach(item => {
             if (!appointments[item.patient_id]) {
               appointments[item.patient_id] = [];
             }
@@ -156,15 +156,15 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       
       try {
         // Buscar documentos
-        const { data: patientDocuments, error: documentsError } = await supabase
+        const documentsResult = await supabase
           .from('patient_documents')
           .select('patient_id, document_type, document_number')
           .in('patient_id', patientIds);
           
-        if (documentsError) {
-          console.error("Erro ao buscar documentos dos pacientes:", documentsError);
-        } else if (patientDocuments) {
-          patientDocuments.forEach(item => {
+        if (documentsResult.error) {
+          console.error("Erro ao buscar documentos dos pacientes:", documentsResult.error);
+        } else if (documentsResult.data) {
+          documentsResult.data.forEach(item => {
             if (!documents[item.patient_id]) {
               documents[item.patient_id] = [];
             }
