@@ -1,3 +1,4 @@
+
 import { Patient, HospitalizedPatient, PatientAdditionalData } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDatabase, ensureProperDateFormat } from "../utils/dateUtils";
@@ -47,7 +48,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
     const fullPatientData: Patient = {
       ...patientData,
       // Use safe optional chaining and fallbacks
-      specialty: additionalDataAny.specialty || (appointmentData?.specialty) || patientData.attendance_type || "Não definida",
+      specialty: additionalDataAny.specialty || (appointmentData?.specialty || null) || patientData.attendance_type || "Não definida",
       professional: additionalDataAny.professional || (appointmentData?.doctor_id ? "Dr." + appointmentData.doctor_id.slice(0, 5) : null) || patientData.father_name || "Não definido",
       health_plan: additionalDataAny.health_plan || "Não informado",
       reception: additionalDataAny.reception || "RECEPÇÃO CENTRAL",

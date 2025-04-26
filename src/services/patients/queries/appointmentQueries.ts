@@ -37,8 +37,10 @@ export const getActiveAppointments = async () => {
         date: ensureProperDateFormat(appointment.date) || "Não agendado",
         time: appointment.time || "Não definido",
         name: patientAny.name || "Paciente",
-        specialty: appointment.specialty || patientAny.specialty || patientAny.attendance_type || "Não definida",
-        professional: appointment.professional || patientAny.professional || patientAny.father_name || "Não definido",
+        // Acessando propriedades do objeto appointment, não do appointment.specialty
+        specialty: appointment.specialty || patientAny.attendance_type || "Não definida",
+        // Acessando propriedades do objeto appointment, não do appointment.professional
+        professional: appointment.professional || patientAny.father_name || "Não definido",
         health_plan: patientAny.health_plan || "Não informado",
         status: appointment.status || "scheduled"
       };
