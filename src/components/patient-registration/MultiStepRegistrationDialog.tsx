@@ -10,6 +10,7 @@ import DocumentsForm from "./steps/DocumentsForm";
 import AllergiesForm from "./steps/AllergiesForm";
 import AppointmentDetailsForm from "./steps/AppointmentDetailsForm";
 import { v4 as uuidv4 } from "uuid";
+import { format } from "date-fns";
 
 interface MultiStepRegistrationDialogProps {
   isOpen: boolean;
@@ -68,6 +69,9 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
       setCurrentStep(currentStep + 1);
     } else {
       // Final step - complete registration
+      const today = new Date();
+      const formattedDate = formData.date || format(today, 'dd/MM/yyyy');
+      
       const finalData = {
         ...formData,
         // Ensure we have the proper structure for saving
@@ -75,29 +79,33 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         // Default reception if not set
         reception: formData.reception || "Recepção Central",
         // Ensure specialized fields are correctly mapped
-        specialty: formData.specialty,
-        professional: formData.professional,
-        health_plan: formData.healthPlan,
+        specialty: formData.specialty || "",
+        professional: formData.professional || "",
+        health_plan: formData.healthPlan || "",
+        date: formattedDate,
+        // Convert address if available
+        address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
+          ? JSON.stringify(formData.addressDetails) 
+          : null
       };
       
-      // Remove empty values from addressDetails to keep data clean
-      if (finalData.addressDetails) {
-        Object.keys(finalData.addressDetails).forEach(key => {
-          if (!finalData.addressDetails[key]) {
-            delete finalData.addressDetails[key];
-          }
-        });
-        
-        // If addressDetails is empty after removing empty values, set it to an empty object
-        if (Object.keys(finalData.addressDetails).length === 0) {
-          finalData.addressDetails = {};
-        }
+      // Add documents if available
+      if (formData.documents) {
+        finalData.documents = formData.documents.map((doc: any) => ({
+          document_type: doc.documentType,
+          document_number: doc.documentNumber,
+          issuing_body: doc.issuingBody || "",
+          issue_date: doc.issueDate || null
+        }));
       }
       
-      // Add today's date if appointment date is not set
-      if (!finalData.date) {
-        const today = new Date();
-        finalData.date = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+      // Add allergies if available
+      if (formData.allergies) {
+        finalData.allergies = formData.allergies.map((allergy: any) => ({
+          allergy_type: allergy.allergyType,
+          description: allergy.description,
+          severity: allergy.severity || "Média"
+        }));
       }
       
       console.log("Completing registration with data:", finalData);

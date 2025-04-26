@@ -36,12 +36,13 @@ const PatientRegistration = () => {
         appointmentTime: formData.appointmentTime
       };
 
+      // Separar dados em categorias corretas para gravação
       const success = await saveCompletePatient(
         patientData,
-        formData.additionalData,
-        formData.documents,
-        formData.allergies,
-        formData.observations
+        formData.additionalData || null,
+        formData.documents || null,
+        formData.allergies || null,
+        formData.observations || null
       );
 
       if (success) {
