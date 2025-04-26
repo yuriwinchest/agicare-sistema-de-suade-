@@ -48,4 +48,40 @@ export interface PatientDocument {
   patient_id: string;
   document_type: string;
   document_number: string;
+  issuing_body?: string;
+  issue_date?: string;
+}
+
+export interface PatientAllergy {
+  patient_id: string;
+  allergy_type: string;
+  description: string;
+  severity?: string;
+}
+
+export interface PatientNote {
+  patient_id: string;
+  notes: string;
+  created_by?: string;
+}
+
+export interface PatientLog {
+  patient_id: string;
+  action: string;
+  description: string;
+  performed_by?: string;
+}
+
+export interface HospitalizedPatient {
+  id: string;
+  name: string;
+  birth_date: string;
+  unit: string;
+  bed: string;
+  doctor: string;
+  diagnosis: string;
+  phone?: string;
+  email?: string;
+  allergies?: string[];
+  admissionDate: string;
 }

@@ -1,128 +1,64 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { Patient } from "../types";
 import { savePatient } from "./basicMutations";
 import { 
   savePatientAdditionalData, 
   savePatientDocument, 
   savePatientAllergy, 
-  savePatientNote,
-  addPatientLog
+  savePatientNote 
 } from "../patientAdditionalDataService";
 
 export const saveCompletePatient = async (
-  patient: any, 
+  patient: Patient, 
   additionalData?: any, 
   documents?: any[], 
   allergies?: any[], 
   notes?: string
 ): Promise<boolean> => {
   try {
-    console.log("Starting saveCompletePatient with data:", { patient, additionalData, documents, allergies, notes });
-    
-    // Extract fields that should be saved in patient_additional_data
-    const reception = patient.reception || "RECEPÇÃO CENTRAL";
-    const healthPlan = patient.health_plan || patient.healthPlan || null;
-    const professional = patient.professional || null;
-    const specialty = patient.specialty || null;
-    
-    // Remove fields that are not in the patients table schema
-    const { 
-      reception: _, 
-      professional: __, 
-      health_plan: ___, 
-      healthPlan: ____, 
-      specialty: _____, 
-      ...patientDataWithoutAdditionalFields 
-    } = patient;
-    
-    // 1. Save patient basic data - Ensure data is properly formatted
-    const patientData = {
-      ...patientDataWithoutAdditionalFields,
-      // Important properties
-      name: patient.name,
-      cpf: patient.cpf || null,
-      phone: patient.phone || null,
-      email: patient.email || null,
-      address: typeof patient.address === 'object' 
-        ? JSON.stringify(patient.address) 
-        : patient.address,
-      birth_date: patient.birth_date || null,
-      status: patient.status || 'Agendado',
-      person_type: patient.person_type || null,
-      gender: patient.gender || null,
-      father_name: patient.father_name || null,
-      mother_name: patient.mother_name || null
-    };
-    
-    console.log("Formatted data for saving:", patientData);
-    
-    let { data: savedPatient, error } = await supabase
-      .from('patients')
-      .insert(patientData)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error("Error saving patient:", error);
-      return false;
-    }
+    // 1. Save basic patient data
+    const savedPatient = await savePatient(patient);
     
     if (!savedPatient) {
-      console.error("Failed to save patient basic data");
       return false;
     }
     
-    console.log("Patient basic data saved successfully:", savedPatient);
-    
-    // Check if in demo mode and handle accordingly
-    const { data: session } = await supabase.auth.getSession();
-    const isAuthenticated = !!session?.session;
-    
-    if (!isAuthenticated) {
-      console.log("Demo mode detected - processing additional data in demo mode");
-      return true; // In demo mode, just return success
+    // 2. Save additional data if provided
+    if (additionalData) {
+      const patientAdditionalData = {
+        id: savedPatient.id,
+        ...additionalData
+      };
+      await savePatientAdditionalData(patientAdditionalData);
     }
-    
-    // 2. Save complementary data if provided
-    const patientAdditionalData = {
-      id: savedPatient.id,
-      health_plan: healthPlan,
-      professional: professional,
-      reception: reception,
-      specialty: specialty, // Added specialty field
-      ...(additionalData || {})
-    };
-    
-    await savePatientAdditionalData(patientAdditionalData);
     
     // 3. Save documents if provided
     if (documents && documents.length > 0) {
-      console.log("Saving documents:", documents);
       for (const doc of documents) {
-        if (doc && doc.documentType && doc.documentNumber) {
-          await savePatientDocument({
-            patient_id: savedPatient.id,
-            document_type: typeof doc.documentType === 'object' ? doc.documentType.value : doc.documentType,
-            document_number: typeof doc.documentNumber === 'object' ? doc.documentNumber.value : doc.documentNumber,
-            issuing_body: doc.issuingBody || "",
-            issue_date: doc.issueDate || null
-          });
-        }
+        // Format document data correctly
+        const documentData = {
+          patient_id: savedPatient.id,
+          document_type: doc.document_type || doc.documentType,
+          document_number: doc.document_number || doc.documentNumber,
+          issuing_body: doc.issuing_body || doc.issuingBody || null,
+          issue_date: doc.issue_date || doc.issueDate || null
+        };
+        
+        await savePatientDocument(documentData);
       }
     }
     
     // 4. Save allergies if provided
     if (allergies && allergies.length > 0) {
-      console.log("Saving allergies:", allergies);
       for (const allergy of allergies) {
-        if (allergy && allergy.allergyType && allergy.description) {
-          await savePatientAllergy({
-            patient_id: savedPatient.id,
-            allergy_type: typeof allergy.allergyType === 'object' ? allergy.allergyType.value : allergy.allergyType,
-            description: allergy.description,
-            severity: allergy.severity || "Média"
-          });
-        }
+        const allergyData = {
+          patient_id: savedPatient.id,
+          allergy_type: allergy.allergy_type || allergy.allergyType,
+          description: allergy.description,
+          severity: allergy.severity || "Média"
+        };
+        
+        await savePatientAllergy(allergyData);
       }
     }
     
@@ -135,15 +71,6 @@ export const saveCompletePatient = async (
       });
     }
     
-    // 6. Register log for successful registration
-    await addPatientLog({
-      patient_id: savedPatient.id,
-      action: "Cadastro",
-      description: `Paciente cadastrado.`,
-      performed_by: "Sistema"
-    });
-    
-    console.log("Complete patient data saved successfully");
     return true;
   } catch (error) {
     console.error("Error in saveCompletePatient:", error);

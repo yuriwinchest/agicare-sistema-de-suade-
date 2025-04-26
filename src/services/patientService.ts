@@ -4,6 +4,8 @@ export {
   getAllPatients,
   getAmbulatoryPatients,
   getHospitalizedPatients,
+  getActiveAppointments,
+  getPatientAppointments,
   savePatient,
   saveDraftPatient,
   loadDraftPatient,

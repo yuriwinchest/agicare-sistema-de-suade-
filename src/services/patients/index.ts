@@ -7,6 +7,11 @@ export {
   getHospitalizedPatients
 } from './queries/patientQueries';
 
+export {
+  getActiveAppointments,
+  getPatientAppointments
+} from './queries/appointmentQueries';
+
 // Export mutations
 export {
   saveDraftPatient,
@@ -27,5 +32,6 @@ export type {
   Patient,
   PatientDraft,
   PatientAdditionalData,
-  PatientDocument
+  PatientDocument,
+  HospitalizedPatient
 } from './types';
