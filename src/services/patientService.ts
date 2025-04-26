@@ -51,7 +51,7 @@ export const loadDraftPatient = loadDraftPatientMutation;
 export const clearDraftPatient = clearDraftPatientMutation;
 export const confirmPatientAppointment = confirmPatientAppointmentMutation;
 
-// Define interfaces for objects of data aninhados
+// Define interfaces for nested data objects
 interface PatientAdditionalDataType {
   health_plan?: string | null;
   specialty?: string | null;
@@ -106,64 +106,76 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     let documents: Record<string, PatientDocumentType[]> = {};
     
     if (patientIds.length > 0) {
-      // Buscar dados adicionais
-      const { data: patientAdditionalData, error: additionalDataError } = await supabase
-        .from('patient_additional_data')
-        .select('id, health_plan, specialty, reception, professional')
-        .in('id', patientIds);
-        
-      if (additionalDataError) {
-        console.error("Erro ao buscar dados adicionais dos pacientes:", additionalDataError);
-      } else if (patientAdditionalData) {
-        patientAdditionalData.forEach(item => {
-          additionalData[item.id] = {
-            health_plan: item.health_plan,
-            specialty: item.specialty,
-            reception: item.reception,
-            professional: item.professional
-          };
-        });
+      try {
+        // Buscar dados adicionais
+        const { data: patientAdditionalData, error: additionalDataError } = await supabase
+          .from('patient_additional_data')
+          .select('id, health_plan, specialty, reception, professional')
+          .in('id', patientIds);
+          
+        if (additionalDataError) {
+          console.error("Erro ao buscar dados adicionais dos pacientes:", additionalDataError);
+        } else if (patientAdditionalData) {
+          patientAdditionalData.forEach(item => {
+            additionalData[item.id] = {
+              health_plan: item.health_plan,
+              specialty: item.specialty,
+              reception: item.reception,
+              professional: item.professional
+            };
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados adicionais:", error);
       }
       
-      // Buscar agendamentos
-      const { data: patientAppointments, error: appointmentsError } = await supabase
-        .from('appointments')
-        .select('patient_id, date, time, status')
-        .in('patient_id', patientIds);
-        
-      if (appointmentsError) {
-        console.error("Erro ao buscar agendamentos dos pacientes:", appointmentsError);
-      } else if (patientAppointments) {
-        patientAppointments.forEach(item => {
-          if (!appointments[item.patient_id]) {
-            appointments[item.patient_id] = [];
-          }
-          appointments[item.patient_id].push({
-            date: item.date,
-            time: item.time,
-            status: item.status
+      try {
+        // Buscar agendamentos
+        const { data: patientAppointments, error: appointmentsError } = await supabase
+          .from('appointments')
+          .select('patient_id, date, time, status')
+          .in('patient_id', patientIds);
+          
+        if (appointmentsError) {
+          console.error("Erro ao buscar agendamentos dos pacientes:", appointmentsError);
+        } else if (patientAppointments) {
+          patientAppointments.forEach(item => {
+            if (!appointments[item.patient_id]) {
+              appointments[item.patient_id] = [];
+            }
+            appointments[item.patient_id].push({
+              date: item.date,
+              time: item.time,
+              status: item.status
+            });
           });
-        });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar agendamentos:", error);
       }
       
-      // Buscar documentos
-      const { data: patientDocuments, error: documentsError } = await supabase
-        .from('patient_documents')
-        .select('patient_id, document_type, document_number')
-        .in('patient_id', patientIds);
-        
-      if (documentsError) {
-        console.error("Erro ao buscar documentos dos pacientes:", documentsError);
-      } else if (patientDocuments) {
-        patientDocuments.forEach(item => {
-          if (!documents[item.patient_id]) {
-            documents[item.patient_id] = [];
-          }
-          documents[item.patient_id].push({
-            document_type: item.document_type,
-            document_number: item.document_number
+      try {
+        // Buscar documentos
+        const { data: patientDocuments, error: documentsError } = await supabase
+          .from('patient_documents')
+          .select('patient_id, document_type, document_number')
+          .in('patient_id', patientIds);
+          
+        if (documentsError) {
+          console.error("Erro ao buscar documentos dos pacientes:", documentsError);
+        } else if (patientDocuments) {
+          patientDocuments.forEach(item => {
+            if (!documents[item.patient_id]) {
+              documents[item.patient_id] = [];
+            }
+            documents[item.patient_id].push({
+              document_type: item.document_type,
+              document_number: item.document_number
+            });
           });
-        });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar documentos:", error);
       }
     }
 
@@ -180,7 +192,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
         specialty: patientAdditionalData.specialty || patient.attendance_type || "Não definida",
         professional: patientAdditionalData.professional || patient.father_name || "Não definido",
         health_plan: patientAdditionalData.health_plan || "Não informado",
-        reception: patientAdditionalData.reception || "RECEPÇÃO CENTRAL", // Valor padrão pois a coluna não existe
+        reception: patientAdditionalData.reception || "RECEPÇÃO CENTRAL",
         date: latestAppointment.date || null,
         appointmentTime: latestAppointment.time || null,
         status: patient.status || 'Pendente'
