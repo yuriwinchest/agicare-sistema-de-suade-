@@ -38,22 +38,34 @@ export const usePatientData = (patientId: string | undefined) => {
     fetchPatientData();
     
     // Configurar assinatura para atualizações em tempo real
-    const subscription = supabase
-      .channel(`patient-${patientId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'patients',
-        filter: `id=eq.${patientId}`
-      }, 
-      () => {
-        console.log("Dados do paciente atualizados, buscando novos dados...");
-        fetchPatientData();
-      })
-      .subscribe();
+    let subscription;
+    
+    try {
+      subscription = supabase
+        .channel(`patient-${patientId}`)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'patients',
+          filter: `id=eq.${patientId}`
+        }, 
+        () => {
+          console.log("Dados do paciente atualizados, buscando novos dados...");
+          fetchPatientData();
+        })
+        .subscribe();
+    } catch (subscriptionError) {
+      console.error("Erro ao configurar assinatura em tempo real:", subscriptionError);
+    }
       
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        try {
+          subscription.unsubscribe();
+        } catch (error) {
+          console.error("Erro ao cancelar assinatura:", error);
+        }
+      }
     };
   }, [patientId]);
 

@@ -54,7 +54,6 @@ export const confirmPatientAppointment = confirmPatientAppointmentMutation;
 // Define interfaces for nested data objects to fix TypeScript errors
 interface PatientAdditionalDataType {
   health_plan?: string | null;
-  reception?: string | null;
   specialty?: string | null;
 }
 
@@ -83,14 +82,13 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       }
     }
 
-    // Fetch patients with their additional data and appointments
+    // Simplificar a consulta para evitar o erro com a coluna "reception"
     const { data: patients, error } = await supabase
       .from('patients')
       .select(`
         *,
         patient_additional_data (
           health_plan,
-          reception,
           specialty
         ),
         appointments (
@@ -123,7 +121,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
         specialty: additionalData.specialty || patient.attendance_type || "Não definida",
         professional: patient.father_name || "Não definido",
         health_plan: additionalData.health_plan || "Não informado",
-        reception: additionalData.reception || "RECEPÇÃO CENTRAL",
+        reception: "RECEPÇÃO CENTRAL", // Valor padrão pois a coluna não existe
         date: latestAppointment.date || null,
         appointmentTime: latestAppointment.time || null,
         status: patient.status || 'Pendente'
