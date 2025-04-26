@@ -1,5 +1,21 @@
+import { differenceInYears, parse, parseISO, isValid, format } from 'date-fns';
 
-import { format, parse, isValid } from 'date-fns';
+export const calculateAge = (birthDate: string | null): number | null => {
+  if (!birthDate) return null;
+
+  try {
+    // Handle different date formats
+    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(birthDate)
+      ? parseISO(birthDate)
+      : parse(birthDate, 'dd/MM/yyyy', new Date());
+
+    // Calculate the difference in years
+    return differenceInYears(new Date(), parsedDate);
+  } catch (error) {
+    console.error('Error calculating age:', error);
+    return null;
+  }
+};
 
 export const formatDateForDatabase = (dateString: string | null): string | null => {
   if (!dateString) return null;
