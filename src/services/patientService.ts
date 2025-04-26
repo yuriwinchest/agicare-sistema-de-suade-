@@ -51,7 +51,14 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     }
 
     // Extract fields that don't belong in patients table
-    const { reception, professional, healthPlan, health_plan, ...basicPatientData } = patient;
+    const { 
+      reception, 
+      professional, 
+      healthPlan, 
+      health_plan, 
+      specialty,
+      ...basicPatientData 
+    } = patient;
 
     const patientData = {
       id: basicPatientData.id || undefined,
@@ -66,8 +73,7 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       gender: basicPatientData.gender || null,
       father_name: basicPatientData.father_name || null,
       mother_name: basicPatientData.mother_name || null,
-      marital_status: basicPatientData.marital_status || null,
-      attendance_type: basicPatientData.specialty || null
+      marital_status: basicPatientData.marital_status || null
     };
 
     console.log("Saving patient data:", patientData);
@@ -104,12 +110,13 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     console.log("Patient saved successfully:", savedPatient);
 
     // Save additional data separately
-    if (reception || professional || healthPlan || health_plan) {
+    if (reception || professional || healthPlan || health_plan || specialty) {
       const additionalData = {
         id: savedPatient.id,
         reception: reception || "RECEPÇÃO CENTRAL",
         professional: professional || null,
-        health_plan: healthPlan || health_plan || null
+        health_plan: healthPlan || health_plan || null,
+        specialty: specialty || null
       };
 
       await supabase
@@ -164,7 +171,8 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       }
     }
 
-    const { data, error } = await supabase
+    // Fetch patients and their additional data using a join or parallel queries
+    const { data: patients, error } = await supabase
       .from('patients')
       .select('*')
       .order('created_at', { ascending: false });
@@ -174,20 +182,39 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       return [];
     }
 
-    if (await isDemoMode() && data) {
+    // Get additional data for all patients in one query
+    const { data: additionalData } = await supabase
+      .from('patient_additional_data')
+      .select('*');
+
+    // Create a map for quick lookup of additional data by patient id
+    const additionalDataMap = {};
+    if (additionalData) {
+      additionalData.forEach(data => {
+        additionalDataMap[data.id] = data;
+      });
+    }
+
+    // Merge patient and additional data
+    const transformedData = patients?.map(patient => {
+      const patientAdditionalData = additionalDataMap[patient.id] || {};
+      
+      return {
+        ...patient,
+        specialty: patientAdditionalData.specialty || patient.attendance_type || "Não definida",
+        professional: patientAdditionalData.professional || "Não definido",
+        health_plan: patientAdditionalData.health_plan || "Não informado",
+        reception: patientAdditionalData.reception || "RECEPÇÃO CENTRAL"
+      };
+    }) || [];
+
+    if (await isDemoMode() && transformedData) {
       try {
-        localStorage.setItem('demo_patients', JSON.stringify(data));
+        localStorage.setItem('demo_patients', JSON.stringify(transformedData));
       } catch (storageError) {
         console.error("Error storing in localStorage:", storageError);
       }
     }
-
-    const transformedData = data?.map(patient => ({
-      ...patient,
-      specialty: patient.attendance_type || "Não definida",
-      professional: patient.father_name || "Não definido", 
-      health_plan: "Não informado"
-    })) || [];
 
     return transformedData;
   } catch (error) {

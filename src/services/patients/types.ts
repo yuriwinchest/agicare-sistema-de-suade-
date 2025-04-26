@@ -29,11 +29,12 @@ export interface Patient {
   mother_name?: string;
   father_name?: string;
   protocol_number?: number; 
-  reception?: string; // This will be saved in patient_additional_data
+  // Fields that are stored in patient_additional_data
+  reception?: string;
   specialty?: string;
-  professional?: string; // This will be saved in patient_additional_data
-  health_plan?: string; // This will be saved in patient_additional_data
-  healthPlan?: string; // Alternative property for health_plan
+  professional?: string;
+  health_plan?: string;
+  healthPlan?: string;
   date?: string; // Appointment date
   appointmentTime?: string; // Appointment time
 }
@@ -114,8 +115,9 @@ export interface PatientAdditionalData {
   health_card_number?: string;
   city?: string;
   state?: string;
-  professional?: string; // Added professional field
-  reception?: string; // Added reception field
+  professional?: string;
+  reception?: string;
+  specialty?: string; // Added specialty field
 }
 
 export interface PatientDocument {

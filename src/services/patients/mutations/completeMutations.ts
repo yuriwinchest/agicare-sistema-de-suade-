@@ -19,15 +19,25 @@ export const saveCompletePatient = async (
   try {
     console.log("Starting saveCompletePatient with data:", { patient, additionalData, documents, allergies, notes });
     
-    // Store reception separately to use with patient_additional_data
+    // Extract fields that should be saved in patient_additional_data
     const reception = patient.reception || "RECEPÇÃO CENTRAL";
+    const healthPlan = patient.health_plan || patient.healthPlan || null;
+    const professional = patient.professional || null;
+    const specialty = patient.specialty || null;
     
-    // Remove reception from patient object as it's not in the patients table
-    const { reception: _, ...patientDataWithoutReception } = patient;
+    // Remove fields that are not in the patients table schema
+    const { 
+      reception: _, 
+      professional: __, 
+      health_plan: ___, 
+      healthPlan: ____, 
+      specialty: _____, 
+      ...patientDataWithoutAdditionalFields 
+    } = patient;
     
     // 1. Save patient basic data - Ensure data is properly formatted
     const patientData = {
-      ...patientDataWithoutReception,
+      ...patientDataWithoutAdditionalFields,
       // Important properties
       name: patient.name,
       cpf: patient.cpf || null,
@@ -41,15 +51,8 @@ export const saveCompletePatient = async (
       person_type: patient.person_type || null,
       gender: patient.gender || null,
       father_name: patient.father_name || null,
-      mother_name: patient.mother_name || null,
-      specialty: patient.specialty || null,
-      attendance_type: patient.specialty || null,
-      // Remove professional, health_plan and reception as they're not in the patients table schema
+      mother_name: patient.mother_name || null
     };
-    
-    // Store health_plan and professional separately to use with patient_additional_data
-    const healthPlan = patient.health_plan || patient.healthPlan || null;
-    const professional = patient.professional || null;
     
     console.log("Formatted data for saving:", patientData);
     
@@ -81,16 +84,16 @@ export const saveCompletePatient = async (
     }
     
     // 2. Save complementary data if provided
-    if (healthPlan || professional || reception || additionalData) {
-      const patientAdditionalData = {
-        id: savedPatient.id,
-        health_plan: healthPlan,
-        professional: professional,
-        reception: reception, // Add reception to additional data
-        ...(additionalData || {})
-      };
-      await savePatientAdditionalData(patientAdditionalData);
-    }
+    const patientAdditionalData = {
+      id: savedPatient.id,
+      health_plan: healthPlan,
+      professional: professional,
+      reception: reception,
+      specialty: specialty, // Added specialty field
+      ...(additionalData || {})
+    };
+    
+    await savePatientAdditionalData(patientAdditionalData);
     
     // 3. Save documents if provided
     if (documents && documents.length > 0) {

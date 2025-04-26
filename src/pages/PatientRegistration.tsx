@@ -23,8 +23,11 @@ const PatientRegistration = () => {
       setIsSubmitting(true);
       console.log("Saving patient data:", formData);
       
-      // Store reception separately
+      // Store fields that should go to patient_additional_data
       const reception = formData.reception || "RECEPÇÃO CENTRAL";
+      const specialty = formData.specialty || null;
+      const professional = formData.professional || null;
+      const healthPlan = formData.healthPlan || null;
       
       // Format basic patient data - excluding fields not in patients table
       const patientData = {
@@ -38,10 +41,7 @@ const PatientRegistration = () => {
         mother_name: formData.mother_name || null,
         address: formData.address || null,
         status: "Agendado",
-        specialty: formData.specialty || null,
-        attendance_type: formData.specialty || null,
-        person_type: formData.person_type || null,
-        // Remove professional, health_plan and reception fields as they're not in the patients table
+        person_type: formData.person_type || null
       };
 
       console.log("Formatted data for Supabase:", patientData);
@@ -101,21 +101,20 @@ const PatientRegistration = () => {
         }
       }
       
-      // Save complementary data if provided
-      if (formData.healthPlan || formData.professional || reception || formData.additionalData) {
-        const additionalData = {
-          id: patientId,
-          health_plan: formData.healthPlan || null,
-          professional: formData.professional || null,
-          reception: reception
-        };
-        
-        if (formData.additionalData) {
-          Object.assign(additionalData, formData.additionalData);
-        }
-        
-        await supabase.from('patient_additional_data').insert(additionalData);
+      // Save complementary data including specialty
+      const additionalData = {
+        id: patientId,
+        health_plan: healthPlan,
+        professional: professional,
+        reception: reception,
+        specialty: specialty
+      };
+      
+      if (formData.additionalData) {
+        Object.assign(additionalData, formData.additionalData);
       }
+      
+      await supabase.from('patient_additional_data').insert(additionalData);
       
       // Register registration log
       await supabase.from('patient_logs').insert({

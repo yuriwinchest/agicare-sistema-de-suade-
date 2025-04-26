@@ -73,9 +73,8 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         ...formData,
         // Ensure we have the proper structure for saving
         status: "Agendado",
-        // Default reception if not defined
+        // Make sure these fields are correctly passed along to be saved in patient_additional_data
         reception: formData.reception || "RECEPÇÃO CENTRAL",
-        // Ensure specialized fields are properly mapped
         specialty: formData.specialty || null,
         professional: formData.professional || null,
         health_plan: formData.healthPlan || null,
