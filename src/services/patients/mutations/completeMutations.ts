@@ -45,7 +45,6 @@ export const saveCompletePatient = async (
       professional: patient.professional || null,
       health_plan: patient.health_plan || patient.healthPlan || null,
       attendance_type: patient.specialty || null,
-      // Remove any date field that's causing errors
     };
     
     console.log("Formatted data for saving:", patientData);

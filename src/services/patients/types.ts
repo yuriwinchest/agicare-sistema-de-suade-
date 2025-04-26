@@ -1,3 +1,4 @@
+
 export interface Patient {
   id: string;
   name: string;
@@ -20,7 +21,7 @@ export interface Patient {
     physicalExam?: any;
     previousEvolutions?: any[];
   };
-  // Novos campos
+  // New fields
   person_type?: string;
   cns?: string;
   marital_status?: string;
@@ -32,9 +33,9 @@ export interface Patient {
   specialty?: string;
   professional?: string;
   health_plan?: string;
-  healthPlan?: string; // Propriedade alternativa para health_plan
-  date?: string; // Data da consulta
-  appointmentTime?: string; // Hora da consulta
+  healthPlan?: string; // Alternative property for health_plan
+  date?: string; // Appointment date
+  appointmentTime?: string; // Appointment time
 }
 
 export interface PatientDraft {
@@ -54,19 +55,19 @@ export interface PatientDraft {
     zipCode?: string;
   };
   birth_date?: string;
-  birthDate?: string; // Campo alternativo usado na UI
+  birthDate?: string; // Alternative field used in UI
   gender?: string;
   active?: boolean;
   healthPlan?: string;
   healthCardNumber?: string;
   status?: string;
-  // Novos campos
+  // New fields
   person_type?: string;
   cns?: string;
   marital_status?: string;
   mother_name?: string;
   father_name?: string;
-  // Campos adicionais que estavam faltando na interface
+  // Additional fields that were missing in the interface
   additionalData?: {
     nationality?: string;
     place_of_birth?: string;
@@ -91,64 +92,4 @@ export interface PatientDraft {
     severity?: string;
   }>;
   notes?: string;
-}
-
-export interface HospitalizedPatient extends Patient {
-  unit?: string;
-  bed?: string;
-  age?: number;
-  doctor?: string;
-  diagnosis?: string;
-  admissionDate?: string;
-  birth_date: string; // Garante que este é obrigatório para HospitalizedPatient
-  medical_records?: {
-    doctor: {
-      name: string;
-    };
-    diagnosis: string;
-  }[];
-}
-
-export interface PatientAdditionalData {
-  id: string; // ID do paciente
-  nationality?: string;
-  place_of_birth?: string;
-  place_of_birth_state?: string;
-  ethnicity?: string;
-  occupation?: string;
-  education_level?: string;
-  health_plan?: string;
-  health_card_number?: string;
-}
-
-export interface PatientDocument {
-  id?: string;
-  patient_id: string;
-  document_type: string;
-  document_number: string;
-  issuing_body?: string;
-  issue_date?: string;
-}
-
-export interface PatientAllergy {
-  id?: string;
-  patient_id: string;
-  allergy_type: string;
-  description: string;
-  severity?: string;
-}
-
-export interface PatientNote {
-  id?: string;
-  patient_id: string;
-  notes?: string;
-  created_by?: string;
-}
-
-export interface PatientLog {
-  id?: string;
-  patient_id: string;
-  action: string;
-  description: string;
-  performed_by?: string;
 }
