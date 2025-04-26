@@ -7,7 +7,7 @@ import { getStatusClass, getDisplayStatus } from "./patientStatusUtils";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const columnClasses = [
   "w-20 min-w-[55px] max-w-[60px]",      // Protocolo
