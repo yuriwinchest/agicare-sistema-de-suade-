@@ -19,17 +19,20 @@ export const usePatientData = (patientId: string | undefined) => {
       }
       
       try {
+        console.log(`Buscando dados do paciente com ID: ${patientId}`);
         const patient = await getPatientById(patientId);
         
         if (patient) {
+          console.log("Dados do paciente encontrados:", patient);
           setPatientData(patient);
           setError(null);
         } else {
+          console.log("Paciente não encontrado");
           setError("Paciente não encontrado");
         }
       } catch (err) {
-        setError("Erro ao carregar dados do paciente");
         console.error("Erro ao buscar paciente:", err);
+        setError("Erro ao carregar dados do paciente");
       } finally {
         setLoading(false);
       }
@@ -49,8 +52,9 @@ export const usePatientData = (patientId: string | undefined) => {
           table: 'patients',
           filter: `id=eq.${patientId}`
         }, 
-        () => {
-          console.log("Dados do paciente atualizados, buscando novos dados...");
+        (payload) => {
+          console.log("Dados do paciente atualizados:", payload);
+          console.log("Buscando novos dados...");
           fetchPatientData();
         })
         .subscribe();

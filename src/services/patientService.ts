@@ -1,4 +1,3 @@
-
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -51,7 +50,7 @@ export const loadDraftPatient = loadDraftPatientMutation;
 export const clearDraftPatient = clearDraftPatientMutation;
 export const confirmPatientAppointment = confirmPatientAppointmentMutation;
 
-// Define interfaces for nested data objects to fix TypeScript errors
+// Define interfaces para objetos de dados aninhados
 interface PatientAdditionalDataType {
   health_plan?: string | null;
   specialty?: string | null;
@@ -70,57 +69,106 @@ interface PatientDocumentType {
 
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
+    console.log("Buscando todos os pacientes...");
+    
     if (await isDemoMode()) {
-      console.log("Demo mode detected - using local storage for patients");
+      console.log("Modo demo detectado - usando localStorage para pacientes");
       try {
         const storedPatients = localStorage.getItem('demo_patients');
         if (storedPatients) {
           return JSON.parse(storedPatients);
         }
       } catch (error) {
-        console.error("Error reading from localStorage:", error);
+        console.error("Erro ao ler do localStorage:", error);
       }
     }
 
-    // Simplificar a consulta para evitar o erro com a coluna "reception"
+    // Consulta simplificada para obter pacientes básicos primeiro
     const { data: patients, error } = await supabase
       .from('patients')
-      .select(`
-        *,
-        patient_additional_data (
-          health_plan,
-          specialty
-        ),
-        appointments (
-          date,
-          time,
-          status,
-          professional_id
-        ),
-        patient_documents (
-          document_type,
-          document_number
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
       
     if (error) {
-      console.error("Error fetching patients:", error);
+      console.error("Erro ao buscar pacientes:", error);
       return [];
     }
 
-    // Transform the data to include all required fields
-    const transformedData = patients?.map(patient => {
-      // Use type assertions and proper null handling for nested objects
-      const additionalData = patient.patient_additional_data?.[0] as PatientAdditionalDataType || {};
-      const latestAppointment = patient.appointments?.[0] as AppointmentType || {};
-      const documentData = patient.patient_documents?.[0] as PatientDocumentType || {};
+    console.log(`Encontrados ${patients?.length || 0} pacientes no banco de dados`);
 
+    // Buscar dados adicionais separadamente para evitar erros de junção
+    const patientIds = patients?.map(p => p.id) || [];
+    let additionalData: Record<string, PatientAdditionalDataType> = {};
+    let appointments: Record<string, AppointmentType[]> = {};
+    let documents: Record<string, PatientDocumentType[]> = {};
+    
+    if (patientIds.length > 0) {
+      // Buscar dados adicionais
+      const { data: patientAdditionalData } = await supabase
+        .from('patient_additional_data')
+        .select('id, health_plan, specialty')
+        .in('id', patientIds);
+        
+      if (patientAdditionalData) {
+        patientAdditionalData.forEach(item => {
+          additionalData[item.id] = {
+            health_plan: item.health_plan,
+            specialty: item.specialty
+          };
+        });
+      }
+      
+      // Buscar agendamentos
+      const { data: patientAppointments } = await supabase
+        .from('appointments')
+        .select('patient_id, date, time, status')
+        .in('patient_id', patientIds);
+        
+      if (patientAppointments) {
+        patientAppointments.forEach(item => {
+          if (!appointments[item.patient_id]) {
+            appointments[item.patient_id] = [];
+          }
+          appointments[item.patient_id].push({
+            date: item.date,
+            time: item.time,
+            status: item.status
+          });
+        });
+      }
+      
+      // Buscar documentos
+      const { data: patientDocuments } = await supabase
+        .from('patient_documents')
+        .select('patient_id, document_type, document_number')
+        .in('patient_id', patientIds);
+        
+      if (patientDocuments) {
+        patientDocuments.forEach(item => {
+          if (!documents[item.patient_id]) {
+            documents[item.patient_id] = [];
+          }
+          documents[item.patient_id].push({
+            document_type: item.document_type,
+            document_number: item.document_number
+          });
+        });
+      }
+    }
+
+    // Transformar os dados para incluir todos os campos necessários
+    const transformedData = patients?.map(patient => {
+      const patientAdditionalData = additionalData[patient.id] || {};
+      const patientAppointments = appointments[patient.id] || [];
+      const patientDocuments = documents[patient.id] || [];
+      
+      const latestAppointment = patientAppointments.length > 0 ? patientAppointments[0] : {};
+      
       return {
         ...patient,
-        specialty: additionalData.specialty || patient.attendance_type || "Não definida",
+        specialty: patientAdditionalData.specialty || patient.attendance_type || "Não definida",
         professional: patient.father_name || "Não definido",
-        health_plan: additionalData.health_plan || "Não informado",
+        health_plan: patientAdditionalData.health_plan || "Não informado",
         reception: "RECEPÇÃO CENTRAL", // Valor padrão pois a coluna não existe
         date: latestAppointment.date || null,
         appointmentTime: latestAppointment.time || null,
@@ -132,13 +180,14 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       try {
         localStorage.setItem('demo_patients', JSON.stringify(transformedData));
       } catch (storageError) {
-        console.error("Error storing in localStorage:", storageError);
+        console.error("Erro ao armazenar no localStorage:", storageError);
       }
     }
 
+    console.log("Pacientes transformados:", transformedData);
     return transformedData;
   } catch (error) {
-    console.error("Error in getAllPatients:", error);
+    console.error("Erro em getAllPatients:", error);
     return [];
   }
 };
@@ -152,13 +201,13 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       .maybeSingle();
       
     if (error) {
-      console.error("Error fetching patient:", error);
+      console.error("Erro ao buscar paciente:", error);
       return null;
     }
     
     return data;
   } catch (error) {
-    console.error("Error in getPatientById:", error);
+    console.error("Erro em getPatientById:", error);
     return null;
   }
 };
@@ -171,13 +220,13 @@ export const getAmbulatoryPatients = async (): Promise<Patient[]> => {
       .in('status', ['Aguardando', 'Em Atendimento', 'Enfermagem']);
       
     if (error) {
-      console.error("Error fetching ambulatory patients:", error);
+      console.error("Erro ao buscar pacientes ambulatoriais:", error);
       return [];
     }
     
     return data || [];
   } catch (error) {
-    console.error("Error in getAmbulatoryPatients:", error);
+    console.error("Erro em getAmbulatoryPatients:", error);
     return [];
   }
 };
@@ -219,7 +268,7 @@ export const getActiveAppointments = async (): Promise<any[]> => {
       .order('created_at', { ascending: false });
       
     if (error) {
-      console.error("Error fetching active appointments:", error);
+      console.error("Erro ao buscar agendamentos ativos:", error);
       return [];
     }
 
@@ -240,7 +289,7 @@ export const getActiveAppointments = async (): Promise<any[]> => {
     console.log("Transformed appointments:", appointments);
     return appointments || [];
   } catch (error) {
-    console.error("Error in getActiveAppointments:", error);
+    console.error("Erro em getActiveAppointments:", error);
     return [];
   }
 };
@@ -253,13 +302,13 @@ export const getHospitalizedPatients = async (): Promise<Patient[]> => {
       .eq('status', 'Internado');
       
     if (error) {
-      console.error("Error fetching hospitalized patients:", error);
+      console.error("Erro ao buscar pacientes internados:", error);
       return [];
     }
     
     return data || [];
   } catch (error) {
-    console.error("Error in getHospitalizedPatients:", error);
+    console.error("Erro em getHospitalizedPatients:", error);
     return [];
   }
 };

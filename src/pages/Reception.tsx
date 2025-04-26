@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -27,18 +28,19 @@ const Reception = () => {
   const loadPatientList = async () => {
     setIsLoading(true);
     try {
+      console.log("Iniciando carregamento de pacientes...");
       const patientsData = await getAllPatients();
-      console.log("Loaded patients:", patientsData);
+      console.log("Pacientes carregados:", patientsData);
       setPatients(patientsData);
-      setIsLoading(false);
     } catch (error) {
-      console.error("Error loading patients:", error);
+      console.error("Erro ao carregar pacientes:", error);
       toast({
         title: "Erro ao carregar pacientes",
         description: "Não foi possível carregar a lista de pacientes.",
         variant: "destructive"
       });
       setPatients([]);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -54,38 +56,45 @@ const Reception = () => {
   }, []);
 
   const filteredPatients = patients.filter((patient) => {
-    // Name or CPF filter
+    if (!patient) return false;
+    
+    // Filtro de nome ou CPF
     const matchesSearch =
-      patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.cpf?.includes(searchTerm);
+      (patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+      (patient.cpf?.includes(searchTerm) || false);
 
-    // Status filter
+    // Filtro de status
     const patientDisplayStatus = getDisplayStatus(patient);
     const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
     
-    // Date filters
+    // Filtros de data
     let matchesDateRange = true;
     if (patient.date && (startDate || endDate)) {
-      const appointmentDate = parseISO(patient.date);
-      
-      if (startDate && endDate) {
-        // Both dates provided - check if appointment is between them
-        const start = startOfDay(startDate);
-        const end = startOfDay(endDate);
-        matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) && 
-                           (isBefore(appointmentDate, end) || isEqual(appointmentDate, end));
-      } else if (startDate) {
-        // Only start date - check if appointment is on or after
-        matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) || 
-                           isEqual(appointmentDate, startOfDay(startDate));
-      } else if (endDate) {
-        // Only end date - check if appointment is on or before
-        matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) || 
-                           isEqual(appointmentDate, startOfDay(endDate));
+      try {
+        const appointmentDate = parseISO(patient.date);
+        
+        if (startDate && endDate) {
+          // Ambas as datas fornecidas - verificar se o agendamento está entre elas
+          const start = startOfDay(startDate);
+          const end = startOfDay(endDate);
+          matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) && 
+                             (isBefore(appointmentDate, end) || isEqual(appointmentDate, end));
+        } else if (startDate) {
+          // Apenas data inicial - verificar se o agendamento é igual ou posterior
+          matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) || 
+                             isEqual(appointmentDate, startOfDay(startDate));
+        } else if (endDate) {
+          // Apenas data final - verificar se o agendamento é igual ou anterior
+          matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) || 
+                             isEqual(appointmentDate, startOfDay(endDate));
+        }
+      } catch (error) {
+        console.error("Erro ao filtrar por data:", error);
+        matchesDateRange = true;
       }
     }
     
-    // Specialty and professional filters
+    // Filtros de especialidade e profissional
     const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
     const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
     
@@ -128,6 +137,12 @@ const Reception = () => {
               patients={filteredPatients}
               isLoading={isLoading}
             />
+
+            {/* Contador de pacientes para depuração */}
+            <div className="text-xs text-gray-500">
+              Total de pacientes carregados: {patients.length} | 
+              Após filtros: {filteredPatients.length}
+            </div>
           </div>
         </div>
       </Layout>
