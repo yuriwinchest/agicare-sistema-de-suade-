@@ -1,15 +1,26 @@
-import { differenceInYears, parse, parseISO, isValid, format } from 'date-fns';
 
+import { 
+  differenceInYears,
+  parse,
+  parseISO,
+  isValid,
+  format,
+  isFuture,
+  isPast,
+  isToday,
+  differenceInDays,
+  addDays,
+  subDays
+} from 'date-fns';
+
+// Calculate age from birth date
 export const calculateAge = (birthDate: string | null): number | null => {
   if (!birthDate) return null;
 
   try {
-    // Handle different date formats
-    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(birthDate)
-      ? parseISO(birthDate)
-      : parse(birthDate, 'dd/MM/yyyy', new Date());
-
-    // Calculate the difference in years
+    const parsedDate = parseDate(birthDate);
+    if (!parsedDate) return null;
+    
     return differenceInYears(new Date(), parsedDate);
   } catch (error) {
     console.error('Error calculating age:', error);
@@ -17,23 +28,33 @@ export const calculateAge = (birthDate: string | null): number | null => {
   }
 };
 
+// Parse date from various formats
+export const parseDate = (dateString: string | null): Date | null => {
+  if (!dateString) return null;
+
+  try {
+    // Handle ISO format (YYYY-MM-DD)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const parsed = parseISO(dateString);
+      return isValid(parsed) ? parsed : null;
+    }
+    
+    // Handle DD/MM/YYYY format
+    const parsed = parse(dateString, 'dd/MM/yyyy', new Date());
+    return isValid(parsed) ? parsed : null;
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return null;
+  }
+};
+
+// Format date for database storage (YYYY-MM-DD)
 export const formatDateForDatabase = (dateString: string | null): string | null => {
   if (!dateString) return null;
   
-  // If the date is already in ISO format (YYYY-MM-DD), return it
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    return dateString;
-  }
-  
   try {
-    // Parse from DD/MM/YYYY format
-    const parsedDate = parse(dateString, 'dd/MM/yyyy', new Date());
-    
-    // Check if date is valid and within reasonable range (1900-2100)
-    if (!isValid(parsedDate)) {
-      console.error('Invalid date format:', dateString);
-      return null;
-    }
+    const parsedDate = parseDate(dateString);
+    if (!parsedDate) return null;
     
     const year = parsedDate.getFullYear();
     if (year < 1900 || year > 2100) {
@@ -43,59 +64,94 @@ export const formatDateForDatabase = (dateString: string | null): string | null 
     
     return format(parsedDate, 'yyyy-MM-dd');
   } catch (error) {
-    console.error('Error parsing date:', error);
+    console.error('Error formatting date for database:', error);
     return null;
   }
 };
 
-// Add a function to ensure proper date format for display
-export const ensureProperDateFormat = (dateString: string): string => {
-  // If the input is empty, return empty string
+// Format date for display (DD/MM/YYYY)
+export const formatDateForDisplay = (dateString: string | null): string => {
   if (!dateString) return '';
   
-  // Remove all non-digit characters
-  const digitsOnly = dateString.replace(/\D/g, '');
-  
-  // Limit to 8 digits total (DDMMYYYY)
-  const limitedDigits = digitsOnly.slice(0, 8);
-  
-  // Format with slashes
-  let formattedDate = '';
-  if (limitedDigits.length > 4) {
-    formattedDate = `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2, 4)}/${limitedDigits.slice(4, 8)}`;
-  } else if (limitedDigits.length > 2) {
-    formattedDate = `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2)}`;
-  } else {
-    formattedDate = limitedDigits;
+  try {
+    const parsedDate = parseDate(dateString);
+    if (!parsedDate) return '';
+    
+    return format(parsedDate, 'dd/MM/yyyy');
+  } catch (error) {
+    console.error('Error formatting date for display:', error);
+    return '';
   }
-  
-  return formattedDate;
 };
 
-// Validate birth date - check if it's within a reasonable range
+// Ensure proper date format while typing (DD/MM/YYYY)
+export const ensureProperDateFormat = (dateString: string): string => {
+  if (!dateString) return '';
+  
+  const digitsOnly = dateString.replace(/\D/g, '');
+  const limitedDigits = digitsOnly.slice(0, 8);
+  
+  if (limitedDigits.length > 4) {
+    return `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2, 4)}/${limitedDigits.slice(4, 8)}`;
+  }
+  if (limitedDigits.length > 2) {
+    return `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2)}`;
+  }
+  return limitedDigits;
+};
+
+// Validate birth date
 export const isValidBirthDate = (dateString: string | null): boolean => {
   if (!dateString) return true; // Null dates are considered valid (optional field)
   
   try {
-    // For ISO format
-    let parsedDate;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      parsedDate = new Date(dateString);
-    } else {
-      // For DD/MM/YYYY format
-      parsedDate = parse(dateString, 'dd/MM/yyyy', new Date());
-    }
-    
-    if (!isValid(parsedDate)) {
-      return false;
-    }
+    const parsedDate = parseDate(dateString);
+    if (!parsedDate) return false;
     
     const year = parsedDate.getFullYear();
-    // Reasonable range check - people are unlikely to be over 120 years old or from the future
     const currentYear = new Date().getFullYear();
-    return year >= 1900 && year <= currentYear;
     
+    return year >= 1900 && year <= currentYear && !isFuture(parsedDate);
   } catch {
     return false;
   }
 };
+
+// Check if date is within a given range
+export const isDateInRange = (
+  dateString: string | null, 
+  minDate: Date, 
+  maxDate: Date
+): boolean => {
+  if (!dateString) return false;
+  
+  try {
+    const parsedDate = parseDate(dateString);
+    if (!parsedDate) return false;
+    
+    return isPast(maxDate) && isFuture(minDate);
+  } catch {
+    return false;
+  }
+};
+
+// Get relative date description
+export const getRelativeDateDescription = (dateString: string | null): string => {
+  if (!dateString) return '';
+  
+  try {
+    const parsedDate = parseDate(dateString);
+    if (!parsedDate) return '';
+    
+    if (isToday(parsedDate)) return 'Hoje';
+    
+    const daysFromToday = differenceInDays(parsedDate, new Date());
+    if (daysFromToday === 1) return 'Amanhã';
+    if (daysFromToday === -1) return 'Ontem';
+    
+    return formatDateForDisplay(dateString);
+  } catch {
+    return '';
+  }
+};
+
