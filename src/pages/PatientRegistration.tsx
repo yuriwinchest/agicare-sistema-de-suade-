@@ -21,28 +21,33 @@ const PatientRegistration = () => {
   const handleComplete = async (formData: any) => {
     try {
       setIsSubmitting(true);
-      console.log("Saving patient data:", formData);
+      console.log("Salvando dados do paciente:", formData);
       
-      // Make sure the status is set correctly for the reception page to display properly
+      // Formatar dados do paciente para gravação adequada
       const patientData = {
         ...formData,
         status: "Agendado",
         reception: formData.reception || "RECEPÇÃO CENTRAL",
-        specialty: formData.specialty,
-        professional: formData.professional,
-        health_plan: formData.healthPlan,
-        // Garantir que a data e hora da consulta sejam salvas
-        date: formData.date,
-        appointmentTime: formData.appointmentTime
+        specialty: formData.specialty || null,
+        professional: formData.professional || null,
+        health_plan: formData.healthPlan || null,
+        date: formData.date || null,
+        appointmentTime: formData.appointmentTime || null
       };
 
-      // Separar dados em categorias corretas para gravação
+      // Separar dados adicionais, documentos e alergias para gravação adequada
+      const additionalData = formData.additionalData || null;
+      const documents = formData.documents || null;
+      const allergies = formData.allergies || null;
+      const observations = formData.observations || null;
+
+      // Chamar a função de gravação completa
       const success = await saveCompletePatient(
         patientData,
-        formData.additionalData || null,
-        formData.documents || null,
-        formData.allergies || null,
-        formData.observations || null
+        additionalData,
+        documents,
+        allergies,
+        observations
       );
 
       if (success) {
@@ -51,7 +56,7 @@ const PatientRegistration = () => {
           description: "Os dados do paciente foram salvos com sucesso."
         });
         
-        // Wait a moment before navigating away to ensure toast is visible
+        // Aguardar um momento antes de navegar para garantir que o toast seja visível
         setTimeout(() => {
           navigate("/reception");
         }, 1500);
@@ -63,7 +68,7 @@ const PatientRegistration = () => {
         });
       }
     } catch (error) {
-      console.error("Error saving patient:", error);
+      console.error("Erro ao salvar paciente:", error);
       toast({
         title: "Erro ao salvar",
         description: "Ocorreu um erro ao processar a requisição.",

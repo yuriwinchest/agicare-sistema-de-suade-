@@ -72,6 +72,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
       const today = new Date();
       const formattedDate = formData.date || format(today, 'dd/MM/yyyy');
       
+      // Prepare data for saving
       const finalData = {
         ...formData,
         // Ensure we have the proper structure for saving
@@ -83,14 +84,14 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         professional: formData.professional || "",
         health_plan: formData.healthPlan || "",
         date: formattedDate,
-        // Convert address if available
+        // Prepare address data in the expected format
         address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
           ? JSON.stringify(formData.addressDetails) 
           : null
       };
       
-      // Add documents if available
-      if (formData.documents) {
+      // Format documents if available
+      if (formData.documents && formData.documents.length > 0) {
         finalData.documents = formData.documents.map((doc: any) => ({
           document_type: doc.documentType,
           document_number: doc.documentNumber,
@@ -99,8 +100,8 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         }));
       }
       
-      // Add allergies if available
-      if (formData.allergies) {
+      // Format allergies if available
+      if (formData.allergies && formData.allergies.length > 0) {
         finalData.allergies = formData.allergies.map((allergy: any) => ({
           allergy_type: allergy.allergyType,
           description: allergy.description,
@@ -108,7 +109,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         }));
       }
       
-      console.log("Completing registration with data:", finalData);
+      console.log("Finalizando cadastro com dados:", finalData);
       onComplete(finalData);
     }
   };

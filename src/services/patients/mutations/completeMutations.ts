@@ -17,9 +17,9 @@ export const saveCompletePatient = async (
   notes?: string
 ): Promise<boolean> => {
   try {
-    console.log("Starting saveCompletePatient with data:", { patient, additionalData, documents, allergies, notes });
+    console.log("Iniciando saveCompletePatient com dados:", { patient, additionalData, documents, allergies, notes });
     
-    // Ensure reception field is set, if not provided, set a default value
+    // Garantir que campo reception esteja definido
     if (!patient.reception) {
       patient.reception = "RECEPÇÃO CENTRAL";
     }
@@ -45,25 +45,27 @@ export const saveCompletePatient = async (
       professional: patient.professional || null,
       health_plan: patient.health_plan || patient.healthPlan || null,
       date: patient.date || null,
+      attendance_type: patient.specialty || null,
       appointmentTime: patient.appointmentTime || null
     };
     
+    console.log("Dados formatados para salvar:", patientData);
     const savedPatient = await savePatient(patientData);
     
     if (!savedPatient) {
-      console.error("Failed to save basic patient data");
+      console.error("Falha ao salvar dados básicos do paciente");
       return false;
     }
     
-    console.log("Successfully saved basic patient data:", savedPatient);
+    console.log("Dados básicos do paciente salvos com sucesso:", savedPatient);
     
-    // Check if in demo mode and handle accordingly
+    // Verificar se está em modo de demonstração e tratar adequadamente
     const { data: session } = await supabase.auth.getSession();
     const isAuthenticated = !!session?.session;
     
     if (!isAuthenticated) {
-      console.log("Demo mode detected - handling additional data in demo mode");
-      return true; // In demo mode, just return success
+      console.log("Modo de demonstração detectado - processando dados adicionais no modo demonstração");
+      return true; // Em modo de demonstração, apenas retorna sucesso
     }
     
     // 2. Salvar dados complementares se fornecidos
@@ -77,7 +79,7 @@ export const saveCompletePatient = async (
     
     // 3. Salvar documentos se fornecidos
     if (documents && documents.length > 0) {
-      console.log("Saving documents:", documents);
+      console.log("Salvando documentos:", documents);
       for (const doc of documents) {
         await savePatientDocument({
           ...doc,
@@ -88,7 +90,7 @@ export const saveCompletePatient = async (
     
     // 4. Salvar alergias se fornecidas
     if (allergies && allergies.length > 0) {
-      console.log("Saving allergies:", allergies);
+      console.log("Salvando alergias:", allergies);
       for (const allergy of allergies) {
         await savePatientAllergy({
           ...allergy,
@@ -106,7 +108,7 @@ export const saveCompletePatient = async (
       });
     }
     
-    // 6. Log the successful registration
+    // 6. Registrar log de cadastro bem-sucedido
     await addPatientLog({
       patient_id: savedPatient.id,
       action: "Cadastro",
@@ -114,7 +116,7 @@ export const saveCompletePatient = async (
       performed_by: "Sistema"
     });
     
-    console.log("Successfully saved complete patient data");
+    console.log("Dados completos do paciente salvos com sucesso");
     return true;
   } catch (error) {
     console.error("Erro em saveCompletePatient:", error);
