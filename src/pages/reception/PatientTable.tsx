@@ -1,12 +1,13 @@
-
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Calendar, Phone, User, CheckCircle2 } from "lucide-react";
+import { Clock, Calendar, Phone, User, CheckCircle2, Pen, Trash } from "lucide-react";
 import { getStatusClass, getDisplayStatus } from "./patientStatusUtils";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const columnClasses = [
   "w-20 min-w-[55px] max-w-[60px]",      // Protocolo
@@ -39,6 +40,7 @@ const PendingNameHoverCard = ({ children }) => (
 
 const PatientTable = ({ patients, isLoading }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handlePatientClick = (patient) => {
     navigate(`/patient/${patient.id}`);
@@ -46,6 +48,31 @@ const PatientTable = ({ patients, isLoading }) => {
 
   const handleCheckIn = (patient) => {
     navigate(`/patient-reception/${patient.id}`);
+  };
+
+  const handleDelete = async (patientId: string) => {
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .delete()
+        .eq('id', patientId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Paciente excluído",
+        description: "O paciente foi excluído com sucesso.",
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting patient:", error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o paciente.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -163,6 +190,32 @@ const PatientTable = ({ patients, isLoading }) => {
                             >
                               <User className="h-4 w-4" />
                               <span className="sr-only">Ver paciente</span>
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="teal-hover text-gray-500 hover:text-teal-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/patient-registration/${patient.id}`);
+                              }}
+                            >
+                              <Pen className="h-4 w-4" />
+                              <span className="sr-only">Editar</span>
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-gray-500 hover:text-red-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('Tem certeza que deseja excluir este paciente?')) {
+                                  handleDelete(patient.id);
+                                }
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                              <span className="sr-only">Excluir</span>
                             </Button>
                             <Button 
                               size="sm" 

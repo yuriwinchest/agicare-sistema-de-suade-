@@ -1,4 +1,3 @@
-
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -10,7 +9,6 @@ import {
   clearDraftPatient as clearDraftPatientMutation,
 } from "./patients/patientMutations";
 
-// Import the confirmPatientAppointment from the correct path
 import { confirmPatientAppointment as confirmPatientAppointmentMutation } from "./patients/mutations/appointmentMutations";
 
 export const formatDateForDatabase = (dateString: string | null): string | null => {
@@ -50,42 +48,72 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     if (patient.birth_date) {
       patient.birth_date = formatDateForDatabase(patient.birth_date);
     }
-    
-    const { data: session } = await supabase.auth.getSession();
-    const isAuthenticated = !!session?.session;
-    
-    if (!isAuthenticated) {
-      console.warn("Usuário não autenticado - tentando criar paciente em modo demo");
-      if (await isDemoMode()) {
-        return {
-          ...patient,
-          id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
-          status: 'Agendado (Demo)',
-          protocol_number: Math.floor(Math.random() * 900) + 100,
-          reception: patient.reception || "RECEPÇÃO CENTRAL",
-          specialty: patient.specialty || null,
-          professional: patient.professional || null,
-          health_plan: patient.healthPlan || null
-        };
+
+    const patientData = {
+      id: patient.id || undefined,
+      name: patient.name,
+      cpf: patient.cpf || null,
+      phone: patient.phone || null,
+      email: patient.email || null,
+      address: typeof patient.address === 'object' ? JSON.stringify(patient.address) : patient.address,
+      birth_date: patient.birth_date ? formatDateForDatabase(patient.birth_date) : null,
+      status: patient.status || 'Agendado',
+      person_type: patient.person_type || null,
+      gender: patient.gender || null,
+      father_name: patient.father_name || null,
+      mother_name: patient.mother_name || null,
+      marital_status: patient.marital_status || null,
+      reception: patient.reception || "RECEPÇÃO CENTRAL",
+      attendance_type: patient.specialty || null
+    };
+
+    console.log("Saving patient data:", patientData);
+
+    if (patientData.id) {
+      const { data: existingPatient, error: checkError } = await supabase
+        .from('patients')
+        .select('id')
+        .eq('id', patientData.id)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existingPatient) {
+        const { data, error } = await supabase
+          .from('patients')
+          .update(patientData)
+          .eq('id', patientData.id)
+          .select();
+
+        if (error) throw error;
+        return data[0] as Patient;
       }
-      throw new Error("Usuário não autenticado");
     }
-    
-    return await savePatientMutation(patient);
-  } catch (error) {
-    console.error("Erro em savePatient service layer:", error);
-    if (await isDemoMode()) {
-      console.log("Creating fallback demo patient");
-      return {
-        ...patient,
-        id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
-        status: 'Agendado',
-        protocol_number: Math.floor(Math.random() * 900) + 100,
-        specialty: patient.specialty || null,
-        professional: patient.professional || null,
+
+    const { data, error } = await supabase
+      .from('patients')
+      .insert(patientData)
+      .select();
+
+    if (error) throw error;
+
+    const savedPatient = data[0] as Patient;
+    console.log("Patient saved successfully:", savedPatient);
+
+    if (patient.healthPlan || patient.specialty || patient.professional) {
+      const additionalData = {
+        id: savedPatient.id,
         health_plan: patient.healthPlan || null
       };
+
+      await supabase
+        .from('patient_additional_data')
+        .upsert(additionalData);
     }
+
+    return savedPatient;
+  } catch (error) {
+    console.error("Error in savePatient:", error);
     throw error;
   }
 };
@@ -118,7 +146,6 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
 
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
-    // Check if in demo mode
     if (await isDemoMode()) {
       console.log("Demo mode detected - using local storage for patients");
       try {
@@ -130,8 +157,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
         console.error("Error reading from localStorage:", error);
       }
     }
-    
-    // Attempt to fetch from Supabase
+
     const { data, error } = await supabase
       .from('patients')
       .select('*')
@@ -141,8 +167,7 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       console.error("Error fetching patients:", error);
       return [];
     }
-    
-    // Store in local storage for demo mode
+
     if (await isDemoMode() && data) {
       try {
         localStorage.setItem('demo_patients', JSON.stringify(data));
@@ -150,14 +175,12 @@ export const getAllPatients = async (): Promise<Patient[]> => {
         console.error("Error storing in localStorage:", storageError);
       }
     }
-    
-    // Transform the data to include proper specialty, professional, and health plan
-    // Using father_name as a temporary stand-in for professional and attendance_type for specialty
+
     const transformedData = data?.map(patient => ({
       ...patient,
       specialty: patient.attendance_type || "Não definida",
       professional: patient.father_name || "Não definido", 
-      health_plan: "Não informado" // Default as there's no direct field for this
+      health_plan: "Não informado"
     })) || [];
 
     return transformedData;
@@ -188,10 +211,8 @@ export const getAmbulatoryPatients = async (): Promise<Patient[]> => {
 
 export const getActiveAppointments = async (): Promise<any[]> => {
   try {
-    // Check if in demo mode
     if (await isDemoMode()) {
       console.log("Demo mode detected - returning mock appointment data");
-      // Return mock data for demo purposes
       return [
         {
           id: "1",
@@ -217,8 +238,7 @@ export const getActiveAppointments = async (): Promise<any[]> => {
         }
       ];
     }
-    
-    // Attempt to fetch from Supabase
+
     const { data, error } = await supabase
       .from('patients')
       .select('*')
@@ -229,22 +249,21 @@ export const getActiveAppointments = async (): Promise<any[]> => {
       console.error("Error fetching active appointments:", error);
       return [];
     }
-    
+
     console.log("Raw patient data from Supabase:", data);
-    
-    // Transform patient data to appointment format using only fields that exist
+
     const appointments = data.map(patient => ({
       id: patient.id,
       patient: { name: patient.name },
-      date: patient.birth_date, // Using birth_date as appointment date for now
-      time: "09:00:00", // Default time since appointmentTime is not available
+      date: patient.birth_date,
+      time: "09:00:00",
       status: patient.status === 'Confirmado' ? 'confirmed' : 'scheduled',
       notes: "",
       specialty: patient.attendance_type || "Não informada", 
       professional: patient.father_name || "Não informado",
-      health_plan: "Não informado" // Default value
+      health_plan: "Não informado"
     }));
-    
+
     console.log("Transformed appointments:", appointments);
     return appointments || [];
   } catch (error) {
