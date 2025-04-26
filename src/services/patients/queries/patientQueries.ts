@@ -1,5 +1,5 @@
 
-import { Patient, HospitalizedPatient } from "../types";
+import { Patient, HospitalizedPatient, PatientAdditionalData } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDatabase, ensureProperDateFormat } from "../utils/dateUtils";
 
@@ -29,14 +29,16 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       .maybeSingle();
     
     // Combine the data with safe access to properties
+    const additionalDataAny = additionalData as any || {};
+    
     const fullPatientData: Patient = {
       ...patientData,
       // Use safe optional chaining and fallbacks
-      specialty: additionalData?.specialty || patientData.attendance_type || "Não definida",
-      professional: additionalData?.professional || patientData.father_name || "Não definido",
-      health_plan: additionalData?.health_plan || "Não informado",
-      reception: additionalData?.reception || "RECEPÇÃO CENTRAL",
-      appointmentTime: additionalData?.appointmentTime || null
+      specialty: additionalDataAny.specialty || patientData.attendance_type || "Não definida",
+      professional: additionalDataAny.professional || patientData.father_name || "Não definido",
+      health_plan: additionalDataAny.health_plan || "Não informado",
+      reception: additionalDataAny.reception || "RECEPÇÃO CENTRAL",
+      appointmentTime: additionalDataAny.appointmentTime || null
     };
     
     return fullPatientData;
@@ -78,17 +80,18 @@ export const getAllPatients = async (): Promise<Patient[]> => {
 
     // Transform data to include additional fields
     const transformedData = patients.map(patient => {
+      const patientAny = patient as any;
       const additionalData = additionalDataMap[patient.id] || {};
       
       return {
         ...patient,
-        specialty: additionalData?.specialty || patient.attendance_type || "Não definida",
-        professional: additionalData?.professional || patient.father_name || "Não definido", 
-        health_plan: additionalData?.health_plan || "Não informado",
-        reception: additionalData?.reception || "RECEPÇÃO CENTRAL",
-        appointmentTime: additionalData?.appointmentTime || null,
+        specialty: additionalData.specialty || patient.attendance_type || "Não definida",
+        professional: additionalData.professional || patient.father_name || "Não definido", 
+        health_plan: additionalData.health_plan || "Não informado",
+        reception: additionalData.reception || "RECEPÇÃO CENTRAL",
+        appointmentTime: additionalData.appointmentTime || null,
         // Ensure date is properly formatted for display
-        date: patient.date || (patient.created_at ? ensureProperDateFormat(patient.created_at.split('T')[0]) : "Não agendado")
+        date: patientAny.date || (patient.created_at ? ensureProperDateFormat(patient.created_at.split('T')[0]) : "Não agendado")
       };
     });
 
