@@ -152,11 +152,12 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     }
     
     // Transform the data to include proper specialty, professional, and health plan
+    // Using father_name as a temporary stand-in for professional and attendance_type for specialty
     const transformedData = data?.map(patient => ({
       ...patient,
       specialty: patient.attendance_type || "Não definida",
-      professional: patient.professional || "Não definido",
-      health_plan: patient.health_plan || "Não informado"
+      professional: patient.father_name || "Não definido", 
+      health_plan: "Não informado" // Default as there's no direct field for this
     })) || [];
 
     return transformedData;
@@ -231,8 +232,7 @@ export const getActiveAppointments = async (): Promise<any[]> => {
     
     console.log("Raw patient data from Supabase:", data);
     
-    // Transform patient data to appointment format
-    // Make sure we're only accessing properties that actually exist on the patient objects
+    // Transform patient data to appointment format using only fields that exist
     const appointments = data.map(patient => ({
       id: patient.id,
       patient: { name: patient.name },
@@ -240,8 +240,8 @@ export const getActiveAppointments = async (): Promise<any[]> => {
       time: "09:00:00", // Default time since appointmentTime is not available
       status: patient.status === 'Confirmado' ? 'confirmed' : 'scheduled',
       notes: "",
-      specialty: patient.attendance_type || "Não informada", // Using attendance_type instead of specialty
-      professional: patient.father_name || "Não informado", // Using father_name temporarily
+      specialty: patient.attendance_type || "Não informada", 
+      professional: patient.father_name || "Não informado",
       health_plan: "Não informado" // Default value
     }));
     
