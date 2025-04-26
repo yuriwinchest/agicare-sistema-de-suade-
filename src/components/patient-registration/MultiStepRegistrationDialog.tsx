@@ -69,8 +69,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
       setCurrentStep(currentStep + 1);
     } else {
       // Etapa final - concluir registro
-      const today = new Date();
-      const formattedDate = formData.date || format(today, 'yyyy-MM-dd');
+      // Não usamos mais o campo date na tabela patients
       
       // Preparar dados para salvar
       const finalData = {
@@ -84,7 +83,8 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         professional: formData.professional || null,
         health_plan: formData.healthPlan || null,
         birth_date: formData.birth_date || null,
-        date: formattedDate,
+        // appointmentTime é salvo separadamente
+        appointmentTime: formData.appointmentTime || null,
         // Preparar dados de endereço no formato esperado
         address: formData.addressDetails && Object.keys(formData.addressDetails).length > 0 
           ? JSON.stringify(formData.addressDetails) 
@@ -93,21 +93,17 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
       
       // Formatar documentos se disponíveis
       if (formData.documents && formData.documents.length > 0) {
-        finalData.documents = formData.documents.map((doc: any) => ({
-          document_type: doc.documentType,
-          document_number: doc.documentNumber,
-          issuing_body: doc.issuingBody || "",
-          issue_date: doc.issueDate || null
-        }));
+        finalData.documents = formData.documents;
       }
       
       // Formatar alergias se disponíveis
       if (formData.allergies && formData.allergies.length > 0) {
-        finalData.allergies = formData.allergies.map((allergy: any) => ({
-          allergy_type: allergy.allergyType,
-          description: allergy.description,
-          severity: allergy.severity || "Média"
-        }));
+        finalData.allergies = formData.allergies;
+      }
+
+      // Dados adicionais
+      if (formData.additionalData) {
+        finalData.additionalData = formData.additionalData;
       }
       
       console.log("Finalizando cadastro com dados:", finalData);

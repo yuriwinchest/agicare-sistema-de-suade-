@@ -44,9 +44,8 @@ export const saveCompletePatient = async (
       specialty: patient.specialty || null,
       professional: patient.professional || null,
       health_plan: patient.health_plan || patient.healthPlan || null,
-      date: patient.date || null,
       attendance_type: patient.specialty || null,
-      appointmentTime: patient.appointmentTime || null
+      // Removendo o campo date que estava causando o erro
     };
     
     console.log("Dados formatados para salvar:", patientData);
@@ -91,10 +90,15 @@ export const saveCompletePatient = async (
     if (documents && documents.length > 0) {
       console.log("Salvando documentos:", documents);
       for (const doc of documents) {
-        await savePatientDocument({
-          ...doc,
-          patient_id: savedPatient.id
-        });
+        if (doc && doc.documentType && doc.documentNumber) {
+          await savePatientDocument({
+            patient_id: savedPatient.id,
+            document_type: typeof doc.documentType === 'object' ? doc.documentType.value : doc.documentType,
+            document_number: typeof doc.documentNumber === 'object' ? doc.documentNumber.value : doc.documentNumber,
+            issuing_body: doc.issuingBody || "",
+            issue_date: doc.issueDate || null
+          });
+        }
       }
     }
     
@@ -102,10 +106,14 @@ export const saveCompletePatient = async (
     if (allergies && allergies.length > 0) {
       console.log("Salvando alergias:", allergies);
       for (const allergy of allergies) {
-        await savePatientAllergy({
-          ...allergy,
-          patient_id: savedPatient.id
-        });
+        if (allergy && allergy.allergyType && allergy.description) {
+          await savePatientAllergy({
+            patient_id: savedPatient.id,
+            allergy_type: typeof allergy.allergyType === 'object' ? allergy.allergyType.value : allergy.allergyType,
+            description: allergy.description,
+            severity: allergy.severity || "Média"
+          });
+        }
       }
     }
     
