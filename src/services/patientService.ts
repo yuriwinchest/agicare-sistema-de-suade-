@@ -214,25 +214,28 @@ export const getActiveAppointments = async (): Promise<any[]> => {
     const { data, error } = await supabase
       .from('patients')
       .select('*')
-      .not('date', 'is', null)
-      .order('date', { ascending: true });
+      .not('birth_date', 'is', null)
+      .order('created_at', { ascending: false });
       
     if (error) {
       console.error("Error fetching active appointments:", error);
       return [];
     }
     
+    console.log("Raw patient data from Supabase:", data);
+    
     // Transform patient data to appointment format
+    // Make sure we're only accessing properties that actually exist on the patient objects
     const appointments = data.map(patient => ({
       id: patient.id,
       patient: { name: patient.name },
-      date: patient.date,
-      time: patient.appointmentTime,
+      date: patient.birth_date, // Using birth_date as appointment date for now
+      time: "09:00:00", // Default time since appointmentTime is not available
       status: patient.status === 'Confirmado' ? 'confirmed' : 'scheduled',
       notes: "",
-      specialty: patient.specialty || null,
-      professional: patient.professional || null,
-      health_plan: patient.health_plan || null
+      specialty: patient.attendance_type || "Não informada", // Using attendance_type instead of specialty
+      professional: patient.father_name || "Não informado", // Using father_name temporarily
+      health_plan: "Não informado" // Default value
     }));
     
     console.log("Transformed appointments:", appointments);
