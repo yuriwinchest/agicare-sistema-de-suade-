@@ -10,6 +10,7 @@ import ReceptionFilters from "./reception/ReceptionFilters";
 import PatientTable from "./reception/PatientTable";
 import ReceptionShortcuts from "./reception/ReceptionShortcuts";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
+import { parseISO, isAfter, isBefore, isEqual, startOfDay } from "date-fns";
 
 const PAGE_BACKGROUND = "bg-gradient-to-br from-[#F6FDFF] via-[#D0F0FA] to-[#F3FAF8] dark:from-[#1d2332] dark:via-[#222a3a] dark:to-[#171b26]";
 
@@ -18,12 +19,12 @@ const Reception = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [receptionFilter, setReceptionFilter] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [professionalFilter, setProfessionalFilter] = useState("");
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [receptionOptions, setReceptionOptions] = useState<string[]>([]);
 
   const loadPatientList = async () => {
     setIsLoading(true);
@@ -31,17 +32,6 @@ const Reception = () => {
       const patientsData = await getAllPatients();
       console.log("Loaded patients:", patientsData);
       setPatients(patientsData);
-      
-      const uniqueReceptions = Array.from(
-        new Set(
-          patientsData
-            .map(patient => patient.reception)
-            .filter(reception => reception)
-        )
-      ) as string[];
-      
-      console.log("Unique reception options:", uniqueReceptions);
-      setReceptionOptions(uniqueReceptions);
       setIsLoading(false);
     } catch (error) {
       console.error("Error loading patients:", error);
@@ -66,17 +56,42 @@ const Reception = () => {
   }, []);
 
   const filteredPatients = patients.filter((patient) => {
+    // Name or CPF filter
     const matchesSearch =
       patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.cpf?.includes(searchTerm);
 
+    // Status filter
     const patientDisplayStatus = getDisplayStatus(patient);
     const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
-    const matchesReception = receptionFilter ? patient.reception === receptionFilter : true;
+    
+    // Date filters
+    let matchesDateRange = true;
+    if (patient.date && (startDate || endDate)) {
+      const appointmentDate = parseISO(patient.date);
+      
+      if (startDate && endDate) {
+        // Both dates provided - check if appointment is between them
+        const start = startOfDay(startDate);
+        const end = startOfDay(endDate);
+        matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) && 
+                           (isBefore(appointmentDate, end) || isEqual(appointmentDate, end));
+      } else if (startDate) {
+        // Only start date - check if appointment is on or after
+        matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) || 
+                           isEqual(appointmentDate, startOfDay(startDate));
+      } else if (endDate) {
+        // Only end date - check if appointment is on or before
+        matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) || 
+                           isEqual(appointmentDate, startOfDay(endDate));
+      }
+    }
+    
+    // Specialty and professional filters
     const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
     const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
     
-    return matchesSearch && matchesStatus && matchesReception && matchesSpecialty && matchesProfessional;
+    return matchesSearch && matchesStatus && matchesDateRange && matchesSpecialty && matchesProfessional;
   });
 
   return (
@@ -102,9 +117,10 @@ const Reception = () => {
               setSearchTerm={setSearchTerm}
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
-              receptionFilter={receptionFilter}
-              setReceptionFilter={setReceptionFilter}
-              receptionOptions={receptionOptions}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
               specialtyFilter={specialtyFilter}
               setSpecialtyFilter={setSpecialtyFilter}
               professionalFilter={professionalFilter}

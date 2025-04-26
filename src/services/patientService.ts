@@ -1,3 +1,4 @@
+
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -212,8 +213,7 @@ export const getActiveAppointments = async (): Promise<any[]> => {
     // Attempt to fetch from Supabase
     const { data, error } = await supabase
       .from('patients')
-      .select('id, name, specialty, professional, health_plan, date, appointmentTime, status')
-      .not('appointmentTime', 'is', null)
+      .select('*')
       .not('date', 'is', null)
       .order('date', { ascending: true });
       
@@ -228,11 +228,11 @@ export const getActiveAppointments = async (): Promise<any[]> => {
       patient: { name: patient.name },
       date: patient.date,
       time: patient.appointmentTime,
-      status: 'scheduled',
+      status: patient.status === 'Confirmado' ? 'confirmed' : 'scheduled',
       notes: "",
-      specialty: patient.specialty,
-      professional: patient.professional,
-      health_plan: patient.health_plan
+      specialty: patient.specialty || null,
+      professional: patient.professional || null,
+      health_plan: patient.health_plan || null
     }));
     
     console.log("Transformed appointments:", appointments);
