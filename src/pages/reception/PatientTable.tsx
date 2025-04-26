@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +8,8 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { calculateAge } from "@/utils/dateUtils";
+import PatientActionsDialog from "@/components/electronic-record/PatientActionsDialog";
 
 const columnClasses = [
   "w-20 min-w-[55px] max-w-[60px]",      // Protocolo
@@ -76,6 +77,25 @@ const PatientTable = ({ patients, isLoading }) => {
     }
   };
 
+  const getStatusColor = (id: string) => {
+    const lastDigit = parseInt(id.charAt(id.length - 1));
+    
+    if (lastDigit % 3 === 0) return "bg-yellow-400";
+    if (lastDigit % 3 === 1) return "bg-red-500";
+    return "bg-blue-500";
+  };
+
+  const handlePatientCall = (patient: any) => {
+    toast({
+      title: "Paciente Chamado",
+      description: `${patient.name} foi chamado para atendimento`,
+    });
+  };
+
+  const handlePatientAttend = (patient: any) => {
+    navigate(`/patient/${patient.id}`);
+  };
+
   if (isLoading) {
     return (
       <Card className="system-card">
@@ -119,120 +139,126 @@ const PatientTable = ({ patients, isLoading }) => {
                     const appointmentDate = patient.date || 'Não agendado';
 
                     return (
-                      <TableRow
+                      <PatientActionsDialog
                         key={patient.id}
-                        className="group transition-colors duration-200 hover:bg-blue-50/70 dark:hover:bg-slate-800"
-                        onClick={() => handlePatientClick(patient)}
+                        patientId={patient.id}
+                        onCall={() => handlePatientCall(patient)}
+                        onAttend={() => handlePatientAttend(patient)}
                       >
-                        <TableCell className={`${columnClasses[0]} font-bold text-gray-700 group-hover:text-teal-700 px-3 py-2`}>
-                          {patient.protocol_number 
-                            ? String(patient.protocol_number).padStart(3, "0")
-                            : "--"
-                          }
-                        </TableCell>
-                        <TableCell className={`${columnClasses[1]} px-3 py-2`}>
-                          {displayStatus === "Pendente" ? (
-                            <div onClick={(e) => e.stopPropagation()} className="w-fit">
-                              <PendingNameHoverCard>{patient.name}</PendingNameHoverCard>
+                        <TableRow 
+                          className="group transition-colors duration-200 hover:bg-blue-50/70 dark:hover:bg-slate-800"
+                          onClick={() => handlePatientClick(patient)}
+                        >
+                          <TableCell className={`${columnClasses[0]} font-bold text-gray-700 group-hover:text-teal-700 px-3 py-2`}>
+                            {patient.protocol_number 
+                              ? String(patient.protocol_number).padStart(3, "0")
+                              : "--"
+                            }
+                          </TableCell>
+                          <TableCell className={`${columnClasses[1]} px-3 py-2`}>
+                            {displayStatus === "Pendente" ? (
+                              <div onClick={(e) => e.stopPropagation()} className="w-fit">
+                                <PendingNameHoverCard>{patient.name}</PendingNameHoverCard>
+                              </div>
+                            ) : (
+                              <span className="font-medium text-gray-800 group-hover:text-teal-800">{patient.name}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[2]} px-3 py-2`}>
+                            {patient.cpf || <span className="text-xs text-muted-foreground">Não informado</span>}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[3]} px-3 py-2`}>
+                            {patient.reception || 'Não definida'}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[4]} px-3 py-2`}>
+                            <div className="flex items-center text-gray-600 group-hover:text-teal-600 gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <span>{appointmentDate}</span>
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span>{appointmentTime}</span>
                             </div>
-                          ) : (
-                            <span className="font-medium text-gray-800 group-hover:text-teal-800">{patient.name}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[2]} px-3 py-2`}>
-                          {patient.cpf || <span className="text-xs text-muted-foreground">Não informado</span>}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[3]} px-3 py-2`}>
-                          {patient.reception || 'Não definida'}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[4]} px-3 py-2`}>
-                          <div className="flex items-center text-gray-600 group-hover:text-teal-600 gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>{appointmentDate}</span>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>{appointmentTime}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className={`${columnClasses[5]} px-3 py-2`}>
-                          {patient.specialty || <span className="text-xs text-muted-foreground">Não definida</span>}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[6]} px-3 py-2`}>
-                          {patient.professional || <span className="text-xs text-muted-foreground">Não definido</span>}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[7]} px-3 py-2`}>
-                          {patient.health_plan || <span className="text-xs text-muted-foreground">Não informado</span>}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[8]} px-3 py-2`}>
-                          {displayStatus === "Pendente" ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className={`${statusClass} cursor-help group-hover:scale-105 transition-transform`}>
-                                  {displayStatus}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent className="bg-amber-50 text-amber-800 border border-amber-200">
-                                {PENDENTE_TOOLTIP}
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : (
-                            <span className={statusClass}>{displayStatus}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className={`${columnClasses[9]} px-3 py-2`}>
-                          <div className="flex justify-end space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="text-gray-500 hover:text-teal-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/patient/${patient.id}`);
-                              }}
-                            >
-                              <User className="h-4 w-4" />
-                              <span className="sr-only">Ver paciente</span>
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="text-gray-500 hover:text-teal-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/patient-registration/${patient.id}`);
-                              }}
-                            >
-                              <Pen className="h-4 w-4" />
-                              <span className="sr-only">Editar</span>
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="text-gray-500 hover:text-red-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (window.confirm('Tem certeza que deseja excluir este paciente?')) {
-                                  handleDelete(patient.id);
-                                }
-                              }}
-                            >
-                              <Trash className="h-4 w-4" />
-                              <span className="sr-only">Excluir</span>
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="text-gray-500 hover:text-teal-600"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCheckIn(patient);
-                              }}
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                              <span className="sr-only">Check-in</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                          </TableCell>
+                          <TableCell className={`${columnClasses[5]} px-3 py-2`}>
+                            {patient.specialty || <span className="text-xs text-muted-foreground">Não definida</span>}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[6]} px-3 py-2`}>
+                            {patient.professional || <span className="text-xs text-muted-foreground">Não definido</span>}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[7]} px-3 py-2`}>
+                            {patient.health_plan || <span className="text-xs text-muted-foreground">Não informado</span>}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[8]} px-3 py-2`}>
+                            {displayStatus === "Pendente" ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className={`${statusClass} cursor-help group-hover:scale-105 transition-transform`}>
+                                    {displayStatus}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-amber-50 text-amber-800 border border-amber-200">
+                                  {PENDENTE_TOOLTIP}
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <span className={statusClass}>{displayStatus}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className={`${columnClasses[9]} px-3 py-2`}>
+                            <div className="flex justify-end space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="text-gray-500 hover:text-teal-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/patient/${patient.id}`);
+                                }}
+                              >
+                                <User className="h-4 w-4" />
+                                <span className="sr-only">Ver paciente</span>
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="text-gray-500 hover:text-teal-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/patient-registration/${patient.id}`);
+                                }}
+                              >
+                                <Pen className="h-4 w-4" />
+                                <span className="sr-only">Editar</span>
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="text-gray-500 hover:text-red-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm('Tem certeza que deseja excluir este paciente?')) {
+                                    handleDelete(patient.id);
+                                  }
+                                }}
+                              >
+                                <Trash className="h-4 w-4" />
+                                <span className="sr-only">Excluir</span>
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="text-gray-500 hover:text-teal-600"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCheckIn(patient);
+                                }}
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span className="sr-only">Check-in</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </PatientActionsDialog>
                     );
                   })}
                 </TableBody>

@@ -171,10 +171,27 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       }
     }
 
-    // Fetch patients and their additional data using a join or parallel queries
+    // Fetch patients with their additional data and appointments
     const { data: patients, error } = await supabase
       .from('patients')
-      .select('*')
+      .select(`
+        *,
+        patient_additional_data (
+          health_plan,
+          reception,
+          specialty
+        ),
+        appointments (
+          date,
+          time,
+          status,
+          professional_id
+        ),
+        patient_documents (
+          document_type,
+          document_number
+        )
+      `)
       .order('created_at', { ascending: false });
       
     if (error) {
@@ -182,29 +199,20 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       return [];
     }
 
-    // Get additional data for all patients in one query
-    const { data: additionalData } = await supabase
-      .from('patient_additional_data')
-      .select('*');
-
-    // Create a map for quick lookup of additional data by patient id
-    const additionalDataMap = {};
-    if (additionalData) {
-      additionalData.forEach(data => {
-        additionalDataMap[data.id] = data;
-      });
-    }
-
-    // Merge patient and additional data
+    // Transform the data to include all required fields
     const transformedData = patients?.map(patient => {
-      const patientAdditionalData = additionalDataMap[patient.id] || {};
-      
+      const additionalData = patient.patient_additional_data?.[0] || {};
+      const latestAppointment = patient.appointments?.[0] || {};
+
       return {
         ...patient,
-        specialty: patientAdditionalData.specialty || patient.attendance_type || "Não definida",
-        professional: patientAdditionalData.professional || "Não definido",
-        health_plan: patientAdditionalData.health_plan || "Não informado",
-        reception: patientAdditionalData.reception || "RECEPÇÃO CENTRAL"
+        specialty: additionalData.specialty || patient.attendance_type || "Não definida",
+        professional: patient.father_name || "Não definido",
+        health_plan: additionalData.health_plan || "Não informado",
+        reception: additionalData.reception || "RECEPÇÃO CENTRAL",
+        date: latestAppointment.date || null,
+        appointmentTime: latestAppointment.time || null,
+        status: patient.status || 'Pendente'
       };
     }) || [];
 
