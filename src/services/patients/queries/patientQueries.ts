@@ -1,7 +1,7 @@
 
-import { Patient } from "../types";
+import { Patient, HospitalizedPatient } from "../types";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDateForDatabase } from "../utils/dateUtils";
+import { formatDateForDatabase, ensureProperDateFormat } from "../utils/dateUtils";
 
 export const getPatientById = async (id: string): Promise<Patient | null> => {
   try {
@@ -69,7 +69,7 @@ export const getAmbulatoryPatients = async (): Promise<Patient[]> => {
   }
 };
 
-export const getHospitalizedPatients = async (): Promise<Patient[]> => {
+export const getHospitalizedPatients = async (): Promise<HospitalizedPatient[]> => {
   try {
     const { data, error } = await supabase
       .from('patients')
@@ -81,7 +81,22 @@ export const getHospitalizedPatients = async (): Promise<Patient[]> => {
       return [];
     }
     
-    return data || [];
+    // Transform Patient data to match HospitalizedPatient type
+    const hospitalizedPatients: HospitalizedPatient[] = (data || []).map(patient => ({
+      id: patient.id,
+      name: patient.name,
+      birth_date: patient.birth_date || "",
+      unit: patient.mother_name || "Unidade Geral", // Using mother_name field as placeholder for unit
+      bed: `${Math.floor(Math.random() * 100) + 1}`, // Generating random bed number for demo
+      doctor: patient.father_name || "Dr. Silva", // Using father_name field as placeholder for doctor
+      diagnosis: patient.person_type || "Em observação", // Using person_type as placeholder for diagnosis
+      phone: patient.phone,
+      email: patient.email,
+      allergies: [], // Empty array as default
+      admissionDate: ensureProperDateFormat(patient.created_at?.split('T')[0]) || "01/01/2023"
+    }));
+    
+    return hospitalizedPatients;
   } catch (error) {
     console.error("Error in getHospitalizedPatients:", error);
     return [];

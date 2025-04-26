@@ -13,4 +13,4 @@ export {
   confirmPatientAppointment
 } from './patients';
 
-export { formatDateForDatabase } from './patients/utils/dateUtils';
+export { formatDateForDatabase, ensureProperDateFormat } from './patients/utils/dateUtils';

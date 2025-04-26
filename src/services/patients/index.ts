@@ -33,5 +33,8 @@ export type {
   PatientDraft,
   PatientAdditionalData,
   PatientDocument,
-  HospitalizedPatient
+  HospitalizedPatient,
+  PatientAllergy,
+  PatientNote,
+  PatientLog
 } from './types';
