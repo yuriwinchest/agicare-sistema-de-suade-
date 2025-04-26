@@ -4,7 +4,7 @@ import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { getHospitalizedPatients } from "@/services/patientService";
+import { getHospitalizedPatients } from "@/services/patients/queries/patientQueries";
 import { HospitalizedPatient } from "@/services/patients/types";
 import { MapPin, Phone, Mail, Calendar, User, Clipboard, Clock } from "lucide-react";
 

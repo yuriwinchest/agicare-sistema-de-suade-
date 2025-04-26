@@ -38,6 +38,14 @@ export interface Patient {
   appointmentTime?: string; // Appointment time
 }
 
+export interface HospitalizedPatient extends Patient {
+  unit?: string;
+  bed?: string;
+  doctor?: string;
+  diagnosis?: string;
+  admissionDate?: string;
+}
+
 export interface PatientDraft {
   id?: string;
   name: string;
@@ -92,4 +100,51 @@ export interface PatientDraft {
     severity?: string;
   }>;
   notes?: string;
+}
+
+export interface PatientAdditionalData {
+  id: string;
+  nationality?: string;
+  place_of_birth?: string;
+  place_of_birth_state?: string;
+  ethnicity?: string;
+  occupation?: string;
+  education_level?: string;
+  health_plan?: string;
+  health_card_number?: string;
+  city?: string;
+  state?: string;
+}
+
+export interface PatientDocument {
+  id?: string;
+  patient_id: string;
+  document_type: string;
+  document_number: string;
+  issuing_body?: string;
+  issue_date?: string | null;
+}
+
+export interface PatientAllergy {
+  id?: string;
+  patient_id: string;
+  allergy_type: string;
+  description: string;
+  severity?: string;
+}
+
+export interface PatientNote {
+  id?: string;
+  patient_id: string;
+  notes: string;
+  created_by?: string;
+}
+
+export interface PatientLog {
+  id?: string;
+  patient_id: string;
+  action: string;
+  description: string;
+  performed_by?: string;
+  created_at?: string;
 }
