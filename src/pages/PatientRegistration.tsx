@@ -37,10 +37,9 @@ const PatientRegistration = () => {
         status: "Agendado",
         reception: formData.reception || "RECEPÇÃO CENTRAL",
         specialty: formData.specialty || null,
-        professional: formData.professional || null,
         attendance_type: formData.specialty || null,
         person_type: formData.person_type || null,
-        // Remove health_plan from here as it's not in the patients table
+        // Remove professional and health_plan fields as they're not in the patients table
       };
 
       console.log("Formatted data for Supabase:", patientData);
@@ -101,10 +100,11 @@ const PatientRegistration = () => {
       }
       
       // Save complementary data if provided
-      if (formData.healthPlan || formData.additionalData) {
+      if (formData.healthPlan || formData.professional || formData.additionalData) {
         const additionalData = {
           id: patientId,
-          health_plan: formData.healthPlan || null
+          health_plan: formData.healthPlan || null,
+          professional: formData.professional || null
         };
         
         if (formData.additionalData) {

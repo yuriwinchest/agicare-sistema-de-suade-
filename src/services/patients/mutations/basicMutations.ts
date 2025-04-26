@@ -39,9 +39,9 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
       cns: patient.cns || null,
       marital_status: patient.marital_status || null,
       specialty: patient.specialty || null,
-      professional: patient.professional || null,
-      health_plan: patient.health_plan || patient.healthPlan || null,
+      attendance_type: patient.specialty || null,
       reception: patient.reception || 'RECEPÇÃO CENTRAL'
+      // Remove professional and health_plan fields as they should be saved in additional data
     };
 
     console.log("Saving patient data:", patientData);
@@ -59,6 +59,22 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
     }
     
     const savedPatient = data as Patient;
+    
+    // Save the health plan and professional in patient_additional_data
+    if (patient.health_plan || patient.healthPlan || patient.professional) {
+      try {
+        await supabase
+          .from('patient_additional_data')
+          .upsert({
+            id: savedPatient.id,
+            health_plan: patient.health_plan || patient.healthPlan || null,
+            professional: patient.professional || null
+          });
+      } catch (additionalDataError) {
+        console.error("Error saving additional data:", additionalDataError);
+        // Continue even if additional data fails
+      }
+    }
     
     // Try to add a log entry
     try {
@@ -84,9 +100,8 @@ export const savePatient = async (patient: Patient): Promise<Patient | null> => 
         ...patient,
         id: patient.id || `demo-${Math.random().toString(36).substring(2, 9)}`,
         status: 'Agendado',
-        specialty: patient.specialty || null,
-        professional: patient.professional || null,
-        health_plan: patient.health_plan || patient.healthPlan || null
+        specialty: patient.specialty || null
+        // professional and health_plan are stored in additional data
       };
     }
     

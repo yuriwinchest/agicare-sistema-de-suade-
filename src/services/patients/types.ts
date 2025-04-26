@@ -31,8 +31,8 @@ export interface Patient {
   protocol_number?: number; 
   reception?: string;
   specialty?: string;
-  professional?: string;
-  health_plan?: string;
+  professional?: string; // This will be saved in patient_additional_data
+  health_plan?: string; // This will be saved in patient_additional_data
   healthPlan?: string; // Alternative property for health_plan
   date?: string; // Appointment date
   appointmentTime?: string; // Appointment time
@@ -114,6 +114,7 @@ export interface PatientAdditionalData {
   health_card_number?: string;
   city?: string;
   state?: string;
+  professional?: string; // Added professional field
 }
 
 export interface PatientDocument {
