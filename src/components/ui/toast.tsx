@@ -28,15 +28,16 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        default: "border bg-[#092837] text-white",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
-        success: "border-green-600 bg-green-500 text-white",
-        warning: "border-orange-600 bg-orange-500 text-white", // Added orange notification style
+          "border-red-600 bg-red-500 text-white",
+        success: "border-[#3D717E] bg-[#3D717E] text-white",
+        warning: "border-[#D68630] bg-[#D68630] text-white", // Notification with the accent color
+        info: "border-[#114655] bg-[#114655] text-white"
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "warning", // Default to the orange accent color
     },
   }
 )
