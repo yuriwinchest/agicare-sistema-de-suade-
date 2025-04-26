@@ -20,7 +20,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       return null;
     }
 
-    // Then get patient additional data
+    // Then get patient additional data including specialty and professional
     const { data: additionalData } = await supabase
       .from('patient_additional_data')
       .select('*')
@@ -47,8 +47,8 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
     const fullPatientData: Patient = {
       ...patientData,
       // Use safe optional chaining and fallbacks
-      specialty: additionalDataAny.specialty || patientData.attendance_type || "Não definida",
-      professional: additionalDataAny.professional || patientData.father_name || "Não definido",
+      specialty: additionalDataAny.specialty || "Não definida",
+      professional: additionalDataAny.professional || "Não definido",
       health_plan: additionalDataAny.health_plan || "Não informado",
       reception: additionalDataAny.reception || "RECEPÇÃO CENTRAL",
       appointmentTime: appointmentData?.time || null,

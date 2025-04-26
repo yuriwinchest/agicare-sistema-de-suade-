@@ -9,7 +9,8 @@ export const getActiveAppointments = async () => {
       .from('appointments')
       .select(`
         *,
-        patients(*)
+        patients(*),
+        patient_additional_data(*)
       `)
       .in('status', ['scheduled', 'confirmed'])
       .order('date', { ascending: true })
@@ -27,9 +28,11 @@ export const getActiveAppointments = async () => {
     const transformedAppointments = (data || []).map(appointment => {
       // Handle empty patient data by using a default object and optional chaining
       const patient = appointment.patients || {};
+      const additionalData = appointment.patient_additional_data || {};
       
-      // Tratamos explicitamente o objeto patient como qualquer (any) para evitar erros de tipo
+      // Tratamos explicitamente o objeto como qualquer (any) para evitar erros de tipo
       const patientAny = patient as any;
+      const additionalDataAny = additionalData as any;
       
       const transformed = {
         id: appointment.id,
@@ -37,11 +40,9 @@ export const getActiveAppointments = async () => {
         date: ensureProperDateFormat(appointment.date) || "Não agendado",
         time: appointment.time || "Não definido",
         name: patientAny.name || "Paciente",
-        // Removendo referência a appointment.specialty que não existe no objeto
-        specialty: patientAny.attendance_type || "Não definida",
-        // Removendo referência a appointment.professional que não existe no objeto
-        professional: patientAny.father_name || "Não definido",
-        health_plan: patientAny.health_plan || "Não informado",
+        specialty: additionalDataAny.specialty || patientAny.attendance_type || "Não definida",
+        professional: additionalDataAny.professional || "Não definido",
+        health_plan: additionalDataAny.health_plan || "Não informado",
         status: appointment.status || "scheduled"
       };
       

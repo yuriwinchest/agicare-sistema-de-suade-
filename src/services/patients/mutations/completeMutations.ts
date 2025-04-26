@@ -1,4 +1,3 @@
-
 import { savePatient } from "./basicMutations";
 import { Patient } from "../types";
 import { 
@@ -24,14 +23,13 @@ export const saveCompletePatient = async (
       return false;
     }
     
-    // 2. Save additional data
+    // 2. Save additional data, including specialty and professional
     const patientAdditionalData = {
       id: savedPatient.id,
-      specialty: patient.specialty,
-      professional: patient.professional,
-      health_plan: patient.health_plan,
+      specialty: patient.specialty || patient.attendance_type || "Não definida",
+      professional: patient.professional || "Não definido",
+      health_plan: patient.health_plan || "Não informado",
       reception: patient.reception || "RECEPÇÃO CENTRAL",
-      appointmentTime: patient.appointmentTime || null,
       ...(additionalData || {})
     };
     
