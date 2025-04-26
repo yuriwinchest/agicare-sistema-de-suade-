@@ -2,7 +2,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ensureProperDateFormat } from "@/services/patients/utils/dateUtils";
+import { ensureProperDateFormat, isValidBirthDate } from "@/services/patients/utils/dateUtils";
 
 interface PersonalInfoFormProps {
   data: any;
@@ -26,6 +26,9 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
     return formattedDate;
   };
 
+  // Add validation feedback
+  const isDateValid = !data.birth_date || isValidBirthDate(data.birth_date);
+
   return (
     <div className="space-y-4">
       <div>
@@ -44,7 +47,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
           onChange={handleDateChange}
           placeholder="DD/MM/AAAA"
           maxLength={10}
+          className={!isDateValid ? "border-red-500" : ""}
         />
+        {!isDateValid && (
+          <p className="text-red-500 text-sm mt-1">
+            Data inválida. Utilize formato DD/MM/AAAA com ano entre 1900 e hoje.
+          </p>
+        )}
       </div>
 
       <div>

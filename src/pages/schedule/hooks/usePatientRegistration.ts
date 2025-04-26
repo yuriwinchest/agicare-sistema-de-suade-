@@ -6,6 +6,7 @@ import { Patient } from "@/services/patients/types";
 import { useDateMask } from "@/hooks/useDateMask";
 import { v4 as uuidv4 } from "uuid";
 import { formatDateForDB, generateId, generateProtocolNumber } from "../utils/patientUtils";
+import { isValidBirthDate } from "@/services/patients/utils/dateUtils";
 
 export interface UsePatientRegistrationProps {
   onSuccess?: (patientName: string) => void;
@@ -85,6 +86,16 @@ export const usePatientRegistration = ({ onSuccess }: UsePatientRegistrationProp
       return;
     }
 
+    // Validate birth date if provided
+    if (birthDate && !isValidBirthDate(birthDate)) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Data de nascimento inválida. Use o formato DD/MM/AAAA com ano entre 1900 e hoje.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -113,6 +124,7 @@ export const usePatientRegistration = ({ onSuccess }: UsePatientRegistrationProp
         toast({
           title: "Cadastro Salvo",
           description: "Os dados do paciente foram salvos com sucesso.",
+          variant: "success", // Use success variant for better visual feedback
         });
         handleReset();
         if (onSuccess) onSuccess(patientData.name);
@@ -122,9 +134,7 @@ export const usePatientRegistration = ({ onSuccess }: UsePatientRegistrationProp
       toast({
         title: "Erro ao salvar",
         description:
-          error.message === "Usuário não autenticado"
-            ? "Você precisa estar logado para salvar pacientes."
-            : "Ocorreu um erro ao salvar os dados do paciente.",
+          error.message || "Ocorreu um erro ao salvar os dados do paciente.",
         variant: "destructive",
       });
     } finally {

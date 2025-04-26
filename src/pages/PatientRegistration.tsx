@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MultiStepRegistrationDialog from "@/components/patient-registration/MultiStepRegistrationDialog";
 import { Toaster } from "@/components/ui/toaster";
+import { isValidBirthDate, formatDateForDatabase } from "@/services/patients/utils/dateUtils";
 
 const PatientRegistration = () => {
   const navigate = useNavigate();
@@ -23,6 +24,17 @@ const PatientRegistration = () => {
       setIsSubmitting(true);
       console.log("Saving patient data:", formData);
       
+      // Validate birth date if provided
+      if (formData.birth_date && !isValidBirthDate(formData.birth_date)) {
+        toast({
+          title: "Erro ao salvar",
+          description: "Data de nascimento inválida. Use o formato DD/MM/AAAA com ano entre 1900 e hoje.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      
       // Store fields that should go to patient_additional_data
       const reception = formData.reception || "RECEPÇÃO CENTRAL";
       const specialty = formData.specialty || null;
@@ -36,7 +48,7 @@ const PatientRegistration = () => {
         email: formData.email || null,
         phone: formData.phone || null,
         gender: formData.gender || null,
-        birth_date: formData.birth_date || null,
+        birth_date: formData.birth_date ? formatDateForDatabase(formData.birth_date) : null,
         father_name: formData.father_name || null,
         mother_name: formData.mother_name || null,
         address: formData.address || null,
@@ -126,7 +138,8 @@ const PatientRegistration = () => {
       
       toast({
         title: "Cadastro Salvo",
-        description: "Os dados do paciente foram salvos com sucesso."
+        description: "Os dados do paciente foram salvos com sucesso.",
+        variant: "success"
       });
       
       // Wait a moment before navigating to ensure the toast is visible
