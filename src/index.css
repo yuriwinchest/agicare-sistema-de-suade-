@@ -2,137 +2,131 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fundo harmonizado entre tons claros e escuros */
 @layer base {
   :root {
-    --background: 220 35% 99%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 200 20% 98%;
+    --foreground: 200 50% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 200 50% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 174 80% 36%;
+    --popover-foreground: 200 50% 12%;
+    --primary: 203 75% 12%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 189 34% 37%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 270 4% 85%;
+    --muted-foreground: 200 20% 40%;
+    --accent: 35 62% 51%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 174 80% 36%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 200 10% 90%;
+    --input: 200 10% 90%;
+    --ring: 189 34% 37%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 85% 7%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 174 80% 36%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 203 75% 12%;
+    --foreground: 0 0% 98%;
+    --card: 203 75% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 203 75% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 203 75% 12%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 189 34% 37%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 200 20% 40%;
+    --muted-foreground: 200 10% 70%;
+    --accent: 35 62% 51%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 174 80% 36%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 203 25% 25%;
+    --input: 203 25% 25%;
+    --ring: 189 34% 37%;
   }
-}
 
-* {
-  @apply border-border;
-}
-
-body {
-  @apply bg-background text-foreground;
-}
-
-/* Status badge styles */
-.status-waiting {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400;
-}
-
-.status-in-progress {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
-}
-
-.status-critical {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
-}
-
-.status-completed {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
-}
-
-/* Animation classes */
-.section-fade {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  * {
+    @apply border-border;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  body {
+    @apply bg-background text-foreground;
   }
-}
 
-/* Card styles */
-.system-card {
-  @apply bg-white shadow-sm border border-gray-100 rounded-lg dark:bg-slate-800/70 dark:border-slate-700;
-}
+  .status-waiting {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400;
+  }
 
-.system-modal {
-  @apply bg-white shadow-sm border border-gray-100 rounded-lg dark:bg-slate-800 dark:border-slate-700;
-}
+  .status-in-progress {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+  }
 
-.page-container {
-  @apply container mx-auto py-6 px-4 max-w-7xl;
-}
+  .status-critical {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+  }
 
-.page-header {
-  @apply mb-6 flex items-center justify-between;
-}
+  .status-completed {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+  }
 
-.teal-hover {
-  @apply hover:bg-teal-50 hover:text-teal-600 dark:hover:bg-teal-900/20 dark:hover:text-teal-400;
-}
+  .section-fade {
+    animation: fadeIn 0.3s ease-in-out;
+  }
 
-/* Media queries */
-@media (max-width: 640px) {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .system-card {
+    @apply bg-white shadow-sm border border-gray-100 rounded-lg dark:bg-slate-800/70 dark:border-slate-700;
+  }
+
+  .system-modal {
+    @apply bg-white shadow-sm border border-gray-100 rounded-lg dark:bg-slate-800 dark:border-slate-700;
+  }
+
   .page-container {
-    @apply px-2 py-4;
+    @apply container mx-auto py-6 px-4 max-w-7xl;
   }
-}
 
-/* Custom widths for tabela colunas */
-.w-24 { width: 6rem !important; }
-.w-32 { width: 8rem !important; }
-.w-36 { width: 9rem !important; }
-.w-40 { width: 10rem !important; }
-.w-44 { width: 11rem !important; }
-.w-48 { width: 12rem !important; }
-.w-52 { width: 13rem !important; }
-.min-w-\[60px\] { min-width:60px !important; }
-.max-w-\[70px\] { max-width:70px !important; }
-.min-w-\[120px\] { min-width:120px !important; }
-.max-w-\[180px\] { max-width:180px !important; }
-.max-w-\[120px\] { max-width:120px !important;}
-.min-w-\[90px\] { min-width:90px !important;}
-.max-w-\[170px\] { max-width:170px !important; }
-.min-w-\[110px\] { min-width:110px !important;}
-.max-w-\[160px\] { max-width:160px !important;}
+  .page-header {
+    @apply mb-6 flex items-center justify-between;
+  }
+
+  .teal-hover {
+    @apply hover:bg-teal-50 hover:text-teal-600 dark:hover:bg-teal-900/20 dark:hover:text-teal-400;
+  }
+
+  @media (max-width: 640px) {
+    .page-container {
+      @apply px-2 py-4;
+    }
+  }
+
+  .w-24 { width: 6rem !important; }
+  .w-32 { width: 8rem !important; }
+  .w-36 { width: 9rem !important; }
+  .w-40 { width: 10rem !important; }
+  .w-44 { width: 11rem !important; }
+  .w-48 { width: 12rem !important; }
+  .w-52 { width: 13rem !important; }
+  .min-w-\[60px\] { min-width:60px !important; }
+  .max-w-\[70px\] { max-width:70px !important; }
+  .min-w-\[120px\] { min-width:120px !important; }
+  .max-w-\[180px\] { max-width:180px !important; }
+  .max-w-\[120px\] { max-width:120px !important;}
+  .min-w-\[90px\] { min-width:90px !important;}
+  .max-w-\[170px\] { max-width:170px !important; }
+  .min-w-\[110px\] { min-width:110px !important;}
+  .max-w-\[160px\] { max-width:160px !important;}
+}
