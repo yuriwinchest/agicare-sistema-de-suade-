@@ -462,6 +462,8 @@ export type Database = {
           occupation: string | null
           place_of_birth: string | null
           place_of_birth_state: string | null
+          reception: string | null
+          specialty: string | null
           state: string | null
           updated_at: string | null
         }
@@ -477,6 +479,8 @@ export type Database = {
           occupation?: string | null
           place_of_birth?: string | null
           place_of_birth_state?: string | null
+          reception?: string | null
+          specialty?: string | null
           state?: string | null
           updated_at?: string | null
         }
@@ -492,6 +496,8 @@ export type Database = {
           occupation?: string | null
           place_of_birth?: string | null
           place_of_birth_state?: string | null
+          reception?: string | null
+          specialty?: string | null
           state?: string | null
           updated_at?: string | null
         }

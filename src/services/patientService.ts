@@ -1,3 +1,4 @@
+
 import { format, parse } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "./patients/types";
@@ -50,10 +51,12 @@ export const loadDraftPatient = loadDraftPatientMutation;
 export const clearDraftPatient = clearDraftPatientMutation;
 export const confirmPatientAppointment = confirmPatientAppointmentMutation;
 
-// Define interfaces para objetos de dados aninhados
+// Define interfaces for objects of data aninhados
 interface PatientAdditionalDataType {
   health_plan?: string | null;
   specialty?: string | null;
+  reception?: string | null;
+  professional?: string | null;
 }
 
 interface AppointmentType {
@@ -104,27 +107,33 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     
     if (patientIds.length > 0) {
       // Buscar dados adicionais
-      const { data: patientAdditionalData } = await supabase
+      const { data: patientAdditionalData, error: additionalDataError } = await supabase
         .from('patient_additional_data')
-        .select('id, health_plan, specialty')
+        .select('id, health_plan, specialty, reception, professional')
         .in('id', patientIds);
         
-      if (patientAdditionalData) {
+      if (additionalDataError) {
+        console.error("Erro ao buscar dados adicionais dos pacientes:", additionalDataError);
+      } else if (patientAdditionalData) {
         patientAdditionalData.forEach(item => {
           additionalData[item.id] = {
             health_plan: item.health_plan,
-            specialty: item.specialty
+            specialty: item.specialty,
+            reception: item.reception,
+            professional: item.professional
           };
         });
       }
       
       // Buscar agendamentos
-      const { data: patientAppointments } = await supabase
+      const { data: patientAppointments, error: appointmentsError } = await supabase
         .from('appointments')
         .select('patient_id, date, time, status')
         .in('patient_id', patientIds);
         
-      if (patientAppointments) {
+      if (appointmentsError) {
+        console.error("Erro ao buscar agendamentos dos pacientes:", appointmentsError);
+      } else if (patientAppointments) {
         patientAppointments.forEach(item => {
           if (!appointments[item.patient_id]) {
             appointments[item.patient_id] = [];
@@ -138,12 +147,14 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       }
       
       // Buscar documentos
-      const { data: patientDocuments } = await supabase
+      const { data: patientDocuments, error: documentsError } = await supabase
         .from('patient_documents')
         .select('patient_id, document_type, document_number')
         .in('patient_id', patientIds);
         
-      if (patientDocuments) {
+      if (documentsError) {
+        console.error("Erro ao buscar documentos dos pacientes:", documentsError);
+      } else if (patientDocuments) {
         patientDocuments.forEach(item => {
           if (!documents[item.patient_id]) {
             documents[item.patient_id] = [];
@@ -167,9 +178,9 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       return {
         ...patient,
         specialty: patientAdditionalData.specialty || patient.attendance_type || "Não definida",
-        professional: patient.father_name || "Não definido",
+        professional: patientAdditionalData.professional || patient.father_name || "Não definido",
         health_plan: patientAdditionalData.health_plan || "Não informado",
-        reception: "RECEPÇÃO CENTRAL", // Valor padrão pois a coluna não existe
+        reception: patientAdditionalData.reception || "RECEPÇÃO CENTRAL", // Valor padrão pois a coluna não existe
         date: latestAppointment.date || null,
         appointmentTime: latestAppointment.time || null,
         status: patient.status || 'Pendente'
