@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { isValidBirthDate } from "@/utils/dateUtils";
 
-interface DateInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface DateInputProps {
   value: string;
   onChange: (value: string) => void;
   showValidation?: boolean;
+  className?: string;
+  [key: string]: any; // Allow other props to pass through
 }
 
 export function DateInput({ 
