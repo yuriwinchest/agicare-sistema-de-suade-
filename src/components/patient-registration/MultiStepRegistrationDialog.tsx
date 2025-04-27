@@ -1,201 +1,201 @@
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { StepIndicator } from "@/components/ui/sidebar";
+import { CircleCheck } from "lucide-react";
 import PersonalInfoForm from "./steps/PersonalInfoForm";
 import ContactForm from "./steps/ContactForm";
-import ComplementaryDataForm from "./steps/ComplementaryDataForm";
 import DocumentsForm from "./steps/DocumentsForm";
+import ComplementaryDataForm from "./steps/ComplementaryDataForm";
 import AllergiesForm from "./steps/AllergiesForm";
 import AppointmentDetailsForm from "./steps/AppointmentDetailsForm";
-import { v4 as uuidv4 } from "uuid";
 
 interface MultiStepRegistrationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (data: any) => void;
-  isSubmitting?: boolean;
+  isSubmitting: boolean;
 }
 
-const steps = [
-  { id: "personal", title: "Dados Pessoais" },
-  { id: "contact", title: "Contato" },
-  { id: "appointment", title: "Dados do Atendimento" },
-  { id: "complementary", title: "Dados Complementares" },
-  { id: "documents", title: "Documentos" },
-  { id: "allergies", title: "Alergias" },
-];
-
-export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = ({
+const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = ({
   isOpen,
   onClose,
   onComplete,
-  isSubmitting = false,
+  isSubmitting
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<any>({
-    id: uuidv4(),
-    status: "Agendado",
-    addressDetails: {},
-    reception: "RECEPÇÃO CENTRAL",
+    id: crypto.randomUUID(),
+    name: "",
+    gender: "",
+    birthDate: "",
+    cpf: "",
+    phone: "",
+    email: "",
+    addressDetails: {
+      street: "",
+      number: "",
+      complement: "",
+      neighborhood: "",
+      city: "",
+      state: "",
+      zipCode: "",
+    },
+    allergies: []
   });
 
-  const handleUpdateFormData = (data: any) => {
-    setFormData((prev: any) => {
-      const newData = { ...prev };
-      
-      Object.entries(data).forEach(([key, value]) => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          newData[key] = {
-            ...(newData[key] || {}),
-            ...value
-          };
-        } else {
-          newData[key] = value;
-        }
-      });
-      
-      return newData;
-    });
+  const totalSteps = 6;
+
+  const updateFormData = (data: any) => {
+    setFormData(prev => ({ ...prev, ...data }));
   };
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
-    } else {
-      // Extract fields that should go into patient_additional_data table
-      const {
-        specialty,
-        professional,
-        health_plan,
-        reception,
-        addressDetails,
-        education_level,
-        occupation,
-        ethnicity,
-        nationality,
-        place_of_birth,
-        place_of_birth_state,
-        allergies,
-        appointmentTime, // Make sure appointmentTime is properly extracted
-        healthCardNumber,
-        observations,
-        // Any other fields that belong in additional data
-        ...basicPatientData
-      } = formData;
-
-      // Properly format address
-      const formattedAddress = addressDetails && Object.keys(addressDetails).length > 0 
-        ? JSON.stringify(addressDetails) 
-        : null;
-
-      // Create the final data structure with properly separated basic and additional data
-      const finalData = {
-        ...basicPatientData,
-        address: formattedAddress,
-        // Pass appointmentTime directly without including in basic patient data
-        appointmentTime: appointmentTime || null,
-        additionalData: {
-          id: basicPatientData.id, // This is crucial - both tables need the same ID
-          specialty: specialty || null,
-          professional: professional || null,
-          health_plan: health_plan || null,
-          reception: reception || "RECEPÇÃO CENTRAL",
-          education_level: education_level || null,
-          occupation: occupation || null,
-          ethnicity: ethnicity || null,
-          nationality: nationality || null,
-          place_of_birth: place_of_birth || null,
-          place_of_birth_state: place_of_birth_state || null,
-          health_card_number: healthCardNumber || null,
-          // Do not include appointmentTime here, as it's passed separately
-        },
-        // Send allergies separately instead of as part of patient data
-        allergies: allergies || [] 
-      };
-
-      console.log("Finalizing registration with data:", finalData);
-      onComplete(finalData);
     }
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) {
+  const handlePrevious = () => {
+    if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
+  const handleComplete = () => {
+    // Format data for saving
+    const {
+      birthDate,
+      addressDetails,
+      specialty,
+      professional,
+      healthPlan,
+      attendanceType, // Extract attendanceType to include in additional data
+      education_level,
+      occupation,
+      ethnicity,
+      nationality,
+      place_of_birth,
+      place_of_birth_state,
+      allergies,
+      appointmentTime,
+      healthCardNumber,
+      observations,
+      // Any other fields that belong in additional data
+      ...basicPatientData
+    } = formData;
+
+    // Format address as JSON string if it's an object
+    const formattedAddress = typeof addressDetails === 'object' 
+      ? JSON.stringify(addressDetails) 
+      : addressDetails;
+
+    // Prepare the final data to be saved
+    const finalData = {
+      ...basicPatientData,
+      address: formattedAddress,
+      // Pass appointmentTime directly without including in basic patient data
+      appointmentTime: appointmentTime || null,
+      additionalData: {
+        id: basicPatientData.id, // This is crucial - both tables need the same ID
+        specialty: specialty || null,
+        health_plan: healthPlan || null,
+        health_card_number: healthCardNumber || null,
+        education_level: education_level || null,
+        occupation: occupation || null,
+        ethnicity: ethnicity || null,
+        nationality: nationality || null,
+        place_of_birth: place_of_birth || null,
+        place_of_birth_state: place_of_birth_state || null,
+        attendanceType: attendanceType || null, // Store attendanceType in additionalData
+      },
+      // Send allergies separately instead of as part of patient data
+      allergies: allergies || [] 
+    };
+
+    onComplete(finalData);
+  };
+
   const renderStep = () => {
-    switch (steps[currentStep].id) {
-      case "personal":
-        return <PersonalInfoForm data={formData} onUpdate={handleUpdateFormData} />;
-      case "contact":
-        return <ContactForm data={formData} onUpdate={handleUpdateFormData} />;
-      case "appointment":
-        return <AppointmentDetailsForm data={formData} onUpdate={handleUpdateFormData} />;
-      case "complementary":
-        return <ComplementaryDataForm data={formData} onUpdate={handleUpdateFormData} />;
-      case "documents":
-        return <DocumentsForm data={formData} onUpdate={handleUpdateFormData} />;
-      case "allergies":
-        return <AllergiesForm data={formData} onUpdate={handleUpdateFormData} />;
+    switch (currentStep) {
+      case 1:
+        return <PersonalInfoForm data={formData} onUpdate={updateFormData} />;
+      case 2:
+        return <ContactForm data={formData} onUpdate={updateFormData} />;
+      case 3:
+        return <DocumentsForm data={formData} onUpdate={updateFormData} />;
+      case 4:
+        return <ComplementaryDataForm data={formData} onUpdate={updateFormData} />;
+      case 5:
+        return <AllergiesForm data={formData} onUpdate={updateFormData} />;
+      case 6:
+        return <AppointmentDetailsForm data={formData} onUpdate={updateFormData} />;
       default:
         return null;
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] system-modal bg-white dark:bg-slate-800">
-        <DialogHeader>
-          <DialogTitle className="text-primary-dark dark:text-white">
-            Cadastro de Paciente - {steps[currentStep].title}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="flex mb-4">
-          {steps.map((step, index) => (
-            <div
-              key={step.id}
-              className={`h-2 flex-1 mx-1 rounded ${
-                index <= currentStep ? "bg-secondary" : "bg-gray-200 dark:bg-gray-600"
-              }`}
-            />
-          ))}
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">
+              {currentStep === totalSteps
+                ? "Finalizar Cadastro"
+                : `Passo ${currentStep} de ${totalSteps}`}
+            </h2>
+            
+            <div className="flex space-x-1">
+              {Array.from({ length: totalSteps }, (_, i) => (
+                <StepIndicator
+                  key={i}
+                  active={i + 1 === currentStep}
+                  completed={i + 1 < currentStep}
+                />
+              ))}
+            </div>
+          </div>
 
-        <div className="py-4">{renderStep()}</div>
+          <div className="mb-6">{renderStep()}</div>
 
-        <div className="flex justify-between mt-6">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0 || isSubmitting}
-            className="border-secondary text-secondary hover:bg-secondary/10"
-          >
-            Voltar
-          </Button>
-          <Button 
-            onClick={handleNext} 
-            disabled={isSubmitting}
-            className="bg-primary text-white hover:bg-primary-light"
-          >
-            {currentStep === steps.length - 1 ? (
-              <>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  "Finalizar"
-                )}
-              </>
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={currentStep === 1 ? onClose : handlePrevious}
+              disabled={isSubmitting}
+            >
+              {currentStep === 1 ? "Cancelar" : "Anterior"}
+            </Button>
+
+            {currentStep < totalSteps ? (
+              <Button onClick={handleNext} disabled={isSubmitting}>
+                Próximo
+              </Button>
             ) : (
-              "Próximo"
+              <Button 
+                onClick={handleComplete} 
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Salvando...
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <CircleCheck className="mr-2 h-4 w-4" />
+                    Finalizar Cadastro
+                  </span>
+                )}
+              </Button>
             )}
-          </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
