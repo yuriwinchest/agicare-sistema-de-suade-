@@ -11,7 +11,7 @@ interface DocumentsFormProps {
 }
 
 const DocumentsForm: React.FC<DocumentsFormProps> = ({ data, onUpdate }) => {
-  // Initialize documents array if it doesn't exist
+  // Initialize documents array from patient data
   const documents = data.documents || [];
 
   // Create a new document

@@ -53,15 +53,24 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
-      // Extract basic patient data, additionalData, allergies, and documents
-      const { additionalData, allergies = [], appointmentTime, documents = [], ...basicPatientData } = formData;
-      
-      console.log("Saving basic patient data:", basicPatientData);
+      // Prepare basic patient data with additional fields included
+      const { 
+        appointmentTime, 
+        ...patientData 
+      } = formData;
 
-      // First save the basic patient data
+      // Include appointmentTime directly in the patient record
+      const patientToSave = {
+        ...patientData,
+        appointment_time: appointmentTime || null
+      };
+      
+      console.log("Saving patient data:", patientToSave);
+
+      // Save all patient data in a single operation to the patients table
       const { data: savedPatient, error: patientError } = await supabase
         .from('patients')
-        .insert(basicPatientData)
+        .insert(patientToSave)
         .select()
         .single();
       
@@ -71,73 +80,6 @@ export const usePatientRegistrationPage = () => {
       }
       
       console.log("Patient saved successfully:", savedPatient);
-
-      // Prepare the additional data with appointmentTime included
-      const patientAdditionalData = {
-        ...(additionalData || {}),
-        id: savedPatient.id,
-        appointmentTime: appointmentTime || null
-      };
-      
-      // Then save the additional data
-      if (patientAdditionalData) {
-        console.log("Saving additional data:", patientAdditionalData);
-        
-        const { error: additionalDataError } = await supabase
-          .from('patient_additional_data')
-          .insert(patientAdditionalData);
-
-        if (additionalDataError) {
-          console.error("Error saving additional data:", additionalDataError);
-          throw new Error("Erro ao salvar dados adicionais do paciente: " + additionalDataError.message);
-        }
-        
-        console.log("Additional data saved successfully");
-      }
-      
-      // Save allergies separately to the patient_allergies table
-      if (allergies && allergies.length > 0) {
-        console.log("Saving patient allergies:", allergies);
-        
-        // Map allergies to include patient_id
-        const allergiesWithPatientId = allergies.map((allergy: any) => ({
-          ...allergy,
-          patient_id: savedPatient.id
-        }));
-        
-        const { error: allergiesError } = await supabase
-          .from('patient_allergies')
-          .insert(allergiesWithPatientId);
-          
-        if (allergiesError) {
-          console.error("Error saving allergies:", allergiesError);
-          throw new Error("Erro ao salvar alergias do paciente: " + allergiesError.message);
-        }
-        
-        console.log("Allergies saved successfully");
-      }
-
-      // Save documents separately to the patient_documents table
-      if (documents && documents.length > 0) {
-        console.log("Saving patient documents:", documents);
-        
-        // Map documents to include patient_id
-        const documentsWithPatientId = documents.map((document: any) => ({
-          ...document,
-          patient_id: savedPatient.id
-        }));
-        
-        const { error: documentsError } = await supabase
-          .from('patient_documents')
-          .insert(documentsWithPatientId);
-          
-        if (documentsError) {
-          console.error("Error saving documents:", documentsError);
-          throw new Error("Erro ao salvar documentos do paciente: " + documentsError.message);
-        }
-        
-        console.log("Documents saved successfully");
-      }
       
       toast({
         title: "Cadastro Salvo",

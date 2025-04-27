@@ -29,7 +29,7 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
     id: crypto.randomUUID(),
     name: "",
     gender: "",
-    birthDate: "",
+    birth_date: "",
     cpf: "",
     phone: "",
     email: "",
@@ -42,7 +42,7 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       state: "",
       zipCode: "",
     },
-    documents: [], // Store documents as an array instead of directly in patient data
+    documents: [],
     allergies: []
   });
 
@@ -69,22 +69,8 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
     const {
       birthDate,
       addressDetails,
-      specialty,
-      professional,
-      healthPlan,
-      attendanceType,
-      education_level,
-      occupation,
-      ethnicity,
-      nationality,
-      place_of_birth,
-      place_of_birth_state,
-      allergies,
-      appointmentTime,
-      healthCardNumber,
-      observations,
-      documents, // Extract documents to save separately
-      // Any other fields that belong in additional data
+      // No need to extract these fields as they will be stored directly in the patient record
+      // Education level, ethnicity, place of birth, etc. are all stored in the patient table now
       ...basicPatientData
     } = formData;
 
@@ -97,25 +83,7 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
     const finalData = {
       ...basicPatientData,
       address: formattedAddress,
-      // Pass appointmentTime directly without including in basic patient data
-      appointmentTime: appointmentTime || null,
-      additionalData: {
-        id: basicPatientData.id, // This is crucial - both tables need the same ID
-        specialty: specialty || null,
-        health_plan: healthPlan || null,
-        health_card_number: healthCardNumber || null,
-        education_level: education_level || null,
-        occupation: occupation || null,
-        ethnicity: ethnicity || null,
-        nationality: nationality || null,
-        place_of_birth: place_of_birth || null,
-        place_of_birth_state: place_of_birth_state || null,
-        attendanceType: attendanceType || null, // Store attendanceType in additionalData
-      },
-      // Send allergies separately instead of as part of patient data
-      allergies: allergies || [],
-      // Send documents separately
-      documents: documents || []
+      // All other fields will be saved directly to the patients table
     };
 
     onComplete(finalData);
