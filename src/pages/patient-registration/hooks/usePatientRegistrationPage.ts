@@ -45,6 +45,7 @@ export const usePatientRegistrationPage = () => {
 
     try {
       setIsSubmitting(true);
+      console.log("Starting save process with data:", formData);
       
       const { data: sessionData } = await supabase.auth.getSession();
       
@@ -52,42 +53,42 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
+      // Extract basic patient data and additionalData
+      const { additionalData, ...basicPatientData } = formData;
+      
+      console.log("Saving basic patient data:", basicPatientData);
+
       // First save the basic patient data
       const { data: savedPatient, error: patientError } = await supabase
         .from('patients')
-        .insert({
-          id: formData.id,
-          name: formData.name,
-          cpf: formData.cpf,
-          phone: formData.phone,
-          email: formData.email,
-          address: formData.address,
-          birth_date: formData.birth_date,
-          status: formData.status,
-          person_type: formData.person_type,
-          gender: formData.gender,
-          mother_name: formData.mother_name,
-          father_name: formData.father_name,
-          marital_status: formData.marital_status,
-          attendance_type: formData.attendance_type
-        })
+        .insert(basicPatientData)
         .select()
         .single();
       
       if (patientError) {
+        console.error("Error saving patient:", patientError);
         throw patientError;
       }
+      
+      console.log("Patient saved successfully:", savedPatient);
 
-      // Then save the additional data
-      if (formData.additionalData) {
+      // Then save the additional data if it exists
+      if (additionalData) {
+        console.log("Saving additional data:", additionalData);
+        
+        // Ensure the ID is set correctly
+        additionalData.id = savedPatient.id;
+        
         const { error: additionalDataError } = await supabase
           .from('patient_additional_data')
-          .insert(formData.additionalData);
+          .insert(additionalData);
 
         if (additionalDataError) {
           console.error("Error saving additional data:", additionalDataError);
-          throw new Error("Erro ao salvar dados adicionais do paciente");
+          throw new Error("Erro ao salvar dados adicionais do paciente: " + additionalDataError.message);
         }
+        
+        console.log("Additional data saved successfully");
       }
       
       toast({

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -63,30 +64,44 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Prepare data for saving by separating basic and additional data
+      // Extract fields that should go into patient_additional_data table
       const {
         specialty,
         professional,
         health_plan,
         reception,
-        additionalData,
         addressDetails,
-        ...basicData
+        education_level,
+        occupation,
+        ethnicity,
+        nationality,
+        place_of_birth,
+        place_of_birth_state,
+        // Any other fields that belong in additional data
+        ...basicPatientData
       } = formData;
 
-      // Create the final data structure
+      // Properly format address
+      const formattedAddress = addressDetails && Object.keys(addressDetails).length > 0 
+        ? JSON.stringify(addressDetails) 
+        : null;
+
+      // Create the final data structure with properly separated basic and additional data
       const finalData = {
-        ...basicData,
-        address: addressDetails && Object.keys(addressDetails).length > 0 
-          ? JSON.stringify(addressDetails) 
-          : null,
+        ...basicPatientData,
+        address: formattedAddress,
         additionalData: {
-          id: basicData.id, // This is crucial - both tables need the same ID
+          id: basicPatientData.id, // This is crucial - both tables need the same ID
           specialty: specialty || null,
           professional: professional || null,
           health_plan: health_plan || null,
           reception: reception || "RECEPÇÃO CENTRAL",
-          ...additionalData
+          education_level: education_level || null,
+          occupation: occupation || null,
+          ethnicity: ethnicity || null,
+          nationality: nationality || null,
+          place_of_birth: place_of_birth || null,
+          place_of_birth_state: place_of_birth_state || null
         }
       };
 
