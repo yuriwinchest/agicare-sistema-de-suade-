@@ -53,8 +53,8 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
-      // Extract basic patient data and additionalData
-      const { additionalData, ...basicPatientData } = formData;
+      // Extract basic patient data, additionalData, and allergies
+      const { additionalData, allergies = [], ...basicPatientData } = formData;
       
       console.log("Saving basic patient data:", basicPatientData);
 
@@ -89,6 +89,28 @@ export const usePatientRegistrationPage = () => {
         }
         
         console.log("Additional data saved successfully");
+      }
+      
+      // Save allergies separately to the patient_allergies table
+      if (allergies && allergies.length > 0) {
+        console.log("Saving patient allergies:", allergies);
+        
+        // Map allergies to include patient_id
+        const allergiesWithPatientId = allergies.map((allergy: any) => ({
+          ...allergy,
+          patient_id: savedPatient.id
+        }));
+        
+        const { error: allergiesError } = await supabase
+          .from('patient_allergies')
+          .insert(allergiesWithPatientId);
+          
+        if (allergiesError) {
+          console.error("Error saving allergies:", allergiesError);
+          throw new Error("Erro ao salvar alergias do paciente: " + allergiesError.message);
+        }
+        
+        console.log("Allergies saved successfully");
       }
       
       toast({

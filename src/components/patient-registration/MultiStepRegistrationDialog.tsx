@@ -77,6 +77,7 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         nationality,
         place_of_birth,
         place_of_birth_state,
+        allergies,  // Separate allergies from patient data
         // Any other fields that belong in additional data
         ...basicPatientData
       } = formData;
@@ -102,7 +103,9 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
           nationality: nationality || null,
           place_of_birth: place_of_birth || null,
           place_of_birth_state: place_of_birth_state || null
-        }
+        },
+        // Send allergies separately instead of as part of patient data
+        allergies: allergies || [] 
       };
 
       console.log("Finalizing registration with data:", finalData);

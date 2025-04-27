@@ -30,6 +30,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
         <DateInput
           value={data.birth_date || ""}
           onChange={(value) => handleChange("birth_date", value)}
+          placeholder="DD/MM/AAAA"
         />
       </div>
 
