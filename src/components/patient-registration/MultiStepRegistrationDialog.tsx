@@ -77,7 +77,10 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
         nationality,
         place_of_birth,
         place_of_birth_state,
-        allergies,  // Separate allergies from patient data
+        allergies,
+        appointmentTime, // Make sure appointmentTime is properly extracted
+        healthCardNumber,
+        observations,
         // Any other fields that belong in additional data
         ...basicPatientData
       } = formData;
@@ -91,6 +94,8 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
       const finalData = {
         ...basicPatientData,
         address: formattedAddress,
+        // Pass appointmentTime directly without including in basic patient data
+        appointmentTime: appointmentTime || null,
         additionalData: {
           id: basicPatientData.id, // This is crucial - both tables need the same ID
           specialty: specialty || null,
@@ -102,7 +107,9 @@ export const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogPr
           ethnicity: ethnicity || null,
           nationality: nationality || null,
           place_of_birth: place_of_birth || null,
-          place_of_birth_state: place_of_birth_state || null
+          place_of_birth_state: place_of_birth_state || null,
+          health_card_number: healthCardNumber || null,
+          // Do not include appointmentTime here, as it's passed separately
         },
         // Send allergies separately instead of as part of patient data
         allergies: allergies || [] 

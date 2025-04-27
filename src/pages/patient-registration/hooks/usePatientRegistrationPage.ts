@@ -54,8 +54,10 @@ export const usePatientRegistrationPage = () => {
       }
 
       // Extract basic patient data, additionalData, and allergies
-      const { additionalData, allergies = [], ...basicPatientData } = formData;
+      const { additionalData, allergies = [], appointmentTime, ...basicPatientData } = formData;
       
+      // Remove appointmentTime from basic patient data
+      // This ensures we don't try to save it directly to the patients table
       console.log("Saving basic patient data:", basicPatientData);
 
       // First save the basic patient data
@@ -72,16 +74,20 @@ export const usePatientRegistrationPage = () => {
       
       console.log("Patient saved successfully:", savedPatient);
 
-      // Then save the additional data if it exists
-      if (additionalData) {
-        console.log("Saving additional data:", additionalData);
-        
-        // Ensure the ID is set correctly
-        additionalData.id = savedPatient.id;
+      // Prepare the additional data with appointmentTime included
+      const patientAdditionalData = {
+        ...(additionalData || {}),
+        id: savedPatient.id,
+        appointmentTime: appointmentTime || null // Include appointmentTime here
+      };
+      
+      // Then save the additional data
+      if (patientAdditionalData) {
+        console.log("Saving additional data:", patientAdditionalData);
         
         const { error: additionalDataError } = await supabase
           .from('patient_additional_data')
-          .insert(additionalData);
+          .insert(patientAdditionalData);
 
         if (additionalDataError) {
           console.error("Error saving additional data:", additionalDataError);
