@@ -42,6 +42,7 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       state: "",
       zipCode: "",
     },
+    documents: [], // Store documents as an array instead of directly in patient data
     allergies: []
   });
 
@@ -71,7 +72,7 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       specialty,
       professional,
       healthPlan,
-      attendanceType, // Extract attendanceType to include in additional data
+      attendanceType,
       education_level,
       occupation,
       ethnicity,
@@ -82,6 +83,7 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       appointmentTime,
       healthCardNumber,
       observations,
+      documents, // Extract documents to save separately
       // Any other fields that belong in additional data
       ...basicPatientData
     } = formData;
@@ -111,7 +113,9 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
         attendanceType: attendanceType || null, // Store attendanceType in additionalData
       },
       // Send allergies separately instead of as part of patient data
-      allergies: allergies || [] 
+      allergies: allergies || [],
+      // Send documents separately
+      documents: documents || []
     };
 
     onComplete(finalData);

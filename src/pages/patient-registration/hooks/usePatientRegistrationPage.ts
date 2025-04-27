@@ -53,11 +53,9 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
-      // Extract basic patient data, additionalData, and allergies
-      const { additionalData, allergies = [], appointmentTime, ...basicPatientData } = formData;
+      // Extract basic patient data, additionalData, allergies, and documents
+      const { additionalData, allergies = [], appointmentTime, documents = [], ...basicPatientData } = formData;
       
-      // Remove appointmentTime from basic patient data
-      // This ensures we don't try to save it directly to the patients table
       console.log("Saving basic patient data:", basicPatientData);
 
       // First save the basic patient data
@@ -78,7 +76,7 @@ export const usePatientRegistrationPage = () => {
       const patientAdditionalData = {
         ...(additionalData || {}),
         id: savedPatient.id,
-        appointmentTime: appointmentTime || null // Include appointmentTime here
+        appointmentTime: appointmentTime || null
       };
       
       // Then save the additional data
@@ -117,6 +115,28 @@ export const usePatientRegistrationPage = () => {
         }
         
         console.log("Allergies saved successfully");
+      }
+
+      // Save documents separately to the patient_documents table
+      if (documents && documents.length > 0) {
+        console.log("Saving patient documents:", documents);
+        
+        // Map documents to include patient_id
+        const documentsWithPatientId = documents.map((document: any) => ({
+          ...document,
+          patient_id: savedPatient.id
+        }));
+        
+        const { error: documentsError } = await supabase
+          .from('patient_documents')
+          .insert(documentsWithPatientId);
+          
+        if (documentsError) {
+          console.error("Error saving documents:", documentsError);
+          throw new Error("Erro ao salvar documentos do paciente: " + documentsError.message);
+        }
+        
+        console.log("Documents saved successfully");
       }
       
       toast({
