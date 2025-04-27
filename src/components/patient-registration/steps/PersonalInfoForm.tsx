@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ensureProperDateFormat, isValidBirthDate } from "@/services/patients/utils/dateUtils";
 
 interface PersonalInfoFormProps {
   data: any;
@@ -13,21 +13,6 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
   const handleChange = (field: string, value: string) => {
     onUpdate({ [field]: value });
   };
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Format the date correctly as user types
-    const inputValue = e.target.value;
-    const formattedDate = ensureProperDateFormat(inputValue);
-    
-    // Update with the formatted value
-    handleChange("birth_date", formattedDate);
-    
-    // Return the formatted date to update the input value
-    return formattedDate;
-  };
-
-  // Add validation feedback
-  const isDateValid = !data.birth_date || isValidBirthDate(data.birth_date);
 
   return (
     <div className="space-y-4">
@@ -42,18 +27,10 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-        <Input
+        <DateInput
           value={data.birth_date || ""}
-          onChange={handleDateChange}
-          placeholder="DD/MM/AAAA"
-          maxLength={10}
-          className={!isDateValid ? "border-red-500" : ""}
+          onChange={(value) => handleChange("birth_date", value)}
         />
-        {!isDateValid && (
-          <p className="text-red-500 text-sm mt-1">
-            Data inválida. Utilize formato DD/MM/AAAA com ano entre 1900 e hoje.
-          </p>
-        )}
       </div>
 
       <div>
