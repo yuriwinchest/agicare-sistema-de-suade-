@@ -53,16 +53,12 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
-      // Prepare basic patient data with additional fields included
-      const { 
-        appointmentTime, 
-        ...patientData 
-      } = formData;
-
-      // Include appointmentTime directly in the patient record
+      // Prepare patient data with all fields included
       const patientToSave = {
-        ...patientData,
-        appointment_time: appointmentTime || null
+        ...formData,
+        // Ensure documents and allergies are in the correct format
+        documents: formData.documents || [],
+        allergies: formData.allergies || []
       };
       
       console.log("Saving patient data:", patientToSave);

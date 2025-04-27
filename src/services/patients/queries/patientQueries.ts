@@ -1,10 +1,10 @@
-import { Patient, HospitalizedPatient, PatientAdditionalData } from "../types";
+import { Patient, HospitalizedPatient } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDatabase, ensureProperDateFormat } from "../utils/dateUtils";
 
 export const getPatientById = async (id: string): Promise<Patient | null> => {
   try {
-    // First get basic patient data
+    // Get patient data directly from patients table
     const { data: patientData, error } = await supabase
       .from('patients')
       .select('*')
@@ -20,13 +20,6 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       return null;
     }
 
-    // Then get patient additional data including specialty and professional
-    const { data: additionalData } = await supabase
-      .from('patient_additional_data')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
-    
     // Get the most recent appointment for this patient
     const { data: appointmentData } = await supabase
       .from('appointments')
@@ -38,20 +31,12 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
       .maybeSingle();
     
     console.log("Patient data:", patientData);
-    console.log("Additional data:", additionalData);
     console.log("Appointment data:", appointmentData);
     
-    // Combine the data with safe access to properties
-    const additionalDataAny = additionalData as any || {};
-    
+    // Use appointment data if available, otherwise use patient data
     const fullPatientData: Patient = {
       ...patientData,
-      // Use safe optional chaining and fallbacks
-      specialty: additionalDataAny.specialty || "Não definida",
-      professional: additionalDataAny.professional || "Não definido",
-      health_plan: additionalDataAny.health_plan || "Não informado",
-      reception: additionalDataAny.reception || "RECEPÇÃO CENTRAL",
-      appointmentTime: appointmentData?.time || null,
+      appointmentTime: appointmentData?.time || patientData.appointment_time || null,
       date: appointmentData?.date || null
     };
     
@@ -65,7 +50,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
 export const getAllPatients = async (): Promise<Patient[]> => {
   try {
     console.log("Iniciando getAllPatients");
-    // First get all patients
+    // Get all patients
     const { data: patients, error } = await supabase
       .from('patients')
       .select('*')
@@ -85,14 +70,6 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     // Get all patient IDs to use in our queries
     const patientIds = patients.map(p => p.id);
     
-    // Get all additional data for patients in one query
-    const { data: additionalDataArray } = await supabase
-      .from('patient_additional_data')
-      .select('*')
-      .in('id', patientIds);
-    
-    console.log(`Dados adicionais encontrados para ${additionalDataArray?.length || 0} pacientes`);
-
     // Get all appointments for these patients, most recent first
     const { data: appointmentsArray } = await supabase
       .from('appointments')
@@ -102,12 +79,6 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       .order('time', { ascending: false });
     
     console.log(`Agendamentos encontrados: ${appointmentsArray?.length || 0}`);
-
-    // Create maps for quick lookup
-    const additionalDataMap = (additionalDataArray || []).reduce((acc, data) => {
-      acc[data.id] = data;
-      return acc;
-    }, {} as Record<string, any>);
     
     // Group appointments by patient_id, keeping only the most recent one
     const appointmentMap: Record<string, any> = {};
@@ -118,23 +89,21 @@ export const getAllPatients = async (): Promise<Patient[]> => {
     });
     
     console.log("appointmentMap:", appointmentMap);
-    console.log("additionalDataMap:", additionalDataMap);
 
     // Transform data to include additional fields
     const transformedData = patients.map(patient => {
       const patientAny = patient as any;
-      const additionalData = additionalDataMap[patient.id] || {};
       const appointment = appointmentMap[patient.id] || {};
       
       const transformedPatient = {
         ...patient,
-        // Priorizar dados do appointment, depois do additionalData, depois fallbacks
-        specialty: additionalData.specialty || patient.attendance_type || "Não definida",
-        professional: additionalData.professional || patient.father_name || "Não definido", 
-        health_plan: additionalData.health_plan || "Não informado",
-        reception: additionalData.reception || "RECEPÇÃO CENTRAL",
+        // Priorizar dados do appointment, depois dados do paciente, depois fallbacks
+        specialty: patient.specialty || patient.attendance_type || "Não definida",
+        professional: patient.professional || patient.father_name || "Não definido", 
+        health_plan: patient.health_plan || "Não informado",
+        reception: patient.reception || "RECEPÇÃO CENTRAL",
         // Usar appointment time e date se existirem
-        appointmentTime: appointment.time || additionalData.appointmentTime || null,
+        appointmentTime: appointment.time || patient.appointment_time || null,
         date: appointment.date || 
               patientAny.date || 
               (patient.created_at ? ensureProperDateFormat(patient.created_at.split('T')[0]) : "Não agendado"),
