@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { StepIndicator } from "@/components/ui/sidebar";
 import { CircleCheck } from "lucide-react";
+import { StepIndicator } from "@/components/ui/step-indicator";
 import PersonalInfoForm from "./steps/PersonalInfoForm";
 import ContactForm from "./steps/ContactForm";
 import DocumentsForm from "./steps/DocumentsForm";
