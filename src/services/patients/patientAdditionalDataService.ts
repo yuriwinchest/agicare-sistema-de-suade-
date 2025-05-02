@@ -49,8 +49,10 @@ export const savePatientDocument = async (document: PatientDocument) => {
       return null;
     }
     
+    // Garante que temos um array para trabalhar
+    const documents = Array.isArray(patientData.documents) ? [...patientData.documents] : [];
+    
     // Adiciona o novo documento à lista
-    const documents = patientData.documents || [];
     documents.push({
       document_type: document.document_type,
       document_number: document.document_number,
@@ -90,8 +92,10 @@ export const savePatientAllergy = async (allergy: PatientAllergy) => {
       return null;
     }
     
+    // Garante que temos um array para trabalhar
+    const allergies = Array.isArray(patientData.allergies) ? [...patientData.allergies] : [];
+    
     // Adiciona a nova alergia à lista
-    const allergies = patientData.allergies || [];
     allergies.push({
       allergy_type: allergy.allergy_type,
       description: allergy.description,
