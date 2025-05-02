@@ -19,7 +19,7 @@ interface PatientReceptionFormProps {
     specialty: string;
     professional: string;
     healthPlan: string;
-    healthCardNumber: string;
+    health_card_number: string;
     observations: string;
     appointment_time: string;
   };

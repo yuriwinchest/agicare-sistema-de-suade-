@@ -70,6 +70,11 @@ export const usePatientRegistrationPage = () => {
         patientToSave.attendance_type = formData.attendanceType;
         delete patientToSave.attendanceType;
       }
+
+      if (formData.healthCardNumber) {
+        patientToSave.health_card_number = formData.healthCardNumber;
+        delete patientToSave.healthCardNumber;
+      }
       
       console.log("Saving patient data:", patientToSave);
 

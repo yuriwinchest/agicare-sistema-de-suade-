@@ -1,9 +1,10 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { attendanceTypes, specialties, professionals, healthPlans } from "@/components/patient-reception/constants";
+import { specialties, professionals, healthPlans, attendanceTypes } from "@/components/patient-reception/constants";
 
 interface AppointmentDetailsFormProps {
   data: any;
@@ -11,14 +12,16 @@ interface AppointmentDetailsFormProps {
 }
 
 const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, onUpdate }) => {
-  const handleChange = (field: string, value: string) => {
-    onUpdate({ [field]: value });
+  const handleChange = (field: string, value: any) => {
+    onUpdate({ ...data, [field]: value });
   };
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <h3 className="text-lg font-medium">Detalhes do Atendimento</h3>
+
+      <div className="space-y-2">
+        <label htmlFor="attendance-type" className="text-sm font-medium text-gray-700">
           Tipo de Atendimento *
         </label>
         <Select
@@ -30,20 +33,20 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           </SelectTrigger>
           <SelectContent>
             {attendanceTypes.map((type) => (
-              <SelectItem key={type.id} value={type.id}>
-                {type.name}
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="space-y-2">
+        <label htmlFor="specialty" className="text-sm font-medium text-gray-700">
           Especialidade *
         </label>
         <Select
-          value={data.specialty}
+          value={data.specialty || ""}
           onValueChange={(value) => handleChange("specialty", value)}
         >
           <SelectTrigger>
@@ -51,20 +54,20 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           </SelectTrigger>
           <SelectContent>
             {specialties.map((specialty) => (
-              <SelectItem key={specialty.id} value={specialty.id}>
-                {specialty.name}
+              <SelectItem key={specialty.value} value={specialty.value}>
+                {specialty.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="space-y-2">
+        <label htmlFor="professional" className="text-sm font-medium text-gray-700">
           Profissional *
         </label>
         <Select
-          value={data.professional}
+          value={data.professional || ""}
           onValueChange={(value) => handleChange("professional", value)}
         >
           <SelectTrigger>
@@ -72,20 +75,20 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           </SelectTrigger>
           <SelectContent>
             {professionals.map((professional) => (
-              <SelectItem key={professional.id} value={professional.id}>
-                {professional.name}
+              <SelectItem key={professional.value} value={professional.value}>
+                {professional.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="space-y-2">
+        <label htmlFor="healthPlan" className="text-sm font-medium text-gray-700">
           Convênio
         </label>
         <Select
-          value={data.healthPlan}
+          value={data.healthPlan || ""}
           onValueChange={(value) => handleChange("healthPlan", value)}
         >
           <SelectTrigger>
@@ -93,29 +96,26 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           </SelectTrigger>
           <SelectContent>
             {healthPlans.map((plan) => (
-              <SelectItem key={plan.id} value={plan.id}>
-                {plan.name}
+              <SelectItem key={plan.value} value={plan.value}>
+                {plan.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Número da Carteirinha
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="health_card_number">Número da Carteirinha</Label>
         <Input
-          value={data.healthCardNumber || ""}
-          onChange={(e) => handleChange("healthCardNumber", e.target.value)}
-          placeholder="Digite o número da carteirinha"
+          id="health_card_number"
+          value={data.health_card_number || ""}
+          onChange={(e) => handleChange("health_card_number", e.target.value)}
+          placeholder="Número da carteirinha do convênio"
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Horário
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="appointment-time">Horário</Label>
         <Input
           type="time"
           value={data.appointment_time || ""}
@@ -123,15 +123,14 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Observações
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="observations">Observações</Label>
         <Textarea
+          id="observations"
           value={data.observations || ""}
           onChange={(e) => handleChange("observations", e.target.value)}
-          placeholder="Digite observações adicionais..."
-          rows={3}
+          placeholder="Informações adicionais sobre o atendimento"
+          rows={4}
         />
       </div>
     </div>
