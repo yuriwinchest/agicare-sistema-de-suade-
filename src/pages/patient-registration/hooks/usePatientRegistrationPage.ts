@@ -53,10 +53,9 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
-      // Prepare patient data with all fields included
+      // Ensure documents and allergies are in valid JSONB format
       const patientToSave = {
         ...formData,
-        // Ensure documents and allergies are in the correct format
         documents: formData.documents || [],
         allergies: formData.allergies || []
       };

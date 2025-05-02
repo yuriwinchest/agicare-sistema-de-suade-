@@ -65,12 +65,11 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
   };
 
   const handleComplete = () => {
-    // Format data for saving
+    // Extract complementary data fields directly into the patient object
     const {
       birthDate,
       addressDetails,
-      // No need to extract these fields as they will be stored directly in the patient record
-      // Education level, ethnicity, place of birth, etc. are all stored in the patient table now
+      additionalData = {},
       ...basicPatientData
     } = formData;
 
@@ -79,11 +78,17 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       ? JSON.stringify(addressDetails) 
       : addressDetails;
 
-    // Prepare the final data to be saved
+    // Prepare the final data to be saved - merge the additionalData fields directly into the patient record
     const finalData = {
       ...basicPatientData,
       address: formattedAddress,
-      // All other fields will be saved directly to the patients table
+      // Add additional data fields directly to patient object
+      nationality: additionalData.nationality,
+      place_of_birth: additionalData.place_of_birth,
+      place_of_birth_state: additionalData.place_of_birth_state,
+      education_level: additionalData.education_level,
+      occupation: additionalData.occupation,
+      health_card_number: additionalData.health_card_number
     };
 
     onComplete(finalData);
