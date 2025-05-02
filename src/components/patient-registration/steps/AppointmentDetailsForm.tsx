@@ -22,8 +22,8 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           Tipo de Atendimento *
         </label>
         <Select
-          value={data.attendanceType}
-          onValueChange={(value) => handleChange("attendanceType", value)}
+          value={data.attendance_type || ""}
+          onValueChange={(value) => handleChange("attendance_type", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione o tipo de atendimento" />
@@ -118,8 +118,8 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
         </label>
         <Input
           type="time"
-          value={data.appointmentTime || ""}
-          onChange={(e) => handleChange("appointmentTime", e.target.value)}
+          value={data.appointment_time || ""}
+          onChange={(e) => handleChange("appointment_time", e.target.value)}
         />
       </div>
 

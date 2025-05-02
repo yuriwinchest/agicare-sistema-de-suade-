@@ -15,13 +15,13 @@ import {
 
 interface PatientReceptionFormProps {
   formData: {
-    attendanceType: string;
+    attendance_type: string;
     specialty: string;
     professional: string;
     healthPlan: string;
     healthCardNumber: string;
     observations: string;
-    appointmentTime: string;
+    appointment_time: string;
   };
   handleChange: (field: string, value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
@@ -49,9 +49,9 @@ export const PatientReceptionForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormGroup
               label="Tipo de Atendimento"
-              id="attendanceType"
-              value={formData.attendanceType}
-              onValueChange={(value) => handleChange("attendanceType", value)}
+              id="attendance_type"
+              value={formData.attendance_type}
+              onValueChange={(value) => handleChange("attendance_type", value)}
               options={attendanceTypes}
               isRequired
               isDisabled={isSubmitting}
@@ -91,8 +91,8 @@ export const PatientReceptionForm = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <TimeInput
-              value={formData.appointmentTime}
-              onChange={(e) => handleChange("appointmentTime", e.target.value)}
+              value={formData.appointment_time}
+              onChange={(e) => handleChange("appointment_time", e.target.value)}
               isDisabled={isSubmitting}
             />
           </div>

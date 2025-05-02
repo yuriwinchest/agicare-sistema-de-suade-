@@ -53,18 +53,22 @@ export const usePatientRegistrationPage = () => {
         throw new Error("Sessão de autenticação perdida. Faça login novamente.");
       }
 
-      // Correct the field name mismatch between JavaScript and database
-      // Map appointmentTime to appointment_time
+      // Correct field name mismatches between JavaScript and database
       const patientToSave = {
         ...formData,
         documents: formData.documents || [],
         allergies: formData.allergies || [],
-        appointment_time: formData.appointmentTime, // Map to correct database column name
       };
       
-      // Remove the original appointmentTime property to avoid conflict
-      if (patientToSave.appointmentTime) {
+      // Specific mappings for column name differences
+      if (formData.appointmentTime) {
+        patientToSave.appointment_time = formData.appointmentTime;
         delete patientToSave.appointmentTime;
+      }
+      
+      if (formData.attendanceType) {
+        patientToSave.attendance_type = formData.attendanceType;
+        delete patientToSave.attendanceType;
       }
       
       console.log("Saving patient data:", patientToSave);
