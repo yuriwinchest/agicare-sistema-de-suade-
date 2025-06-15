@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Table,
@@ -22,21 +21,21 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
   return (
     <div className="overflow-x-auto">
       <Table>
-        <TableHeader className="bg-gray-50">
+        <TableHeader className="bg-gray-100">
           <TableRow>
-            <TableHead className="font-semibold">Código</TableHead>
-            <TableHead className="font-semibold">Descrição</TableHead>
-            <TableHead className="font-semibold">Profissional</TableHead>
-            <TableHead className="font-semibold">Função</TableHead>
-            <TableHead className="font-semibold">Tipo Agenda</TableHead>
-            <TableHead className="font-semibold">Unidade</TableHead>
-            <TableHead className="font-semibold">Especialidade</TableHead>
+            <TableHead className="font-semibold text-gray-800">Código</TableHead>
+            <TableHead className="font-semibold text-gray-800">Descrição</TableHead>
+            <TableHead className="font-semibold text-gray-800">Profissional</TableHead>
+            <TableHead className="font-semibold text-gray-800">Função</TableHead>
+            <TableHead className="font-semibold text-gray-800">Tipo Agenda</TableHead>
+            <TableHead className="font-semibold text-gray-800">Unidade</TableHead>
+            <TableHead className="font-semibold text-gray-800">Especialidade</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {currentItems.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+              <TableCell colSpan={7} className="text-center py-4 text-gray-700">
                 Nenhum resultado encontrado
               </TableCell>
             </TableRow>
@@ -47,13 +46,13 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => onScheduleSelect && onScheduleSelect(item)}
               >
-                <TableCell className="font-mono">{item.code}</TableCell>
-                <TableCell>{item.description}</TableCell>
-                <TableCell>{item.professional}</TableCell>
-                <TableCell>{item.position}</TableCell>
-                <TableCell>{item.scheduleType}</TableCell>
-                <TableCell>{item.unit || "HOSPITAL REGIONAL"}</TableCell>
-                <TableCell>{item.position.split(" - ")[1]}</TableCell>
+                <TableCell className="font-mono text-gray-900 font-medium">{item.code}</TableCell>
+                <TableCell className="text-gray-900">{item.description}</TableCell>
+                <TableCell className="text-gray-900">{item.professional}</TableCell>
+                <TableCell className="text-gray-900">{item.position}</TableCell>
+                <TableCell className="text-gray-900">{item.scheduleType}</TableCell>
+                <TableCell className="text-gray-900">{item.unit || "HOSPITAL REGIONAL"}</TableCell>
+                <TableCell className="text-gray-900">{item.position.split(" - ")[1]}</TableCell>
               </TableRow>
             ))
           )}

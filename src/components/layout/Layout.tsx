@@ -128,7 +128,7 @@ const Sidebar = () => {
                         </Link>
                       </TooltipTrigger>
                       {!isOpen && (
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700 font-medium">
                           {item.label}
                         </TooltipContent>
                       )}

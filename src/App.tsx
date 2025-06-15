@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,6 +18,7 @@ import Ambulatory from "./pages/Ambulatory";
 import Appointment from "./pages/Appointment";
 import Reception from "./pages/Reception";
 import PatientReception from "./pages/PatientReception";
+import PatientFlow from "./pages/PatientFlow";
 import Hospitalization from "./pages/Hospitalization";
 import PatientRecord from "./pages/PatientRecord";
 import PatientConsultation from "./pages/PatientConsultation";
@@ -33,6 +33,7 @@ import SystemOverview from "./pages/SystemOverview";
 import ScheduleConsultation from "./pages/ScheduleConsultation";
 import ScheduleAccountPage from "./pages/ScheduleAccountPage";
 import ScheduleDetailPage from "./pages/ScheduleDetailPage";
+import PatientSimplifiedPage from "./pages/PatientSimplifiedPage";
 
 // Auth Provider
 import { AuthProvider, RequireAuth } from "@/components/auth/AuthContext";
@@ -76,6 +77,7 @@ function App() {
                     <Route path="/appointment" element={<Appointment />} />
                     <Route path="/reception" element={<Reception />} />
                     <Route path="/patient-reception/:id" element={<PatientReception />} />
+                    <Route path="/patient-flow/:id" element={<PatientFlow />} />
                     <Route path="/hospitalization" element={<Hospitalization />} />
                     <Route path="/patient/:id" element={<PatientRecord />} />
                     <Route path="/patient-consultation" element={<PatientConsultation />} />
@@ -88,6 +90,7 @@ function App() {
                     <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
                     <Route path="/schedule-account" element={<ScheduleAccountPage />} />
                     <Route path="/schedule-detail/:id?" element={<ScheduleDetailPage />} />
+                    <Route path="/patient-simplified/:id" element={<PatientSimplifiedPage />} />
                   </Route>
                   
                   <Route path="*" element={<NotFound />} />

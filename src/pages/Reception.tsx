@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getAllPatients } from "@/services/patientService";
+import { PatientsApi } from "@/services/api";
 import ReceptionFilters from "./reception/ReceptionFilters";
 import PatientTable from "./reception/PatientTable";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
@@ -14,6 +14,7 @@ const PAGE_BACKGROUND = "bg-gradient-to-br from-[#F6FDFF] via-[#D0F0FA] to-[#F3F
 
 const Reception = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -23,15 +24,24 @@ const Reception = () => {
   const [professionalFilter, setProfessionalFilter] = useState("");
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const loadPatientList = async () => {
+  const loadPatientList = async (forceRefresh = false) => {
+    // Verifica se faz menos de 10 segundos desde a última atualização
+    if (!forceRefresh && lastUpdated && (new Date().getTime() - lastUpdated.getTime()) < 10000) {
+      console.log("Dados carregados recentemente, pulando recarregamento");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       console.log("Iniciando carregamento de pacientes...");
-      const patientsData = await getAllPatients();
-      console.log("Dados brutos dos pacientes:", patientsData);
+      // Usando a nova API com suporte a cache
+      const patientsData = await PatientsApi.getAll(forceRefresh);
+      console.log("Dados de pacientes carregados:", patientsData.length);
       
       setPatients(patientsData);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error("Erro ao carregar pacientes:", error);
       toast({
@@ -45,15 +55,30 @@ const Reception = () => {
     }
   };
 
+  // Carregar dados quando a rota mudar para esta página
   useEffect(() => {
-    loadPatientList();
+    loadPatientList(false); // Não força atualização, usa cache se disponível
+  }, [location.pathname]);
+  
+  // Configurar atualizações periódicas
+  useEffect(() => {
+    // Adiciona listener para evento de foco na janela
+    const handleFocus = () => loadPatientList(false);
+    window.addEventListener('focus', handleFocus);
     
-    window.addEventListener('focus', loadPatientList);
+    // Atualiza os dados a cada 1 minuto para manter tudo atual
+    const intervalId = setInterval(() => loadPatientList(true), 60000);
     
     return () => {
-      window.removeEventListener('focus', loadPatientList);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
     };
   }, []);
+
+  // Função para forçar uma atualização manual
+  const handleRefresh = () => {
+    loadPatientList(true);
+  };
 
   const filteredPatients = patients.filter((patient) => {
     if (!patient) return false;
@@ -123,8 +148,19 @@ const Reception = () => {
                 <UserPlus size={18} />
                 Cadastrar Paciente
               </Button>
-              <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 ml-4">
-                Controle de Atendimento Ambulatorial
+              <Button
+                variant="outline"
+                className="mr-4 flex items-center gap-2"
+                onClick={handleRefresh}
+                disabled={isLoading}
+              >
+                <svg className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {isLoading ? 'Atualizando...' : 'Atualizar'}
+              </Button>
+              <h1 className="text-xl font-semibold text-teal-700 dark:text-teal-300 bg-teal-50/80 dark:bg-teal-900/20 px-4 py-2 rounded-md shadow-sm">
+                CONTROLE DE ATENDIMENTOS ELETIVOS
               </h1>
             </div>
             <ReceptionFilters
@@ -153,6 +189,7 @@ const Reception = () => {
               {statusFilter ? `Status: "${statusFilter}"` : "Sem filtro de status"},
               {specialtyFilter ? `Especialidade: "${specialtyFilter}"` : "Sem filtro de especialidade"},
               {professionalFilter ? `Profissional: "${professionalFilter}"` : "Sem filtro de profissional"}
+              {lastUpdated ? ` | Última atualização: ${lastUpdated.toLocaleTimeString()}` : ""}
             </div>
           </div>
         </div>

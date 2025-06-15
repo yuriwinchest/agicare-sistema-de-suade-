@@ -1,0 +1,457 @@
+// This is your Prisma schema file for SaludoCare Manager
+// Learn more about Prisma schemas: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Usuários e autenticação
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String
+  password         String    // Armazenado com hash
+  role             UserRole  @default(STAFF)
+  phone            String?
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLogin        DateTime?
+  profileImage     String?
+  specialty        String?   // Para médicos/enfermeiros
+  registrationCode String?   // CRM, COREN, etc.
+  
+  // Relacionamentos
+  patients         Patient[]
+  appointments     Appointment[]
+  nursingRecords   NursingRecord[]
+  medicalRecords   MedicalRecord[]
+  consultations    Consultation[]
+  staffSchedules   StaffSchedule[]
+  hospitalizations Hospitalization[]
+}
+
+enum UserRole {
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+  STAFF
+}
+
+// Pacientes
+model Patient {
+  id                  String    @id @default(uuid())
+  registrationNumber  String    @unique // Número de registro no sistema
+  name                String
+  socialName          String?
+  cpf                 String?   @unique
+  rg                  String?
+  dateOfBirth         DateTime
+  gender              String
+  bloodType           String?
+  maritalStatus       String?
+  occupation          String?
+  education           String?
+  address             Json?     // Endereço estruturado
+  phone               String
+  email               String?
+  emergencyContact    String?
+  responsibleName     String?   // Para pacientes menores ou incapazes
+  responsibleContact  String?
+  insuranceProvider   String?
+  insuranceNumber     String?
+  insuranceValidity   DateTime?
+  registeredBy        String    // ID do usuário que registrou
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  // Relacionamentos
+  appointments        Appointment[]
+  medicalRecords      MedicalRecord[]
+  nursingRecords      NursingRecord[]
+  consultations       Consultation[]
+  hospitalizations    Hospitalization[]
+  examResults         ExamResult[]
+  documents           Document[]
+  
+  // Campos para histórico de saúde
+  allergies           Allergy[]
+  medications         Medication[]
+  conditions          HealthCondition[]
+  
+  // Referências
+  registeredByUser    User       @relation(fields: [registeredBy], references: [id])
+}
+
+// Alergias do paciente
+model Allergy {
+  id          String    @id @default(uuid())
+  patientId   String
+  name        String
+  description String?
+  severity    String?
+  diagnosed   DateTime?
+  notes       String?
+  
+  patient     Patient   @relation(fields: [patientId], references: [id])
+}
+
+// Medicações em uso pelo paciente
+model Medication {
+  id          String    @id @default(uuid())
+  patientId   String
+  name        String
+  dosage      String
+  frequency   String
+  startDate   DateTime
+  endDate     DateTime?
+  prescribedBy String?
+  active      Boolean   @default(true)
+  notes       String?
+  
+  patient     Patient   @relation(fields: [patientId], references: [id])
+}
+
+// Condições de saúde do paciente
+model HealthCondition {
+  id          String    @id @default(uuid())
+  patientId   String
+  name        String
+  description String?
+  diagnosed   DateTime?
+  status      String?   // Ativo, Em tratamento, Resolvido
+  notes       String?
+  
+  patient     Patient   @relation(fields: [patientId], references: [id])
+}
+
+// Documentos do paciente
+model Document {
+  id          String    @id @default(uuid())
+  patientId   String
+  name        String
+  type        String    // Exame, Laudo, Receita, etc.
+  fileUrl     String
+  uploadedBy  String
+  uploadedAt  DateTime  @default(now())
+  notes       String?
+  
+  patient     Patient   @relation(fields: [patientId], references: [id])
+}
+
+// Pagamentos
+model Payment {
+  id              String    @id @default(uuid())
+  appointmentId   String
+  amount          Float
+  paymentMethod   PaymentMethod
+  paymentStatus   PaymentStatus @default(PENDING)
+  paidAt          DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relacionamentos
+  appointment     Appointment @relation(fields: [appointmentId], references: [id])
+  
+  // Novo relacionamento com serviços através de uma tabela intermediária
+  services        PaymentService[]
+}
+
+// Tabela intermediária para relacionar pagamentos e serviços
+model PaymentService {
+  id            String      @id @default(uuid())
+  paymentId     String
+  serviceId     String
+  quantity      Int         @default(1)
+  unitPrice     Float       // Preço unitário no momento da compra
+  discount      Float       @default(0) // Desconto aplicado
+  total         Float       // Valor total após desconto
+  createdAt     DateTime    @default(now())
+  
+  // Relacionamentos
+  payment       Payment     @relation(fields: [paymentId], references: [id])
+  service       ServicePrice @relation(fields: [serviceId], references: [id])
+  
+  @@unique([paymentId, serviceId])
+}
+
+enum PaymentMethod {
+  HEALTH_INSURANCE
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+  PIX
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  CANCELLED
+}
+
+// Agendamentos e consultas
+model Appointment {
+  id              String    @id @default(uuid())
+  patientId       String
+  doctorId        String
+  scheduledStart  DateTime
+  scheduledEnd    DateTime
+  status          AppointmentStatus @default(SCHEDULED)
+  type            String    // Consulta, Retorno, Emergência, etc.
+  reason          String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  checkedInAt     DateTime?
+  consultationId  String?   // Link para a consulta quando realizada
+  
+  patient         Patient   @relation(fields: [patientId], references: [id])
+  doctor          User      @relation(fields: [doctorId], references: [id])
+  consultation    Consultation? @relation(fields: [consultationId], references: [id])
+  payments        Payment[]
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// Consultas realizadas
+model Consultation {
+  id              String    @id @default(uuid())
+  patientId       String
+  doctorId        String
+  date            DateTime
+  chiefComplaint  String?
+  symptoms        String?
+  diagnosis       String?
+  treatment       String?
+  prescription    String?
+  notes           String?
+  followUp        DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  patient         Patient   @relation(fields: [patientId], references: [id])
+  doctor          User      @relation(fields: [doctorId], references: [id])
+  appointments    Appointment[]
+  examRequests    ExamRequest[]
+}
+
+// Solicitações de exames
+model ExamRequest {
+  id              String    @id @default(uuid())
+  patientId       String
+  requestedById   String
+  consultationId  String?
+  type            String
+  description     String?
+  urgency         String?
+  requestedAt     DateTime  @default(now())
+  scheduledFor    DateTime?
+  notes           String?
+  status          String    @default("PENDING")
+  
+  // Novo campo para preço do serviço
+  serviceId       String?
+  
+  // Relacionamentos
+  consultation    Consultation? @relation(fields: [consultationId], references: [id])
+  results         ExamResult[]
+  service         ServicePrice? @relation(fields: [serviceId], references: [id])
+}
+
+// Resultados de exames
+model ExamResult {
+  id              String    @id @default(uuid())
+  examRequestId   String
+  patientId       String
+  performedAt     DateTime
+  performedBy     String?
+  results         String
+  fileUrl         String?
+  notes           String?
+  
+  patient         Patient     @relation(fields: [patientId], references: [id])
+  examRequest     ExamRequest @relation(fields: [examRequestId], references: [id])
+}
+
+// Escala de profissionais
+model StaffSchedule {
+  id          String    @id @default(uuid())
+  userId      String
+  dayOfWeek   Int       // 0-6 para domingo a sábado
+  startTime   String    // Formato HH:MM
+  endTime     String    // Formato HH:MM
+  location    String?
+  notes       String?
+  
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+// Prontuário médico
+model MedicalRecord {
+  id          String    @id @default(uuid())
+  patientId   String
+  doctorId    String
+  date        DateTime  @default(now())
+  type        String    // Evolução, Prescrição, Anamnese, etc.
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  doctor      User      @relation(fields: [doctorId], references: [id])
+  
+  hospitalizationId String?
+  hospitalization   Hospitalization? @relation(fields: [hospitalizationId], references: [id])
+}
+
+// Registro de enfermagem
+model NursingRecord {
+  id          String    @id @default(uuid())
+  patientId   String
+  nurseId     String
+  date        DateTime  @default(now())
+  type        String    // Avaliação, Medicação, Sinais Vitais, etc.
+  content     Json      // Estrutura baseada no tipo
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  nurse       User      @relation(fields: [nurseId], references: [id])
+  
+  hospitalizationId String?
+  hospitalization   Hospitalization? @relation(fields: [hospitalizationId], references: [id])
+}
+
+// Internações
+model Hospitalization {
+  id                String    @id @default(uuid())
+  patientId         String
+  responsibleDoctorId String
+  bedId             String?
+  admissionDate     DateTime
+  expectedDischarge DateTime?
+  actualDischarge   DateTime?
+  admissionReason   String
+  status            HospitalizationStatus @default(ACTIVE)
+  dischargeNotes    String?
+  
+  patient           Patient   @relation(fields: [patientId], references: [id])
+  responsibleDoctor User      @relation(fields: [responsibleDoctorId], references: [id])
+  bed               Bed?      @relation(fields: [bedId], references: [id])
+  
+  medicalRecords    MedicalRecord[]
+  nursingRecords    NursingRecord[]
+}
+
+enum HospitalizationStatus {
+  ACTIVE
+  DISCHARGED
+  TRANSFERRED
+}
+
+// Leitos hospitalares
+model Bed {
+  id          String    @id @default(uuid())
+  number      String    @unique
+  wardId      String
+  type        String?   // Normal, UTI, Isolamento, etc.
+  status      BedStatus @default(AVAILABLE)
+  notes       String?
+  
+  ward        Ward      @relation(fields: [wardId], references: [id])
+  hospitalizations Hospitalization[]
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  RESERVED
+}
+
+// Alas/setores hospitalares
+model Ward {
+  id          String    @id @default(uuid())
+  name        String
+  floor       String?
+  description String?
+  
+  beds        Bed[]
+}
+
+// Configurações do sistema
+model SystemSettings {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  value       String
+  description String?
+  updatedAt   DateTime  @updatedAt
+}
+
+// Logs de auditoria
+model AuditLog {
+  id          String    @id @default(uuid())
+  userId      String?
+  action      String
+  entity      String
+  entityId    String?
+  details     Json?
+  ipAddress   String?
+  timestamp   DateTime  @default(now())
+}
+
+// Tabela de preços dos serviços
+model ServicePrice {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  price         Float
+  type          ServiceType
+  active        Boolean       @default(true)
+  categoryId    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relacionamento com categoria
+  category      ServiceCategory? @relation(fields: [categoryId], references: [id])
+  
+  // Relacionamentos com outros modelos
+  payments      Payment[]
+  examRequests  ExamRequest[]
+}
+
+// Categorias de serviços
+model ServiceCategory {
+  id          String        @id @default(uuid())
+  name        String        
+  description String?
+  
+  // Relacionamentos
+  services    ServicePrice[]
+}
+
+enum ServiceType {
+  CONSULTATION
+  EXAM
+  PROCEDURE
+  SURGERY
+  NURSING
+  OTHER
+} 

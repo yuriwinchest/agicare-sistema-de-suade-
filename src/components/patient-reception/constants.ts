@@ -1,4 +1,3 @@
-
 export const specialties = [
   { id: "1", name: "Clínica Médica" },
   { id: "2", name: "Cardiologia" },
@@ -31,4 +30,34 @@ export const attendanceTypes = [
   { id: "2", name: "Retorno" },
   { id: "3", name: "Procedimento" },
   { id: "4", name: "Exame" },
+];
+
+export const originLocations = [
+  { id: "1", name: "Próprio Paciente" },
+  { id: "2", name: "Emergência" },
+  { id: "3", name: "Ambulatório" },
+  { id: "4", name: "Internação" },
+  { id: "5", name: "Transferência Externa" },
+  { id: "6", name: "Encaminhamento" },
+  { id: "7", name: "Unidade Básica de Saúde" },
+];
+
+export const procedures = [
+  { id: "1", name: "Consulta Médica" },
+  { id: "2", name: "Exame Laboratorial" },
+  { id: "3", name: "Raio-X" },
+  { id: "4", name: "Ultrassonografia" },
+  { id: "5", name: "Eletrocardiograma" },
+  { id: "6", name: "Curativo" },
+  { id: "7", name: "Medicação" },
+];
+
+export const relationships = [
+  { id: "1", name: "Mãe" },
+  { id: "2", name: "Pai" },
+  { id: "3", name: "Avó(ô)" },
+  { id: "4", name: "Irmã(o)" },
+  { id: "5", name: "Tio(a)" },
+  { id: "6", name: "Tutor Legal" },
+  { id: "7", name: "Outro" },
 ];

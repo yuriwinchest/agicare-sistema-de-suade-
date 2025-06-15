@@ -1,0 +1,13 @@
+# Exemplo de arquivo .env para configuração do Prisma
+# Copie este arquivo para .env e ajuste conforme necessário
+
+# URL de conexão com o banco de dados PostgreSQL
+# Formato: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+DATABASE_URL="postgresql://postgres:password@localhost:5432/saludocare?schema=public"
+
+# Para conexão com o banco de dados do Supabase
+# DATABASE_URL="postgresql://postgres:postgres@db.xspmibkhtmnetivtnjox.supabase.co:5432/postgres"
+
+# Variáveis adicionais que podem ser necessárias
+NODE_ENV="development"
+SHADOW_DATABASE_URL="postgresql://postgres:password@localhost:5432/saludocare_shadow" 

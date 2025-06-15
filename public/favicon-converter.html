@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversor de Favicon</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .preview-item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Conversor de Favicon SVG para PNG</h1>
+  <p>Esta ferramenta converte o arquivo favicon.svg em vários tamanhos de PNG para seu site.</p>
+  
+  <div id="originalSvg">
+    <h2>SVG Original</h2>
+    <img src="favicon.svg" alt="Favicon SVG" width="100" height="100">
+  </div>
+  
+  <button id="convertBtn">Converter para PNG</button>
+  
+  <div class="preview" id="preview"></div>
+  
+  <script>
+    const sizes = [
+      { name: 'favicon-16x16.png', size: 16 },
+      { name: 'favicon-32x32.png', size: 32 },
+      { name: 'apple-touch-icon.png', size: 180 },
+      { name: 'android-chrome-192x192.png', size: 192 },
+      { name: 'android-chrome-512x512.png', size: 512 }
+    ];
+    
+    document.getElementById('convertBtn').addEventListener('click', async () => {
+      const svgImage = document.querySelector('#originalSvg img');
+      const preview = document.getElementById('preview');
+      
+      // Limpar preview
+      preview.innerHTML = '';
+      
+      for (const { name, size } of sizes) {
+        // Criar canvas para desenhar o SVG
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        // Criar uma nova imagem a partir do SVG
+        const img = new Image();
+        img.src = svgImage.src;
+        
+        // Aguardar o carregamento da imagem
+        await new Promise(resolve => {
+          img.onload = resolve;
+        });
+        
+        // Desenhar no canvas
+        ctx.drawImage(img, 0, 0, size, size);
+        
+        // Converter para PNG
+        const pngUrl = canvas.toDataURL('image/png');
+        
+        // Criar elemento para visualização
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        
+        const previewImage = document.createElement('img');
+        previewImage.src = pngUrl;
+        previewImage.width = size;
+        previewImage.height = size;
+        previewImage.style.maxWidth = '200px';
+        previewImage.style.maxHeight = '200px';
+        
+        const previewTitle = document.createElement('p');
+        previewTitle.textContent = `${name} (${size}x${size})`;
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pngUrl;
+        downloadLink.download = name;
+        downloadLink.textContent = 'Baixar';
+        downloadLink.style.display = 'block';
+        downloadLink.style.marginTop = '10px';
+        
+        previewItem.appendChild(previewImage);
+        previewItem.appendChild(previewTitle);
+        previewItem.appendChild(downloadLink);
+        
+        preview.appendChild(previewItem);
+      }
+    });
+  </script>
+</body>
+</html> 

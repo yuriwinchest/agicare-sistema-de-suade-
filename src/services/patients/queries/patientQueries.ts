@@ -1,6 +1,23 @@
 import { Patient, HospitalizedPatient } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDatabase, ensureProperDateFormat } from "../utils/dateUtils";
+import { specialties, professionals, healthPlans } from "@/components/patient-reception/constants";
+
+// Função auxiliar para converter ID em nome descritivo
+const getSpecialtyNameById = (id: string): string => {
+  const specialty = specialties.find(spec => spec.id === id);
+  return specialty ? specialty.name : id;
+};
+
+const getProfessionalNameById = (id: string): string => {
+  const professional = professionals.find(prof => prof.id === id);
+  return professional ? professional.name : id;
+};
+
+const getHealthPlanNameById = (id: string): string => {
+  const healthPlan = healthPlans.find(plan => plan.id === id);
+  return healthPlan ? healthPlan.name : id;
+};
 
 export const getPatientById = async (id: string): Promise<Patient | null> => {
   try {
@@ -37,7 +54,11 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
     const fullPatientData: Patient = {
       ...patientData,
       appointmentTime: appointmentData?.time || patientData.appointment_time || null,
-      date: appointmentData?.date || null
+      date: appointmentData?.date || null,
+      // Converter IDs para nomes descritivos
+      specialty: getSpecialtyNameById(patientData.specialty),
+      professional: getProfessionalNameById(patientData.professional),
+      health_plan: getHealthPlanNameById(patientData.health_plan)
     };
     
     return fullPatientData;
@@ -95,12 +116,22 @@ export const getAllPatients = async (): Promise<Patient[]> => {
       const patientAny = patient as any;
       const appointment = appointmentMap[patient.id] || {};
       
+      // Obter os valores brutos (IDs) para conversão
+      const rawSpecialty = patient.specialty || patient.attendance_type || "";
+      const rawProfessional = patient.professional || "";
+      const rawHealthPlan = patient.health_plan || "";
+      
+      // Converter IDs para nomes descritivos
+      const specialtyName = getSpecialtyNameById(rawSpecialty);
+      const professionalName = getProfessionalNameById(rawProfessional);
+      const healthPlanName = getHealthPlanNameById(rawHealthPlan);
+      
       const transformedPatient = {
         ...patient,
-        // Priorizar dados do appointment, depois dados do paciente, depois fallbacks
-        specialty: patient.specialty || patient.attendance_type || "Não definida",
-        professional: patient.professional || patient.father_name || "Não definido", 
-        health_plan: patient.health_plan || "Não informado",
+        // Usar os nomes descritivos em vez dos IDs
+        specialty: specialtyName || "Não definida",
+        professional: professionalName || patient.father_name || "Não definido", 
+        health_plan: healthPlanName || "Não informado",
         reception: patient.reception || "RECEPÇÃO CENTRAL",
         // Usar appointment time e date se existirem
         appointmentTime: appointment.time || patient.appointment_time || null,
@@ -134,7 +165,15 @@ export const getAmbulatoryPatients = async (): Promise<Patient[]> => {
       return [];
     }
     
-    return data || [];
+    // Processar os dados para converter IDs em nomes descritivos
+    const processedData = (data || []).map(patient => ({
+      ...patient,
+      specialty: getSpecialtyNameById(patient.specialty),
+      professional: getProfessionalNameById(patient.professional),
+      health_plan: getHealthPlanNameById(patient.health_plan)
+    }));
+    
+    return processedData;
   } catch (error) {
     console.error("Error in getAmbulatoryPatients:", error);
     return [];

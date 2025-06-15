@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,11 +16,29 @@ interface PatientInfoProps {
 }
 
 const PatientInfoHeader: React.FC<PatientInfoProps> = ({ patientInfo }) => {
+  // Debug log para verificar os dados recebidos
+  console.log("PatientInfoHeader recebeu:", patientInfo);
+  
   const [showAllergies, setShowAllergies] = useState(false);
   
   // Add safety check for allergies to prevent "Cannot read properties of undefined (reading 'length')"
-  const allergies = patientInfo.allergies || [];
+  const allergies = patientInfo?.allergies || [];
   const hasAllergies = allergies.length > 0;
+  
+  // Se patientInfo for undefined ou null, mostra uma mensagem de erro
+  if (!patientInfo) {
+    console.error("PatientInfoHeader recebeu dados inválidos");
+    return (
+      <Card className="col-span-full section-fade">
+        <CardContent className="pt-6">
+          <div className="text-red-500 flex items-center">
+            <AlertCircle className="mr-2 h-5 w-5" />
+            Erro ao carregar informações do paciente
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card className="col-span-full section-fade">

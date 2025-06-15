@@ -1,270 +1,289 @@
-
-import React, { useState, useEffect } from 'react';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { EditCollaboratorDialog } from './EditCollaboratorDialog';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserX, Trash2, ShieldAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { deleteCollaborator } from '@/services/collaborators';
-import { useAuth } from "@/components/auth/AuthContext";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
-type Collaborator = {
-  id?: string;
-  name: string;
-  role: string;
-  image_url?: string;
-  email?: string;
-  phone?: string;
-  specialty?: string;
-  department?: string;
-  active?: boolean;
-};
-
-const roleTranslations = {
-  doctor: 'Médico(a)',
-  nurse: 'Enfermeiro(a)',
-  receptionist: 'Recepcionista',
-  admin: 'Administrador(a)'
-};
+import { CollaboratorFormValues } from '@/hooks/useCollaboratorForm';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Trash2, Edit, UserCheck, UserX, RefreshCw, ServerOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { EditCollaboratorDialog } from './EditCollaboratorDialog';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 export const CollaboratorGrid = () => {
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [selectedCollaborator, setSelectedCollaborator] = useState<Collaborator | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [collaborators, setCollaborators] = useState<CollaboratorFormValues[]>([]);
+  const [selectedCollaborator, setSelectedCollaborator] = useState<CollaboratorFormValues | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deletingCollaborator, setDeletingCollaborator] = useState<Collaborator | null>(null);
+  const [serverAvailable, setServerAvailable] = useState(true);
   const { toast } = useToast();
-  const { user } = useAuth();
 
-  useEffect(() => {
-    fetchCollaborators();
-    
-    // Configurar um canal em tempo real para ouvir mudanças na tabela collaborators
-    const channel = supabase
-      .channel('collaborator-changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'collaborators' 
-      }, () => {
-        fetchCollaborators();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  const checkServerAvailability = async () => {
+    try {
+      // Obter a chave anônima do Supabase das variáveis de ambiente ou usar a chave padrão
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xspmibkhtmnetivtnjox.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcG1pYmtodG1uZXRpdnRuam94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjcwMzUsImV4cCI6MjA2MDI0MzAzNX0.eOILz9zyxyM8i0ZJ3AHrjlWK1AFbf_MX2i62m3KNYsA";
+      
+      const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+        headers: {
+          "apikey": supabaseAnonKey,
+          "Authorization": `Bearer ${supabaseAnonKey}`
+        }
+      });
+      
+      setServerAvailable(response.ok);
+      return response.ok;
+    } catch (error) {
+      console.error('Erro ao verificar disponibilidade do servidor:', error);
+      setServerAvailable(false);
+      return false;
+    }
+  };
 
   const fetchCollaborators = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      setError(null);
-      
+      // Verificar disponibilidade do servidor
+      const isAvailable = await checkServerAvailability();
+      if (!isAvailable) {
+        setCollaborators([]);
+        toast({
+          title: 'Servidor indisponível',
+          description: 'O servidor de dados está temporariamente indisponível. Tente novamente mais tarde.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('collaborators')
         .select('*')
-        .order('name', { ascending: true });
+        .order('name');
 
       if (error) {
-        console.error("Erro ao carregar colaboradores:", error);
-        setError("Não foi possível carregar os colaboradores devido a um erro de permissão.");
-        
-        if (error.code === 'PGRST301') {
-          toast({
-            title: "Acesso restrito",
-            description: "Apenas administradores podem visualizar a lista de colaboradores",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Erro ao carregar colaboradores",
-            description: "Ocorreu um problema ao tentar carregar a lista",
-            variant: "destructive"
-          });
-        }
-        
-        setCollaborators([]);
-      } else {
-        console.log("Colaboradores carregados:", data);
-        setCollaborators(data || []);
+        throw error;
       }
+
+      setCollaborators(data || []);
     } catch (error) {
-      console.error("Erro ao carregar colaboradores:", error);
-      setError("Ocorreu um erro inesperado ao tentar carregar os colaboradores.");
+      console.error('Erro ao carregar colaboradores:', error);
       toast({
-        title: "Erro ao carregar colaboradores",
-        description: "Não foi possível carregar a lista de colaboradores",
-        variant: "destructive"
+        title: 'Erro',
+        description: 'Não foi possível carregar a lista de colaboradores',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCardClick = (collaborator: Collaborator) => {
-    if (user?.role !== 'admin' && user?.id !== collaborator.id) {
+  useEffect(() => {
+    fetchCollaborators();
+  }, []);
+
+  const handleEdit = (collaborator: CollaboratorFormValues) => {
+    if (!serverAvailable) {
       toast({
-        title: "Acesso negado",
-        description: "Você só pode editar seu próprio perfil ou precisa ser administrador",
-        variant: "destructive"
+        title: 'Servidor indisponível',
+        description: 'Não é possível editar colaboradores no momento pois o servidor está indisponível.',
+        variant: 'destructive',
       });
       return;
     }
-    
     setSelectedCollaborator(collaborator);
-    setIsEditModalOpen(true);
+    setIsEditDialogOpen(true);
   };
 
-  const handleDelete = async (collaborator: Collaborator, event: React.MouseEvent) => {
-    event.stopPropagation(); // Previne que o clique propague para o card
-    
-    if (user?.role !== 'admin') {
+  const handleRemove = async (id: string) => {
+    if (!serverAvailable) {
       toast({
-        title: "Acesso negado",
-        description: "Apenas administradores podem excluir colaboradores",
-        variant: "destructive"
+        title: 'Servidor indisponível',
+        description: 'Não é possível remover colaboradores no momento pois o servidor está indisponível.',
+        variant: 'destructive',
       });
       return;
     }
-    
-    setDeletingCollaborator(collaborator);
-    setIsDeleteDialogOpen(true);
-  };
 
-  const confirmDelete = async () => {
-    if (!deletingCollaborator?.id) return;
-    
+    if (!window.confirm('Tem certeza que deseja remover este colaborador?')) {
+      return;
+    }
+
     try {
-      await deleteCollaborator(deletingCollaborator.id);
+      const { error } = await supabase
+        .from('collaborators')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setCollaborators(collaborators.filter(c => c.id !== id));
       toast({
-        title: "Colaborador excluído",
-        description: `${deletingCollaborator.name} foi removido com sucesso`,
+        title: 'Colaborador removido',
+        description: 'O colaborador foi removido com sucesso',
       });
-      fetchCollaborators();
     } catch (error) {
+      console.error('Erro ao remover colaborador:', error);
       toast({
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir o colaborador",
-        variant: "destructive"
+        title: 'Erro',
+        description: 'Não foi possível remover o colaborador',
+        variant: 'destructive',
       });
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setDeletingCollaborator(null);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
-        <span className="ml-2 text-white">Carregando colaboradores...</span>
-      </div>
-    );
-  }
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    if (!serverAvailable) {
+      toast({
+        title: 'Servidor indisponível',
+        description: 'Não é possível alterar o status do colaborador no momento pois o servidor está indisponível.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-  if (error) {
-    return (
-      <div className="bg-red-500/20 border border-red-300/30 rounded-lg p-8 text-center">
-        <ShieldAlert className="h-10 w-10 text-red-300 mx-auto mb-2" />
-        <p className="text-white text-lg font-medium">Acesso Restrito</p>
-        <p className="text-white/80 mt-2">{error}</p>
-      </div>
-    );
-  }
+    try {
+      const { error } = await supabase
+        .from('collaborators')
+        .update({ active: !currentStatus })
+        .eq('id', id);
 
-  if (collaborators.length === 0) {
-    return (
-      <div className="bg-white/10 border border-white/20 rounded-lg p-8 text-center">
-        <p className="text-white">Nenhum colaborador cadastrado ainda.</p>
-      </div>
-    );
-  }
+      if (error) {
+        throw error;
+      }
+
+      setCollaborators(
+        collaborators.map(c => 
+          c.id === id ? { ...c, active: !currentStatus } : c
+        )
+      );
+
+      toast({
+        title: 'Status atualizado',
+        description: `Colaborador ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`,
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar status do colaborador:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status do colaborador',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {collaborators.map((collaborator) => (
-          <Card 
-            key={collaborator.id} 
-            className="bg-white/10 border border-white/20 cursor-pointer hover:bg-white/20 transition-colors relative"
-            onClick={() => handleCardClick(collaborator)}
-          >
-            <CardHeader className="flex flex-row items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={collaborator.image_url} alt={collaborator.name} />
-                <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <CardTitle className="text-lg text-white">{collaborator.name}</CardTitle>
-                <p className="text-sm text-gray-200">
-                  {roleTranslations[collaborator.role as keyof typeof roleTranslations] || collaborator.role}
-                </p>
-                {collaborator.specialty && (
-                  <p className="text-xs text-gray-300">{collaborator.specialty}</p>
-                )}
-                {collaborator.role === 'admin' && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-300/80 text-amber-900">
-                    <ShieldAlert className="w-3 h-3 mr-1" />
-                    Admin
-                  </span>
-                )}
+    <div>
+      <div className="flex justify-between mb-4">
+        <div>
+          {!serverAvailable && (
+            <div className="bg-red-100 text-red-800 rounded-lg p-2 flex items-center mb-4">
+              <ServerOff className="h-5 w-5 mr-2" />
+              <span>Servidor indisponível. As operações estão limitadas.</span>
+            </div>
+          )}
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={fetchCollaborators}
+          disabled={isLoading}
+          className="bg-white/30 text-white hover:bg-white/40 border-white/30"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Carregando...' : 'Atualizar'}
+        </Button>
+      </div>
+
+      {collaborators.length === 0 ? (
+        <div className="text-center bg-white/30 backdrop-blur-md rounded-lg p-8 text-white">
+          {isLoading ? 'Carregando colaboradores...' : (
+            serverAvailable 
+              ? 'Nenhum colaborador cadastrado' 
+              : 'Servidor indisponível. Não foi possível carregar os colaboradores.'
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {collaborators.map((collaborator) => (
+            <div 
+              key={collaborator.id} 
+              className={`bg-white/30 backdrop-blur-md rounded-lg p-4 flex flex-col ${
+                !collaborator.active ? 'opacity-70' : 'opacity-100'
+              }`}
+            >
+              <div className="flex items-center mb-4">
+                <Avatar className="h-12 w-12 mr-3 border-2 border-white/50">
+                  <AvatarImage src={collaborator.image_url || ''} />
+                  <AvatarFallback className="bg-teal-100 text-teal-800">
+                    {collaborator.name?.slice(0, 2).toUpperCase() || 'UN'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 overflow-hidden">
+                  <h3 className="font-medium text-white truncate">{collaborator.name}</h3>
+                  <p className="text-sm text-white/80 truncate">{collaborator.email}</p>
+                </div>
+                <Badge 
+                  className={`ml-2 ${
+                    collaborator.active 
+                      ? 'bg-green-500 hover:bg-green-600' 
+                      : 'bg-red-500 hover:bg-red-600'
+                  } text-white`}
+                >
+                  {collaborator.active ? 'Ativo' : 'Inativo'}
+                </Badge>
               </div>
-              {user?.role === 'admin' && (
+              
+              <div className="text-sm space-y-1 mb-4">
+                <p className="text-white"><span className="font-medium">Função:</span> {collaborator.role || 'Não definido'}</p>
+                <p className="text-white"><span className="font-medium">Especialidade:</span> {collaborator.specialty || 'Não definido'}</p>
+                <p className="text-white"><span className="font-medium">Departamento:</span> {collaborator.department || 'Não definido'}</p>
+                <p className="text-white"><span className="font-medium">Telefone:</span> {collaborator.phone || 'Não informado'}</p>
+              </div>
+              
+              <div className="flex justify-end mt-auto space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleToggleActive(collaborator.id || '', collaborator.active || false)}
+                  disabled={!serverAvailable}
+                  className="bg-white/30 text-white hover:bg-white/40 border-white/30"
+                >
+                  {collaborator.active ? <UserX size={16} /> : <UserCheck size={16} />}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEdit(collaborator)}
+                  disabled={!serverAvailable}
+                  className="bg-white/30 text-white hover:bg-white/40 border-white/30"
+                >
+                  <Edit size={16} />
+                </Button>
                 <Button 
                   variant="destructive" 
                   size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={(e) => handleDelete(collaborator, e)}
+                  onClick={() => handleRemove(collaborator.id || '')}
+                  disabled={!serverAvailable}
+                  className="bg-red-500/70 hover:bg-red-500/90"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 size={16} />
                 </Button>
-              )}
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {selectedCollaborator && (
         <EditCollaboratorDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => {
+            setIsEditDialogOpen(false);
+            setSelectedCollaborator(null);
+          }}
           collaborator={selectedCollaborator}
-          open={isEditModalOpen}
-          onOpenChange={setIsEditModalOpen}
-          onCollaboratorUpdate={fetchCollaborators}
+          onSuccess={fetchCollaborators}
         />
       )}
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o colaborador {deletingCollaborator?.name}?
-              Esta ação não poderá ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    </div>
   );
 };

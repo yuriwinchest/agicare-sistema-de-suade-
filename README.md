@@ -1,5 +1,14 @@
 # Welcome to your Lovable project
 
+## Atualizações Recentes
+
+**2024-10-19**: 
+- Implementada API centralizada com sistema de cache (`src/services/api/index.ts`)
+- Corrigido problema de carregamento lento na tela de recepção
+- Adicionada conversão automática de IDs para nomes nas tabelas
+- Melhorada a experiência do usuário com atualizações automáticas
+- Consulte o CHANGELOG.md para mais detalhes das alterações
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/183d77c4-b0e1-4e78-bf16-2ac67f909cf5

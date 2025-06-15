@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from "@/components/layout/Layout";
 import { Users, Settings, Activity } from "lucide-react";
@@ -29,15 +28,26 @@ const AdminDashboard = () => {
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-600 p-8">
         <div className="container mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-8">Painel Administrativo</h1>
+          <div className="bg-white/20 backdrop-blur-md p-6 rounded-xl mb-8 shadow-lg">
+            <h1 className="text-3xl font-bold text-white mb-2">Painel Administrativo</h1>
+            <p className="text-white/80">Gerencie usuários e configurações do sistema</p>
+          </div>
           
-          <div className="bg-white/10 border border-white/20 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Registro de Usuários</h2>
-            <RegisterUserDialog />
+          <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-xl p-8 mb-8 shadow-lg">
+            <h2 className="text-2xl font-semibold text-white mb-4 flex items-center">
+              <Users className="mr-2 h-6 w-6 text-teal-200" />
+              Registro de Usuários
+            </h2>
+            <div className="bg-white/30 p-4 rounded-lg mb-4">
+              <RegisterUserDialog />
+            </div>
           </div>
 
-          <div className="bg-white/10 border border-white/20 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Colaboradores</h2>
+          <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-xl p-8 mb-8 shadow-lg">
+            <h2 className="text-2xl font-semibold text-white mb-4 flex items-center">
+              <Users className="mr-2 h-6 w-6 text-teal-200" />
+              Colaboradores
+            </h2>
             <CollaboratorGrid />
           </div>
 

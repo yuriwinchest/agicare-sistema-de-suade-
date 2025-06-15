@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -31,10 +30,11 @@ import {
 
 import PatientInfoHeader from "@/components/patient-record/PatientInfoHeader";
 import SummaryTab from "@/components/patient-record/tabs/SummaryTab";
-import AnamnesisTab from "@/components/patient-record/tabs/AnamnesisTab";
-import NursingTab from "@/components/patient-record/tabs/NursingTab";
+// Removidas as importações das abas que não serão mais usadas
+// import AnamnesisTab from "@/components/patient-record/tabs/AnamnesisTab";
+// import NursingTab from "@/components/patient-record/tabs/NursingTab";
 import ClinicalRecordTab from "@/components/patient-record/tabs/ClinicalRecordTab";
-import LaudoTab from "@/components/patient-record/tabs/LaudoTab";
+// import LaudoTab from "@/components/patient-record/tabs/LaudoTab";
 import PatientDestinationDialog from "@/components/patient-record/PatientDestinationDialog";
 
 import { 
@@ -45,6 +45,17 @@ import {
 } from "@/components/patient-record/PatientRecordData";
 
 import { usePatientData } from "@/hooks/usePatientData";
+
+/**
+ * Sistema de Prontuário Eletrônico
+ * 
+ * Existem três tipos de prontuários no sistema:
+ * 1. AGENDA - Utilizado para consultas agendadas (implementado neste arquivo)
+ * 2. PRONTO ATENDIMENTO - Para atendimentos de urgência/emergência (a ser implementado)
+ * 3. INTERNAÇÃO - Para pacientes internados (a ser implementado)
+ * 
+ * Cada prontuário tem um conjunto específico de abas e funcionalidades.
+ */
 
 // Redirection para substituir updatePatientRedirection
 const updatePatientRedirection = async (patientId: string, destination: string) => {
@@ -155,54 +166,6 @@ const PatientRecord = () => {
           <PatientInfoHeader patientInfo={patientInfo} />
         </div>
         
-        {/* Patient destination buttons - Fixed on right side */}
-        <div className="fixed right-4 top-1/3 flex flex-col gap-2 z-10">
-          <Button 
-            variant="outline" 
-            onClick={handleGoBack} 
-            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
-          >
-            <RotateCcw className="h-5 w-5 text-blue-600" />
-            <span className="text-xs font-medium">VOLTAR</span>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={handlePatientDischarge} 
-            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
-          >
-            <LogOut className="h-5 w-5 text-red-600" />
-            <span className="text-xs font-medium">ALTA</span>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={handleMedicationClick}
-            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
-          >
-            <Pill className="h-5 w-5 text-purple-600" />
-            <span className="text-xs font-medium">MEDICAÇÃO</span>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={handleCreateObservation} 
-            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
-          >
-            <EyeIcon className="h-5 w-5 text-teal-600" />
-            <span className="text-xs font-medium">OBSERVAÇÃO</span>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={handleFinalizeConsult} 
-            className="flex items-center gap-2 h-auto py-2 px-3 rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
-          >
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="text-xs font-medium">FINALIZAR</span>
-          </Button>
-        </div>
-        
         <Card className="section-fade" style={{ animationDelay: "0.1s" }}>
           <CardContent className="p-0">
             <Tabs defaultValue="summary" onValueChange={setActiveTab} className="w-full">
@@ -210,41 +173,25 @@ const PatientRecord = () => {
                 <TabsTrigger value="summary" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   Resumo
                 </TabsTrigger>
-                <TabsTrigger value="anamnesis" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-                  <FileText className="h-4 w-4 mr-1" />
-                  Anamnese
-                </TabsTrigger>
-                <TabsTrigger value="nursing" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-                  <Activity className="h-4 w-4 mr-1" />
-                  Enfermagem
-                </TabsTrigger>
-                <TabsTrigger value="prescription" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-                  <Pill className="h-4 w-4 mr-1" />
-                  Prescrição
+                <TabsTrigger value="clinical" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                  <ClipboardIcon className="h-4 w-4 mr-1" />
+                  Ficha Clínica
                 </TabsTrigger>
                 <TabsTrigger value="laborders" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <FlaskConical className="h-4 w-4 mr-1" />
                   Pedidos
                 </TabsTrigger>
-                <TabsTrigger value="labresults" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                <TabsTrigger value="prescription" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                  <Pill className="h-4 w-4 mr-1" />
+                  Prescrição
+                </TabsTrigger>
+                <TabsTrigger value="recipe" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <ClipboardList className="h-4 w-4 mr-1" />
-                  Resultados
-                </TabsTrigger>
-                <TabsTrigger value="clinical" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-                  <ClipboardIcon className="h-4 w-4 mr-1" />
-                  Ficha Clínica
-                </TabsTrigger>
-                <TabsTrigger value="laudo" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-                  <FileSpreadsheet className="h-4 w-4 mr-1" />
-                  Laudo
+                  Receita
                 </TabsTrigger>
                 <TabsTrigger value="discharge" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
                   <UserCheck className="h-4 w-4 mr-1" />
                   Alta/Atestado
-                </TabsTrigger>
-                <TabsTrigger value="hospitalization" className="py-3 px-4 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
-                  <Bed className="h-4 w-4 mr-1" />
-                  Internação
                 </TabsTrigger>
               </TabsList>
               
@@ -257,37 +204,11 @@ const PatientRecord = () => {
                 />
               </TabsContent>
               
-              <TabsContent value="anamnesis" className="p-6">
-                <AnamnesisTab 
-                  medicalNotes={patientInfo.medicalNotes}
-                  availableForms={availableForms}
-                />
-              </TabsContent>
-              
-              <TabsContent value="nursing" className="p-6">
-                <NursingTab 
-                  vitalSigns={patientInfo.vitalSigns} 
-                  readOnly={true} // Definindo como somente leitura
-                />
-              </TabsContent>
-              
               <TabsContent value="clinical">
                 <ClinicalRecordTab 
                   clinicalRecords={clinicalRecords}
                   specialities={specialities}
                 />
-              </TabsContent>
-              
-              <TabsContent value="laudo" className="p-6">
-                <LaudoTab />
-              </TabsContent>
-              
-              
-              <TabsContent value="prescription" className="p-6">
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">Prescrição</h2>
-                  <p className="text-muted-foreground">Conteúdo da prescrição a ser implementado.</p>
-                </div>
               </TabsContent>
               
               <TabsContent value="laborders" className="p-6">
@@ -297,10 +218,38 @@ const PatientRecord = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="labresults" className="p-6">
+              <TabsContent value="prescription" className="p-6">
                 <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">Resultados de Exames</h2>
-                  <p className="text-muted-foreground">Conteúdo de resultados de exames a ser implementado.</p>
+                  <h2 className="text-lg font-semibold">Prescrição</h2>
+                  <p className="text-muted-foreground">Conteúdo da prescrição a ser implementado.</p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="recipe" className="p-6">
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold">Receita</h2>
+                  <p className="text-muted-foreground">Conteúdo da receita médica a ser implementado.</p>
+                  
+                  <div className="border p-4 rounded-md">
+                    <h3 className="font-medium mb-2">Receita para impressão</h3>
+                    <div className="space-y-2">
+                      <div className="border-l-4 border-teal-500 pl-3 py-1">
+                        <div className="font-medium">Dipirona 500mg</div>
+                        <div className="text-sm text-gray-600">1 comprimido a cada 6 horas se dor ou febre</div>
+                      </div>
+                      
+                      <div className="border-l-4 border-teal-500 pl-3 py-1">
+                        <div className="font-medium">Omeprazol 20mg</div>
+                        <div className="text-sm text-gray-600">1 cápsula em jejum por 30 dias</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 flex justify-end">
+                      <Button size="sm" className="bg-teal-500 text-white hover:bg-teal-600">
+                        Imprimir Receita
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
               
@@ -310,16 +259,59 @@ const PatientRecord = () => {
                   <p className="text-muted-foreground">Conteúdo de alta/atestado a ser implementado.</p>
                 </div>
               </TabsContent>
-              
-              <TabsContent value="hospitalization" className="p-6">
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">Internação</h2>
-                  <p className="text-muted-foreground">Conteúdo de internação a ser implementado.</p>
-                </div>
-              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
+        
+        {/* Patient destination buttons - Horizontal fixed bar on bottom */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg flex justify-center py-2 z-10">
+          <div className="flex gap-2 justify-center container px-4">
+            <Button 
+              variant="outline" 
+              onClick={handleGoBack} 
+              className="flex items-center gap-1 h-auto py-2"
+            >
+              <RotateCcw className="h-4 w-4 text-blue-600" />
+              <span className="text-xs font-medium">VOLTAR</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handlePatientDischarge} 
+              className="flex items-center gap-1 h-auto py-2"
+            >
+              <LogOut className="h-4 w-4 text-red-600" />
+              <span className="text-xs font-medium">ALTA</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleMedicationClick}
+              className="flex items-center gap-1 h-auto py-2"
+            >
+              <Pill className="h-4 w-4 text-purple-600" />
+              <span className="text-xs font-medium">MEDICAÇÃO</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleCreateObservation} 
+              className="flex items-center gap-1 h-auto py-2"
+            >
+              <EyeIcon className="h-4 w-4 text-teal-600" />
+              <span className="text-xs font-medium">OBSERVAÇÃO</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleFinalizeConsult} 
+              className="flex items-center gap-1 h-auto py-2"
+            >
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-xs font-medium">FINALIZAR</span>
+            </Button>
+          </div>
+        </div>
         
         <PatientDestinationDialog 
           open={showDestinationDialog} 

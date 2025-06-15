@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -11,7 +10,7 @@ import {
   Form,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
+import { UserPlus, AlertTriangle } from "lucide-react";
 import { CollaboratorImageUpload } from './CollaboratorImageUpload';
 import { useCollaboratorForm } from '@/hooks/useCollaboratorForm';
 import { ContactFields } from './collaborator/ContactFields';
@@ -19,30 +18,58 @@ import { ProfessionalFields } from './collaborator/ProfessionalFields';
 import { StatusToggle } from './collaborator/StatusToggle';
 import { PasswordField } from './collaborator/PasswordField';
 import { PersonalInfoFields } from './collaborator/PersonalInfoFields';
+import { useToast } from '@/hooks/use-toast';
 
 export const RegisterUserDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
   const {
     form,
     uploading,
     isSubmitting,
     handleImageUpload,
-    onSubmit
+    onSubmit,
+    serverAvailable
   } = useCollaboratorForm(undefined, () => {
     setIsOpen(false);
   });
 
+  const handleOpenDialog = () => {
+    if (!serverAvailable) {
+      toast({
+        title: 'Servidor indisponível',
+        description: 'Não é possível registrar colaboradores no momento pois o servidor está indisponível.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsOpen(true);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full" variant="outline" onClick={() => setIsOpen(true)}>
-          <UserPlus className="mr-2" size={16} />
-          Registrar Novo Colaborador
+        <Button 
+          className={`w-full ${serverAvailable ? 'bg-teal-500 hover:bg-teal-600' : 'bg-gray-400 cursor-not-allowed'} text-white shadow-md`}
+          onClick={handleOpenDialog}
+          disabled={!serverAvailable}
+        >
+          {serverAvailable ? (
+            <>
+              <UserPlus className="mr-2" size={18} />
+              Registrar Novo Colaborador
+            </>
+          ) : (
+            <>
+              <AlertTriangle className="mr-2" size={18} />
+              Servidor Indisponível
+            </>
+          )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[550px] bg-white/90 backdrop-blur-md">
         <DialogHeader>
-          <DialogTitle>Registrar Novo Colaborador</DialogTitle>
+          <DialogTitle className="text-xl">Registrar Novo Colaborador</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -66,13 +93,22 @@ export const RegisterUserDialog = () => {
             <ProfessionalFields form={form} />
             <StatusToggle form={form} />
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={uploading || isSubmitting}
-            >
-              {isSubmitting ? "Registrando..." : "Registrar Colaborador"}
-            </Button>
+            <div className="flex justify-end space-x-2 pt-3">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-teal-600 hover:bg-teal-700 text-white"
+                disabled={uploading || isSubmitting}
+              >
+                {isSubmitting ? "Registrando..." : "Registrar Colaborador"}
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>

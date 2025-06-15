@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CircleCheck } from "lucide-react";
 import { StepIndicator } from "@/components/ui/step-indicator";
@@ -65,6 +64,9 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
   };
 
   const handleComplete = () => {
+    // Log form data for debugging
+    console.log("Form data before processing:", formData);
+
     // Extract complementary data fields directly into the patient object
     const {
       birthDate,
@@ -78,6 +80,16 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       ? JSON.stringify(addressDetails) 
       : addressDetails;
 
+    // Prepare appointment details fields
+    const appointmentDetails = {
+      attendance_type: formData.attendance_type || null,
+      specialty: formData.specialty || null,
+      professional: formData.professional || null,
+      health_plan: formData.healthPlan || null,
+      health_card_number: formData.health_card_number || null,
+      appointment_time: formData.appointment_time || null,
+    };
+
     // Prepare the final data to be saved - merge the additionalData fields directly into the patient record
     const finalData = {
       ...basicPatientData,
@@ -88,9 +100,12 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
       place_of_birth_state: additionalData.place_of_birth_state,
       education_level: additionalData.education_level,
       occupation: additionalData.occupation,
-      health_card_number: additionalData.health_card_number
+      health_card_number: additionalData.health_card_number,
+      // Add appointment details
+      ...appointmentDetails
     };
 
+    console.log("Final data being sent:", finalData);
     onComplete(finalData);
   };
 
@@ -113,16 +128,15 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
     }
   };
 
+  const dialogTitle = currentStep === totalSteps ? "Finalizar Cadastro" : `Passo ${currentStep} de ${totalSteps}`;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogTitle className="sr-only">{dialogTitle}</DialogTitle>
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">
-              {currentStep === totalSteps
-                ? "Finalizar Cadastro"
-                : `Passo ${currentStep} de ${totalSteps}`}
-            </h2>
+            <h2 className="text-xl font-bold">{dialogTitle}</h2>
             
             <div className="flex space-x-1">
               {Array.from({ length: totalSteps }, (_, i) => (

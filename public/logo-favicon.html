@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Logo Agicare</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #03BFB3;
+    }
+    .logo-container {
+      margin: 30px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background-color: white;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Logo Agicare para Favicon</h1>
+  
+  <div class="logo-container">
+    <canvas id="logoCanvas" width="200" height="200"></canvas>
+    <a id="downloadBtn" href="#" download="favicon.ico" style="padding: 10px 20px; background-color: #03BFB3; color: white; text-decoration: none; border-radius: 4px;">Baixar Favicon</a>
+  </div>
+  
+  <script>
+    // Desenhar o logo quando a página carregar
+    window.onload = function() {
+      const canvas = document.getElementById('logoCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Desenhar fundo circular
+      ctx.fillStyle = '#03BFB3';
+      ctx.beginPath();
+      ctx.arc(100, 100, 100, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Desenhar letra "A"
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 120px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('A', 100, 100);
+      
+      // Atualizar link de download
+      document.getElementById('downloadBtn').href = canvas.toDataURL('image/png');
+    };
+  </script>
+</body>
+</html> 

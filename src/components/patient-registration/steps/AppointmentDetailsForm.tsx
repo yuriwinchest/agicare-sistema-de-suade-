@@ -1,9 +1,7 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { specialties, professionals, healthPlans, attendanceTypes } from "@/components/patient-reception/constants";
 
 interface AppointmentDetailsFormProps {
@@ -31,10 +29,10 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           <SelectTrigger>
             <SelectValue placeholder="Selecione o tipo de atendimento" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {attendanceTypes.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
+              <SelectItem key={type.id} value={type.id}>
+                {type.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -52,10 +50,10 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           <SelectTrigger>
             <SelectValue placeholder="Selecione a especialidade" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {specialties.map((specialty) => (
-              <SelectItem key={specialty.value} value={specialty.value}>
-                {specialty.label}
+              <SelectItem key={specialty.id} value={specialty.id}>
+                {specialty.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -73,10 +71,10 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           <SelectTrigger>
             <SelectValue placeholder="Selecione o profissional" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {professionals.map((professional) => (
-              <SelectItem key={professional.value} value={professional.value}>
-                {professional.label}
+              <SelectItem key={professional.id} value={professional.id}>
+                {professional.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -94,10 +92,10 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           <SelectTrigger>
             <SelectValue placeholder="Selecione o convênio" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {healthPlans.map((plan) => (
-              <SelectItem key={plan.value} value={plan.value}>
-                {plan.label}
+              <SelectItem key={plan.id} value={plan.id}>
+                {plan.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -120,17 +118,6 @@ const AppointmentDetailsForm: React.FC<AppointmentDetailsFormProps> = ({ data, o
           type="time"
           value={data.appointment_time || ""}
           onChange={(e) => handleChange("appointment_time", e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="observations">Observações</Label>
-        <Textarea
-          id="observations"
-          value={data.observations || ""}
-          onChange={(e) => handleChange("observations", e.target.value)}
-          placeholder="Informações adicionais sobre o atendimento"
-          rows={4}
         />
       </div>
     </div>

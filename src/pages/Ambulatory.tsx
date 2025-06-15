@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -76,7 +75,7 @@ const Ambulatory = () => {
     <Layout>
       <div className="page-container">
         <div className="mb-8 section-fade">
-          <h1 className="text-2xl font-semibold tracking-tight">Atendimento Ambulatorial</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">ATENDIMENTOS ELETIVO</h1>
           <p className="text-muted-foreground">Gerencie pacientes em espera e em atendimento</p>
         </div>
         
