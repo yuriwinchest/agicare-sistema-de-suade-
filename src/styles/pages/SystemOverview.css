@@ -1,0 +1,188 @@
+/*
+ * SystemOverview.css
+ * Estilos específicos para a página de visão geral do sistema
+ */
+
+/* Cabeçalho da página */
+.overview-header {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6;
+}
+
+.overview-title {
+  @apply text-2xl font-bold;
+}
+
+.overview-actions {
+  @apply flex flex-wrap gap-2;
+}
+
+/* Contêiner principal */
+.overview-container {
+  @apply grid gap-6;
+}
+
+/* Cartões de estatísticas */
+.stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6;
+}
+
+.stat-card {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-100
+  dark:bg-primary dark:border-gray-800 transition-all hover:shadow-md;
+}
+
+.stat-header {
+  @apply flex justify-between items-center mb-3;
+}
+
+.stat-title {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.stat-icon {
+  @apply text-secondary;
+}
+
+.stat-value {
+  @apply text-2xl font-bold;
+}
+
+.stat-meta {
+  @apply text-xs flex items-center gap-1;
+}
+
+.stat-trend-up {
+  @apply text-green-500 flex items-center;
+}
+
+.stat-trend-down {
+  @apply text-red-500 flex items-center;
+}
+
+/* Gráficos e visualizações */
+.chart-section {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.chart-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.chart-title {
+  @apply font-medium text-lg;
+}
+
+.chart-container {
+  @apply h-80 w-full;
+}
+
+/* Layout de duas colunas */
+.two-column-layout {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-6;
+}
+
+.main-column {
+  @apply lg:col-span-2;
+}
+
+.side-column {
+  @apply lg:col-span-1;
+}
+
+/* Seções do sistema */
+.system-section {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.system-section-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.system-section-title {
+  @apply font-medium text-lg;
+}
+
+/* Tabela de atividades */
+.activities-table {
+  @apply w-full border-collapse;
+}
+
+.activities-table th {
+  @apply bg-gray-50 dark:bg-gray-800/50 text-left p-3 text-sm font-medium;
+}
+
+.activities-table td {
+  @apply border-t border-gray-100 dark:border-gray-800 p-3 text-sm;
+}
+
+.activities-table tr {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-800/20;
+}
+
+/* Lista de alertas e notificações */
+.alerts-list {
+  @apply space-y-3;
+}
+
+.alert-item {
+  @apply p-3 border-l-4 rounded-r-lg;
+}
+
+.alert-high {
+  @apply border-l-red-500 bg-red-50 dark:bg-red-900/20;
+}
+
+.alert-medium {
+  @apply border-l-amber-500 bg-amber-50 dark:bg-amber-900/20;
+}
+
+.alert-low {
+  @apply border-l-blue-500 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.alert-header {
+  @apply flex justify-between items-center mb-1;
+}
+
+.alert-title {
+  @apply font-medium;
+}
+
+.alert-time {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.alert-message {
+  @apply text-sm;
+}
+
+/* Cartões de atalho */
+.shortcut-grid {
+  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3;
+}
+
+.shortcut-card {
+  @apply bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg flex flex-col items-center text-center
+  hover:bg-secondary/10 hover:text-secondary transition-all cursor-pointer;
+}
+
+.shortcut-icon {
+  @apply text-2xl mb-2;
+}
+
+.shortcut-label {
+  @apply text-sm font-medium;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .stats-grid {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+
+  .shortcut-grid {
+    @apply grid-cols-2;
+  }
+}

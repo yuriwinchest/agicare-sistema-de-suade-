@@ -1,0 +1,288 @@
+/**
+ * Estilos específicos da página SystemSummary
+ * Design azul elegante premium consistente
+ */
+
+/* ===================================================================
+ * SALUDOCARE - Resumo do Sistema Premium
+ * Design azul elegante consistente
+ * =================================================================== */
+
+/* Container principal */
+.page-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.03) 50%, rgba(147, 197, 253, 0.02) 100%);
+  position: relative;
+}
+
+/* Efeitos de fundo */
+.page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Títulos da página */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 30%, #60a5fa 60%, #93c5fd 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.text-muted-foreground {
+  color: #1e3a8a;
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Cards do sistema */
+.card, .summary-section, .metrics-panel, .report-card, .department-card {
+  position: relative;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8)) !important;
+  border: 2px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.card:hover, .summary-section:hover, .metrics-panel:hover, .report-card:hover, .department-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 60px rgba(30, 58, 138, 0.15),
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    0 12px 24px rgba(96, 165, 250, 0.08) !important;
+}
+
+/* Cabeçalho da página */
+.summary-header {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6;
+}
+
+.summary-title {
+  @apply text-2xl font-bold;
+}
+
+.summary-actions {
+  @apply flex flex-wrap gap-2;
+}
+
+/* Contêiner principal */
+.summary-container {
+  @apply grid gap-6;
+}
+
+/* Painel de métricas principais */
+.metrics-panel {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.metrics-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.metrics-title {
+  @apply font-medium text-lg;
+}
+
+.metrics-grid {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+.metric-item {
+  @apply flex flex-col p-4;
+}
+
+.metric-value {
+  @apply text-3xl font-bold;
+}
+
+.metric-label {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.metric-trend {
+  @apply text-xs flex items-center gap-1 mt-1;
+}
+
+.trend-positive {
+  @apply text-green-500;
+}
+
+.trend-negative {
+  @apply text-red-500;
+}
+
+/* Seções de resumo */
+.summary-section {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.summary-section-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.summary-section-title {
+  @apply font-medium text-lg;
+}
+
+/* Layout de grade para relatórios */
+.reports-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+/* Cartões de relatório */
+.report-card {
+  @apply bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.report-card-header {
+  @apply flex justify-between items-start mb-3;
+}
+
+.report-card-title {
+  @apply font-medium;
+}
+
+.report-card-meta {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.report-card-content {
+  @apply mt-3;
+}
+
+/* Gráficos */
+.chart-wrapper {
+  @apply h-80 w-full;
+}
+
+/* Tabelas de resumo */
+.summary-table {
+  @apply w-full border-collapse;
+}
+
+.summary-table th {
+  @apply bg-gray-50 dark:bg-gray-800/50 text-left p-3 text-sm font-medium;
+}
+
+.summary-table td {
+  @apply border-t border-gray-100 dark:border-gray-800 p-3 text-sm;
+}
+
+.summary-table tr {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-800/20;
+}
+
+/* Indicadores e badges */
+.indicator {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.indicator-success {
+  @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+}
+
+.indicator-warning {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+}
+
+.indicator-danger {
+  @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+}
+
+.indicator-info {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+}
+
+/* Filtros de período */
+.period-filters {
+  @apply flex gap-2 mb-4;
+}
+
+.period-filter-button {
+  @apply px-3 py-1 text-sm rounded-md border border-gray-200 dark:border-gray-700
+  hover:bg-secondary/20 hover:border-secondary transition-colors;
+}
+
+.period-filter-active {
+  @apply bg-secondary/20 border-secondary text-secondary-dark dark:text-secondary-light;
+}
+
+/* Detalhes departamentais */
+.department-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+}
+
+.department-card {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-100
+  dark:bg-primary dark:border-gray-800;
+}
+
+.department-header {
+  @apply flex items-center gap-2 mb-3;
+}
+
+.department-icon {
+  @apply text-secondary;
+}
+
+.department-name {
+  @apply font-medium;
+}
+
+.department-stats {
+  @apply space-y-2;
+}
+
+.department-stat-item {
+  @apply flex justify-between text-sm;
+}
+
+.department-stat-label {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.department-stat-value {
+  @apply font-medium;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .metrics-grid {
+    @apply grid-cols-2;
+  }
+
+  .reports-grid {
+    @apply grid-cols-1;
+  }
+
+  .department-grid {
+    @apply grid-cols-1;
+  }
+}

@@ -1,21 +1,14 @@
 import React from 'react';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FormFieldWrapper } from '@/components/ui/FormFieldWrapper';
 import { UseFormReturn } from 'react-hook-form';
 import { CollaboratorFormValues } from '@/hooks/useCollaboratorForm';
+import { ROLE_OPTIONS } from '@/constants/formOptions';
+
+/**
+ * PersonalInfoFields
+ * Responsabilidade: Campos de informações pessoais para colaboradores
+ * Princípios: DRY - Usa componentes e constantes reutilizáveis
+ */
 
 interface PersonalInfoFieldsProps {
   form: UseFormReturn<CollaboratorFormValues>;
@@ -25,51 +18,24 @@ interface PersonalInfoFieldsProps {
 export function PersonalInfoFields({ form, disabled = false }: PersonalInfoFieldsProps) {
   return (
     <div className="w-full md:w-2/3 space-y-4">
-      <FormField
-        control={form.control}
+      <FormFieldWrapper
+        form={form}
         name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome Completo</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder="Nome do colaborador" 
-                {...field} 
-                disabled={disabled}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        label="Nome Completo"
+        placeholder="Nome do colaborador"
+        disabled={disabled}
+        required
       />
 
-      <FormField
-        control={form.control}
+      <FormFieldWrapper
+        form={form}
         name="role"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Função</FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              defaultValue={field.value}
-              disabled={disabled}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a função" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="doctor">Médico</SelectItem>
-                <SelectItem value="nurse">Enfermeiro</SelectItem>
-                <SelectItem value="receptionist">Atendente</SelectItem>
-                <SelectItem value="admin">Administrador</SelectItem>
-                <SelectItem value="other">Outro</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
+        label="Função"
+        type="select"
+        placeholder="Selecione a função"
+        options={ROLE_OPTIONS}
+        disabled={disabled}
+        required
       />
     </div>
   );

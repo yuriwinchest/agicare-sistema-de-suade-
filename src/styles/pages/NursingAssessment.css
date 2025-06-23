@@ -1,0 +1,188 @@
+/*
+ * NursingAssessment.css
+ * Estilos específicos para a página de avaliação de enfermagem
+ */
+
+/* Cabeçalho da avaliação */
+.assessment-header {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.assessment-patient-info {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-4;
+}
+
+.assessment-patient-main {
+  @apply flex items-center gap-4;
+}
+
+.assessment-patient-avatar {
+  @apply w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center;
+}
+
+.assessment-patient-name {
+  @apply text-xl font-bold;
+}
+
+.assessment-patient-id {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.assessment-meta {
+  @apply text-right;
+}
+
+.assessment-status {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.assessment-status-inprogress {
+  @apply bg-secondary/20 text-secondary-dark dark:bg-secondary/20 dark:text-secondary-light;
+}
+
+.assessment-status-completed {
+  @apply bg-green-500/20 text-green-700 dark:bg-green-500/20 dark:text-green-400;
+}
+
+.assessment-date {
+  @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+}
+
+/* Contêiner principal */
+.assessment-container {
+  @apply grid gap-6;
+}
+
+/* Abas da avaliação */
+.assessment-tabs {
+  @apply mb-6;
+}
+
+/* Estilos de seção */
+.assessment-section {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.assessment-section-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.assessment-section-title {
+  @apply font-medium text-lg;
+}
+
+/* Formulários de avaliação */
+.assessment-form-group {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6;
+}
+
+.assessment-form-row {
+  @apply flex flex-wrap gap-4 mb-4;
+}
+
+.assessment-form-field {
+  @apply flex-1 min-w-[200px];
+}
+
+.assessment-form-label {
+  @apply block text-sm font-medium mb-1;
+}
+
+/* Seção de sinais vitais */
+.vital-signs-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+.vital-sign-card {
+  @apply p-4 border border-gray-200 dark:border-gray-700 rounded-lg;
+}
+
+.vital-sign-header {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.vital-sign-icon {
+  @apply text-secondary;
+}
+
+.vital-sign-name {
+  @apply font-medium;
+}
+
+.vital-sign-value {
+  @apply text-2xl font-bold;
+}
+
+.vital-sign-meta {
+  @apply text-xs text-gray-500 dark:text-gray-400 mt-1;
+}
+
+/* Exame físico */
+.physical-exam-categories {
+  @apply space-y-6;
+}
+
+.physical-exam-category {
+  @apply mb-4;
+}
+
+.physical-exam-category-title {
+  @apply font-medium mb-3;
+}
+
+.physical-exam-items {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* Balanço hídrico */
+.hydric-balance-table {
+  @apply w-full border-collapse mb-4;
+}
+
+.hydric-balance-table th {
+  @apply bg-gray-50 dark:bg-gray-800/50 text-left p-3 text-sm font-medium;
+}
+
+.hydric-balance-table td {
+  @apply border-t border-gray-100 dark:border-gray-800 p-3 text-sm;
+}
+
+.hydric-balance-total {
+  @apply flex justify-between items-center bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg mt-4;
+}
+
+.hydric-balance-total-label {
+  @apply font-medium;
+}
+
+.hydric-balance-total-value {
+  @apply font-bold text-lg;
+}
+
+/* Evolução de enfermagem */
+.evolution-textarea {
+  @apply w-full h-40 p-3 border border-gray-200 dark:border-gray-700
+  rounded-lg bg-white dark:bg-gray-800 resize-y;
+}
+
+/* Ações finais */
+.assessment-actions {
+  @apply flex justify-end gap-3 mt-6;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .assessment-form-group {
+    @apply grid-cols-1;
+  }
+
+  .vital-signs-grid {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+
+  .physical-exam-items {
+    @apply grid-cols-1;
+  }
+}

@@ -7,6 +7,7 @@ export default {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "./index.html",
   ],
   prefix: "",
   theme: {
@@ -25,27 +26,41 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#092837",
-          light: "#11465E",
-          dark: "#051821",
+          DEFAULT: "#0B8A8F",
+          light: "#14B8A6",
+          dark: "#075E5F",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#3D717E",
-          light: "#4B8A99",
-          dark: "#2F5660",
+          DEFAULT: "#0891B2",
+          light: "#22D3EE",
+          dark: "#0E7490",
           foreground: "hsl(var(--secondary-foreground))",
         },
         accent: {
-          DEFAULT: "#D68630",
-          light: "#E19545",
-          dark: "#964515",
+          DEFAULT: "#3B82F6",
+          light: "#60A5FA",
+          dark: "#2563EB",
           foreground: "hsl(var(--accent-foreground))",
         },
         muted: {
           DEFAULT: "#DAD5DC",
           darker: "#B8B4BA",
           foreground: "hsl(var(--muted-foreground))",
+        },
+        // Sidebar colors
+        sidebar: {
+          DEFAULT: "#0B8A8F",
+          foreground: "#FFFFFF",
+          muted: "rgba(255, 255, 255, 0.7)",
+          border: "rgba(255, 255, 255, 0.1)",
+          ring: "rgba(255, 255, 255, 0.3)",
+          item: {
+            active: "#14B8A6",
+            "active-foreground": "#FFFFFF",
+            hover: "rgba(255, 255, 255, 0.1)",
+            "hover-foreground": "#FFFFFF",
+          }
         },
         // Theme colors for clinical systems
         teal: {
@@ -69,9 +84,9 @@ export default {
           700: '#047857',
         },
         clinic: {
-          DEFAULT: 'hsl(174, 100%, 39%)',
-          light: 'hsl(174, 100%, 49%)',
-          dark: 'hsl(174, 100%, 29%)',
+          DEFAULT: '#14B8A6',
+          light: '#2DD4BF',
+          dark: '#0D9488',
         },
         // Keep these colors for backward compatibility
         indigo: {

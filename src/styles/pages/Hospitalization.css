@@ -1,0 +1,338 @@
+/*
+ * Hospitalization.css
+ * Estilos específicos para a página de hospitalização
+ */
+
+/* ===================================================================
+ * SALUDOCARE - Internação Premium
+ * Design azul elegante consistente
+ * =================================================================== */
+
+/* Container principal */
+.page-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.03) 50%, rgba(147, 197, 253, 0.02) 100%);
+  position: relative;
+}
+
+/* Efeitos de fundo */
+.page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Títulos da página */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 30%, #60a5fa 60%, #93c5fd 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.text-muted-foreground {
+  color: #1e3a8a;
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Cards do sistema */
+.card {
+  position: relative;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8)) !important;
+  border: 2px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 60px rgba(30, 58, 138, 0.15),
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    0 12px 24px rgba(96, 165, 250, 0.08) !important;
+}
+
+/* Botões personalizados */
+button {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-primary, [class*="bg-primary"] {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover, [class*="bg-primary"]:hover {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Inputs personalizados */
+input, textarea, select {
+  border-radius: 12px !important;
+  border: 2px solid rgba(59, 130, 246, 0.2) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(15px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Inter', sans-serif;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow:
+    0 8px 32px rgba(59, 130, 246, 0.15),
+    0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .page-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Cabeçalho da página */
+.hospitalization-header {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6;
+}
+
+.hospitalization-title {
+  @apply text-2xl font-bold;
+}
+
+.hospitalization-actions {
+  @apply flex flex-wrap gap-2;
+}
+
+/* Contêiner principal */
+.hospitalization-container {
+  @apply grid gap-6;
+}
+
+/* Visão geral de leitos */
+.beds-overview {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.beds-overview-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.beds-overview-title {
+  @apply font-medium text-lg;
+}
+
+.beds-status-container {
+  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4;
+}
+
+.bed-status-card {
+  @apply p-4 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.bed-status-header {
+  @apply flex justify-between mb-3;
+}
+
+.bed-status-number {
+  @apply font-bold text-lg;
+}
+
+.bed-status-indicator {
+  @apply w-3 h-3 rounded-full;
+}
+
+.bed-status-indicator-occupied {
+  @apply bg-red-500;
+}
+
+.bed-status-indicator-available {
+  @apply bg-green-500;
+}
+
+.bed-status-indicator-maintenance {
+  @apply bg-amber-500;
+}
+
+.bed-status-indicator-reserved {
+  @apply bg-blue-500;
+}
+
+.bed-status-patient {
+  @apply font-medium mb-1;
+}
+
+.bed-status-details {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+/* Lista de pacientes hospitalizados */
+.hospitalized-patients {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.hospitalized-patients-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.hospitalized-patients-title {
+  @apply font-medium text-lg;
+}
+
+.hospitalized-patients-table {
+  @apply w-full border-collapse;
+}
+
+.hospitalized-patients-table th {
+  @apply bg-gray-50 dark:bg-gray-800/50 text-left p-3 text-sm font-medium;
+}
+
+.hospitalized-patients-table td {
+  @apply border-t border-gray-100 dark:border-gray-800 p-3 text-sm;
+}
+
+.hospitalized-patients-table tr {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-800/20;
+}
+
+/* Estatísticas de ocupação */
+.occupancy-stats {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6;
+}
+
+.occupancy-stat-card {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-100
+  dark:bg-primary dark:border-gray-800;
+}
+
+.occupancy-stat-value {
+  @apply text-2xl font-bold;
+}
+
+.occupancy-stat-label {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+/* Alertas e notificações */
+.hospitalization-alerts {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.hospitalization-alerts-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.hospitalization-alerts-title {
+  @apply font-medium text-lg;
+}
+
+.hospitalization-alert-item {
+  @apply p-3 mb-3 border-l-4 border-l-red-500 bg-red-50 dark:bg-red-900/20 rounded-r-lg;
+}
+
+.hospitalization-alert-priority-high {
+  @apply border-l-red-500 bg-red-50 dark:bg-red-900/20;
+}
+
+.hospitalization-alert-priority-medium {
+  @apply border-l-amber-500 bg-amber-50 dark:bg-amber-900/20;
+}
+
+.hospitalization-alert-priority-low {
+  @apply border-l-blue-500 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.hospitalization-alert-header {
+  @apply flex justify-between items-center mb-1;
+}
+
+.hospitalization-alert-title {
+  @apply font-medium;
+}
+
+.hospitalization-alert-time {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.hospitalization-alert-message {
+  @apply text-sm;
+}
+
+/* Filtros e pesquisa */
+.hospitalization-filters {
+  @apply flex flex-wrap gap-3 mb-6;
+}
+
+.hospitalization-search {
+  @apply flex-1 min-w-[250px];
+}
+
+.hospitalization-filter {
+  @apply min-w-[150px];
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .beds-status-container {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+
+  .hospitalization-filters {
+    @apply flex-col;
+  }
+
+  .hospitalization-search, .hospitalization-filter {
+    @apply w-full;
+  }
+
+  .occupancy-stats {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+}

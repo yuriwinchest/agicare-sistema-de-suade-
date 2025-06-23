@@ -1,52 +1,67 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 
-import { useEffect } from 'react';
 import { ensureStorageBuckets } from './services/storageService';
 
-// Pages
-import Login from "./pages/Login";
-import AdminDashboard from "./pages/AdminDashboard";
-import Dashboard from "./pages/Dashboard";
-import MainMenu from "./pages/MainMenu";
-import Ambulatory from "./pages/Ambulatory";
-import Appointment from "./pages/Appointment";
-import Reception from "./pages/Reception";
-import PatientReception from "./pages/PatientReception";
-import PatientFlow from "./pages/PatientFlow";
-import Hospitalization from "./pages/Hospitalization";
-import PatientRecord from "./pages/PatientRecord";
-import PatientConsultation from "./pages/PatientConsultation";
-import PatientRegistration from "./pages/PatientRegistration";
-import ElectronicMedicalRecord from "./pages/ElectronicMedicalRecord";
-import Nursing from "./pages/Nursing";
-import NursingAssessment from "./pages/NursingAssessment";
-import NotFound from "./pages/NotFound";
-import Index from "./pages/Index";
-import SystemSummary from "./pages/SystemSummary";
-import SystemOverview from "./pages/SystemOverview";
-import ScheduleConsultation from "./pages/ScheduleConsultation";
-import ScheduleAccountPage from "./pages/ScheduleAccountPage";
-import ScheduleDetailPage from "./pages/ScheduleDetailPage";
-import PatientSimplifiedPage from "./pages/PatientSimplifiedPage";
-
-// Auth Provider
-import { AuthProvider, RequireAuth } from "@/components/auth/AuthContext";
-import DestinationModal from "./components/auth/DestinationModal";
+// Configuração de Providers
+import { AuthProvider } from "@/components/auth/AuthContext";
 import { SidebarProvider } from "./components/layout/SidebarContext";
 
+// Componente de Roteamento
+import AppRoutes from './components/routing/AppRoutes';
+
+// Componente de Loading
+import LoadingScreen from './components/ui/LoadingScreen';
+
+// Componente de Notificação Offline
+import OfflineNotification from './components/ui/OfflineNotification';
+
+/**
+ * Componente principal da aplicação
+ * Responsabilidade: Configurar providers globais e gerenciar estado da aplicação
+ * Organiza a estrutura de contextos e roteamento
+ */
+
+// Configuração do cliente de queries
 const queryClient = new QueryClient();
 
 function App() {
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * Efeito para inicialização da aplicação
+   * Responsabilidade: Configurar modo offline e inicializar serviços
+   */
   useEffect(() => {
-    // Ensure storage buckets exist when the app starts
-    ensureStorageBuckets().catch(console.error);
+    // Verificar se o modo offline está ativado
+    const offlineMode = import.meta.env.VITE_OFFLINE_MODE === 'true';
+    setIsOfflineMode(offlineMode);
+
+    if (!offlineMode) {
+      // Ensure storage buckets exist when the app starts
+      ensureStorageBuckets().catch(console.error);
+    } else {
+      console.log('Aplicação rodando em modo offline. Dados simulados serão usados.');
+    }
+
+    // Simular carregamento inicial
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
+
+  // Renderizar tela de loading durante inicialização
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -57,44 +72,12 @@ function App() {
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
-                
-                {/* DestinationModal must be inside Routes to ensure it has access to AuthProvider context */}
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  
-                  <Route element={<RequireAuth />}>
-                    {/* DestinationModal placed here so it only appears for authenticated routes */}
-                    <Route path="/" element={
-                      <>
-                        <DestinationModal />
-                        <Index />
-                      </>
-                    } />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/menu" element={<MainMenu />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/ambulatory" element={<Ambulatory />} />
-                    <Route path="/appointment" element={<Appointment />} />
-                    <Route path="/reception" element={<Reception />} />
-                    <Route path="/patient-reception/:id" element={<PatientReception />} />
-                    <Route path="/patient-flow/:id" element={<PatientFlow />} />
-                    <Route path="/hospitalization" element={<Hospitalization />} />
-                    <Route path="/patient/:id" element={<PatientRecord />} />
-                    <Route path="/patient-consultation" element={<PatientConsultation />} />
-                    <Route path="/patient-registration/:id?" element={<PatientRegistration />} />
-                    <Route path="/electronic-medical-record" element={<ElectronicMedicalRecord />} />
-                    <Route path="/nursing" element={<Nursing />} />
-                    <Route path="/nursing/assessment/:id" element={<NursingAssessment />} />
-                    <Route path="/system-summary" element={<SystemSummary />} />
-                    <Route path="/system-overview" element={<SystemOverview />} />
-                    <Route path="/schedule-consultation" element={<ScheduleConsultation />} />
-                    <Route path="/schedule-account" element={<ScheduleAccountPage />} />
-                    <Route path="/schedule-detail/:id?" element={<ScheduleDetailPage />} />
-                    <Route path="/patient-simplified/:id" element={<PatientSimplifiedPage />} />
-                  </Route>
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+
+                {/* Notificação de modo offline */}
+                {isOfflineMode && <OfflineNotification />}
+
+                {/* Sistema de roteamento da aplicação */}
+                <AppRoutes />
               </TooltipProvider>
             </SidebarProvider>
           </AuthProvider>

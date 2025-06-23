@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { 
-  Search, 
-  Calendar, 
-  Clock, 
-  FileText, 
+import {
+  Search,
+  Calendar,
+  Clock,
+  FileText,
   Activity,
   Bell,
   Pill,
@@ -54,7 +54,7 @@ const ElectronicMedicalRecord = () => {
   const [doctorFilter, setDoctorFilter] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  
+
   useEffect(() => {
     const loadPatients = async () => {
       try {
@@ -65,10 +65,10 @@ const ElectronicMedicalRecord = () => {
         setPatients([]);
       }
     };
-    
+
     loadPatients();
   }, []);
-  
+
   const getPatientsByStatus = () => {
     if (activeTab === 'agendados') return mockPatientGroups.agendados;
     if (activeTab === 'aguardando') return mockPatientGroups.aguardando;
@@ -78,23 +78,23 @@ const ElectronicMedicalRecord = () => {
 
   const filteredPatients = getPatientsByStatus().filter((patient) => {
     // Filtro de pesquisa
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.id?.includes(searchTerm) ||
       patient.specialty?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Filtro de médico
-    const matchesDoctor = !doctorFilter || 
+    const matchesDoctor = !doctorFilter ||
       patient.doctor?.toLowerCase().includes(doctorFilter.toLowerCase());
-    
+
     // Filtro de especialidade
-    const matchesSpecialty = !specialtyFilter || 
+    const matchesSpecialty = !specialtyFilter ||
       patient.specialty === specialtyFilter;
-    
+
     // Filtro de status (utilizado principalmente na aba "Todos")
-    const matchesStatus = !statusFilter || 
+    const matchesStatus = !statusFilter ||
       patient.status === statusFilter;
-    
+
     return matchesSearch && matchesDoctor && matchesSpecialty && matchesStatus;
   });
 
@@ -109,260 +109,166 @@ const ElectronicMedicalRecord = () => {
     navigate(`/patient/${patient.id}`);
   };
 
-  const getStatusColor = (status: string) => {
-    if (!status) return "bg-gray-400";
-    
-    if (status === "Agendado") return "bg-amber-400";
-    if (status === "Na recepção") return "bg-green-500";
-    if (status === "Triagem") return "bg-blue-500";
-    if (status === "Alta") return "bg-teal-500";
-    if (status === "Encaminhado") return "bg-purple-500";
-    
-    return "bg-gray-400";
-  };
+  const getStatusBadgeClass = (status: string) => {
+    if (!status) return "emr-status-badge";
 
-  const getStatusBadge = (status: string) => {
-    if (!status) return null;
-    
-    let bgColor = "bg-gray-200 text-gray-800";
-    
-    if (status === "Agendado") bgColor = "bg-amber-100 text-amber-800";
-    if (status === "Na recepção") bgColor = "bg-green-100 text-green-800";
-    if (status === "Triagem") bgColor = "bg-blue-100 text-blue-800";
-    if (status === "Alta") bgColor = "bg-teal-100 text-teal-800";
-    if (status === "Encaminhado") bgColor = "bg-purple-100 text-purple-800";
-    
-    return (
-      <Badge className={`${bgColor} font-medium`}>
-        {status}
-      </Badge>
-    );
+    let statusClass = "emr-status-badge ";
+
+    if (status === "Agendado") statusClass += "emr-status-agendado";
+    else if (status === "Na recepção") statusClass += "emr-status-recepcao";
+    else if (status === "Triagem") statusClass += "emr-status-triagem";
+    else if (status === "Alta") statusClass += "emr-status-alta";
+    else if (status === "Encaminhado") statusClass += "emr-status-encaminhado";
+
+    return statusClass;
   };
 
   return (
     <Layout>
-      <div className="page-container">
+      <div className="emr-container">
         <div className="flex flex-col space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-800">Prontuário Eletrônico Atendimento Ambulatorial</h1>
+          <div className="emr-header">
+            <h1 className="emr-title">Prontuário Eletrônico Atendimento Ambulatorial</h1>
           </div>
 
-          <div className="flex flex-wrap gap-4 justify-between">
-            <div className="flex flex-col md:flex-row gap-4">
-              <Card className="w-full md:w-60">
-                <CardContent className="p-4">
-                  <label htmlFor="registro" className="text-sm text-gray-500 mb-1 block">Registro Atendimento</label>
-                  <Input 
-                    id="registro" 
-                    placeholder="Digite o registro"
-                    className="border-teal-500/20"
-                  />
-                </CardContent>
-              </Card>
-              
-              <Card className="w-full md:w-60">
-                <CardContent className="p-4">
-                  <label htmlFor="paciente" className="text-sm text-gray-500 mb-1 block">Paciente</label>
-                  <Input 
-                    id="paciente" 
-                    placeholder="Digite o nome do paciente"
-                    className="border-teal-500/20"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </CardContent>
-              </Card>
-              
-              <Card className="w-full md:w-60">
-                <CardContent className="p-4">
-                  <label htmlFor="data" className="text-sm text-gray-500 mb-1 block">Data de Atendimento</label>
-                  <div className="relative">
-                    <Input 
-                      id="data" 
-                      value={selectedDate}
-                      className="border-teal-500/20 pl-9"
-                    />
-                    <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-teal-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="w-full md:w-60">
-                <CardContent className="p-4">
-                  <label htmlFor="especialidade" className="text-sm text-gray-500 mb-1 block">Especialidade</label>
-                  <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-                    <SelectTrigger className="border-teal-500/20">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Todas</SelectItem>
-                      <SelectItem value="CARDIOLOGIA">Cardiologia</SelectItem>
-                      <SelectItem value="CLÍNICA GERAL">Clínica Geral</SelectItem>
-                      <SelectItem value="ORTOPEDIA">Ortopedia</SelectItem>
-                      <SelectItem value="PEDIATRIA">Pediatria</SelectItem>
-                      <SelectItem value="DERMATOLOGIA">Dermatologia</SelectItem>
-                      <SelectItem value="NEUROLOGIA">Neurologia</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Button className="h-10 px-4 py-2 bg-teal-500 text-white hover:bg-teal-600 self-end">
-              <Search className="h-4 w-4 mr-2" />
-              PESQUISAR
-            </Button>
-          </div>
-
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="grid grid-cols-4 p-0 border-b">
-              <div className={`bg-white px-6 py-3 text-center font-medium border-r transition-colors ${activeTab === "todos" ? "bg-blue-50 text-blue-600 border-b-2 border-b-blue-500" : ""}`}>
-                <button 
-                  className="flex items-center justify-center w-full" 
-                  onClick={() => setActiveTab("todos")}
-                >
-                  <FileText className="h-5 w-5 mr-2" />
-                  <span>TODOS</span>
-                </button>
-              </div>
-              
-              <div className={`bg-amber-500 text-white px-6 py-3 text-center font-medium border-r ${activeTab === "agendados" ? "bg-amber-600" : ""}`}>
-                <button 
-                  className="flex items-center justify-center w-full" 
-                  onClick={() => setActiveTab("agendados")}
-                >
-                  <Calendar className="h-5 w-5 mr-2" />
-                  <div className="flex items-center gap-2">
-                    <span>PACIENTES AGENDADOS</span>
-                    <Badge className="bg-white text-amber-600">{mockPatientGroups.agendados.length}</Badge>
-                  </div>
-                </button>
-              </div>
-              
-              <div className={`bg-green-600 text-white px-6 py-3 text-center font-medium border-r ${activeTab === "aguardando" ? "bg-green-700" : ""}`}>
-                <button 
-                  className="flex items-center justify-center w-full" 
-                  onClick={() => setActiveTab("aguardando")}
-                >
-                  <Clock className="h-5 w-5 mr-2" />
-                  <div className="flex items-center gap-2">
-                    <span>AGUARDANDO ATENDIMENTO</span>
-                    <Badge className="bg-white text-green-700">{mockPatientGroups.aguardando.length}</Badge>
-                  </div>
-                </button>
-              </div>
-              
-              <div className={`bg-blue-600 text-white px-6 py-3 text-center font-medium ${activeTab === "finalizados" ? "bg-blue-700" : ""}`}>
-                <button 
-                  className="flex items-center justify-center w-full" 
-                  onClick={() => setActiveTab("finalizados")}
-                >
-                  <CheckCircle2 className="h-5 w-5 mr-2" />
-                  <div className="flex items-center gap-2">
-                    <span>ATENDIMENTOS FINALIZADOS</span>
-                    <Badge className="bg-white text-blue-700">{mockPatientGroups.finalizados.length}</Badge>
-                  </div>
-                </button>
+          <div className="emr-filters">
+            <div className="emr-filter-card">
+              <div className="emr-filter-content">
+                <label htmlFor="registro" className="emr-filter-label">Registro Atendimento</label>
+                <Input
+                  id="registro"
+                  placeholder="Digite o registro"
+                  className="emr-input"
+                />
               </div>
             </div>
-            
-            <div className="p-2 bg-gray-50 border-b flex items-center justify-between">
-              <div className="flex items-center text-xs text-red-500">
-                <Bell className="h-4 w-4 mr-1" />
-                <span>Mensagens do Sistema: {filteredPatients.length} paciente(s) disponíveis para visualização.</span>
+
+            <div className="emr-filter-card">
+              <div className="emr-filter-content">
+                <label htmlFor="paciente" className="emr-filter-label">Paciente</label>
+                <Input
+                  id="paciente"
+                  placeholder="Digite o nome do paciente"
+                  className="emr-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-400" />
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-7 text-xs border-gray-300 w-40">
-                    <SelectValue placeholder="Filtrar por status" />
+            </div>
+
+            <div className="emr-filter-card">
+              <div className="emr-filter-content">
+                <label htmlFor="data" className="emr-filter-label">Data de Atendimento</label>
+                <div className="emr-input-icon">
+                  <Input
+                    id="data"
+                    value={selectedDate}
+                    className="emr-input"
+                  />
+                  <Calendar className="text-teal-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="emr-filter-card">
+              <div className="emr-filter-content">
+                <label htmlFor="especialidade" className="emr-filter-label">Especialidade</label>
+                <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+                  <SelectTrigger className="emr-input">
+                    <SelectValue placeholder="Todas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os status</SelectItem>
-                    <SelectItem value="Agendado">Agendado</SelectItem>
-                    <SelectItem value="Na recepção">Na recepção</SelectItem>
-                    <SelectItem value="Triagem">Triagem</SelectItem>
-                    <SelectItem value="Alta">Alta</SelectItem>
-                    <SelectItem value="Encaminhado">Encaminhado</SelectItem>
+                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="CARDIOLOGIA">Cardiologia</SelectItem>
+                    <SelectItem value="CLÍNICA GERAL">Clínica Geral</SelectItem>
+                    <SelectItem value="ORTOPEDIA">Ortopedia</SelectItem>
+                    <SelectItem value="PEDIATRIA">Pediatria</SelectItem>
+                    <SelectItem value="DERMATOLOGIA">Dermatologia</SelectItem>
+                    <SelectItem value="NEUROLOGIA">Neurologia</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
+          </div>
 
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-gray-100">
-                  <TableRow>
-                    <TableHead className="w-16 text-center">Seleção</TableHead>
-                    <TableHead className="w-16 text-center">Status</TableHead>
-                    <TableHead className="text-center">Guia de Prontuário</TableHead>
-                    <TableHead className="text-center">Registro / Ident.</TableHead>
-                    <TableHead className="text-center">Data / Hora</TableHead>
-                    <TableHead className="text-center">Senha Espera</TableHead>
-                    <TableHead className="text-center">Paciente</TableHead>
-                    <TableHead className="text-center">Médico Principal</TableHead>
-                    <TableHead className="text-center">Especialidade</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPatients.length > 0 ? (
-                    filteredPatients.map((patient) => (
-                      <PatientActionsDialog
-                        key={patient.id}
-                        patientId={patient.id}
-                        onCall={() => handlePatientCall(patient)}
-                        onAttend={() => handlePatientAttend(patient)}
-                      >
-                        <TableRow 
-                          className="cursor-pointer hover:bg-blue-50/50"
-                        >
-                          <TableCell className="text-center">
-                            <div className="flex justify-center">
-                              <div className="w-6 h-6 bg-blue-500 rounded-sm"></div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex justify-center">
-                              <div className={`w-5 h-5 ${getStatusColor(patient.status)} rounded-sm`}></div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center font-medium">{`${Math.floor(Math.random() * 9000) + 1000}`}</TableCell>
-                          <TableCell className="text-center">{patient.id}</TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex flex-col items-center">
-                              <span>{patient.date || "03/03/2023"}</span>
-                              <span className="text-xs text-gray-500">{patient.time || "14:30"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">{`S-${Math.floor(Math.random() * 900) + 100}`}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{patient.name}</span>
-                              <div className="mt-1">
-                                {getStatusBadge(patient.status)}
+          <div className="emr-tabs">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="emr-tabs-list">
+                <TabsTrigger value="todos" className="emr-tab">Todos</TabsTrigger>
+                <TabsTrigger value="agendados" className="emr-tab">Agendados</TabsTrigger>
+                <TabsTrigger value="aguardando" className="emr-tab">Em Espera</TabsTrigger>
+                <TabsTrigger value="finalizados" className="emr-tab">Finalizados</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={activeTab} className="mt-4">
+                <div className="emr-table-container">
+                  <Table className="emr-table">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Paciente</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Horário</TableHead>
+                        <TableHead>Especialidade</TableHead>
+                        <TableHead>Profissional</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPatients.length > 0 ? (
+                        filteredPatients.map((patient) => (
+                          <TableRow key={patient.id}>
+                            <TableCell>{patient.name}</TableCell>
+                            <TableCell>{patient.date}</TableCell>
+                            <TableCell>{patient.time}</TableCell>
+                            <TableCell>{patient.specialty}</TableCell>
+                            <TableCell>{patient.doctor}</TableCell>
+                            <TableCell>
+                              <span className={`emr-status-badge ${
+                                patient.status === "Agendado" ? "emr-status-agendado" :
+                                patient.status === "Na recepção" ? "emr-status-recepcao" :
+                                patient.status === "Triagem" ? "emr-status-triagem" :
+                                patient.status === "Alta" ? "emr-status-alta" :
+                                patient.status === "Encaminhado" ? "emr-status-encaminhado" : ""
+                              }`}>
+                                {patient.status}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="emr-action-button emr-action-secondary"
+                                  onClick={() => handlePatientCall(patient)}
+                                >
+                                  <Bell size={14} />
+                                  Chamar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="emr-action-button emr-action-primary"
+                                  onClick={() => handlePatientAttend(patient)}
+                                >
+                                  <FileText size={14} />
+                                  Atender
+                                </Button>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span>{patient.doctor || "MÉDICO PADRÃO"}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span>{patient.specialty || "CLÍNICA GERAL"}</span>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                            Nenhum paciente encontrado
                           </TableCell>
                         </TableRow>
-                      </PatientActionsDialog>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                        Nenhum registro encontrado.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>

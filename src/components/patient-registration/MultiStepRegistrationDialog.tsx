@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CircleCheck } from "lucide-react";
@@ -10,12 +10,41 @@ import ComplementaryDataForm from "./steps/ComplementaryDataForm";
 import AllergiesForm from "./steps/AllergiesForm";
 import AppointmentDetailsForm from "./steps/AppointmentDetailsForm";
 
+/**
+ * MultiStepRegistrationDialog
+ * Responsabilidade: Gerenciar o fluxo de cadastro de pacientes em etapas
+ * Princípios: KISS - Mantém a lógica simples e focada
+ */
+
 interface MultiStepRegistrationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (data: any) => void;
   isSubmitting: boolean;
 }
+
+// Mantém a configuração simples e direta
+const TOTAL_STEPS = 6;
+const INITIAL_FORM_DATA = {
+  id: crypto.randomUUID(),
+  name: "",
+  gender: "",
+  birth_date: "",
+  cpf: "",
+  phone: "",
+  email: "",
+  addressDetails: {
+    street: "",
+    number: "",
+    complement: "",
+    neighborhood: "",
+    city: "",
+    state: "",
+    zipCode: "",
+  },
+  documents: [],
+  allergies: []
+};
 
 const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = ({
   isOpen,
@@ -24,35 +53,15 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
   isSubmitting
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<any>({
-    id: crypto.randomUUID(),
-    name: "",
-    gender: "",
-    birth_date: "",
-    cpf: "",
-    phone: "",
-    email: "",
-    addressDetails: {
-      street: "",
-      number: "",
-      complement: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      zipCode: "",
-    },
-    documents: [],
-    allergies: []
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
-  const totalSteps = 6;
-
+  // Mantém a lógica simples e focada
   const updateFormData = (data: any) => {
     setFormData(prev => ({ ...prev, ...data }));
   };
 
   const handleNext = () => {
-    if (currentStep < totalSteps) {
+    if (currentStep < TOTAL_STEPS) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -63,83 +72,45 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
     }
   };
 
+  // Simplifica o processamento de dados - apenas o necessário
   const handleComplete = () => {
-    // Log form data for debugging
-    console.log("Form data before processing:", formData);
-
-    // Extract complementary data fields directly into the patient object
-    const {
-      birthDate,
-      addressDetails,
-      additionalData = {},
-      ...basicPatientData
-    } = formData;
-
-    // Format address as JSON string if it's an object
-    const formattedAddress = typeof addressDetails === 'object' 
-      ? JSON.stringify(addressDetails) 
-      : addressDetails;
-
-    // Prepare appointment details fields
-    const appointmentDetails = {
-      attendance_type: formData.attendance_type || null,
-      specialty: formData.specialty || null,
-      professional: formData.professional || null,
-      health_plan: formData.healthPlan || null,
-      health_card_number: formData.health_card_number || null,
-      appointment_time: formData.appointment_time || null,
+    const processedData = {
+      ...formData,
+      address: JSON.stringify(formData.addressDetails)
     };
 
-    // Prepare the final data to be saved - merge the additionalData fields directly into the patient record
-    const finalData = {
-      ...basicPatientData,
-      address: formattedAddress,
-      // Add additional data fields directly to patient object
-      nationality: additionalData.nationality,
-      place_of_birth: additionalData.place_of_birth,
-      place_of_birth_state: additionalData.place_of_birth_state,
-      education_level: additionalData.education_level,
-      occupation: additionalData.occupation,
-      health_card_number: additionalData.health_card_number,
-      // Add appointment details
-      ...appointmentDetails
-    };
-
-    console.log("Final data being sent:", finalData);
-    onComplete(finalData);
+    onComplete(processedData);
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <PersonalInfoForm data={formData} onUpdate={updateFormData} />;
-      case 2:
-        return <ContactForm data={formData} onUpdate={updateFormData} />;
-      case 3:
-        return <DocumentsForm data={formData} onUpdate={updateFormData} />;
-      case 4:
-        return <ComplementaryDataForm data={formData} onUpdate={updateFormData} />;
-      case 5:
-        return <AllergiesForm data={formData} onUpdate={updateFormData} />;
-      case 6:
-        return <AppointmentDetailsForm data={formData} onUpdate={updateFormData} />;
-      default:
-        return null;
-    }
+  // Simplifica a renderização de steps
+  const renderCurrentStep = () => {
+    const stepComponents = [
+      <PersonalInfoForm data={formData} onUpdate={updateFormData} />,
+      <ContactForm data={formData} onUpdate={updateFormData} />,
+      <DocumentsForm data={formData} onUpdate={updateFormData} />,
+      <ComplementaryDataForm data={formData} onUpdate={updateFormData} />,
+      <AllergiesForm data={formData} onUpdate={updateFormData} />,
+      <AppointmentDetailsForm data={formData} onUpdate={updateFormData} />
+    ];
+
+    return stepComponents[currentStep - 1] || null;
   };
 
-  const dialogTitle = currentStep === totalSteps ? "Finalizar Cadastro" : `Passo ${currentStep} de ${totalSteps}`;
+  const isLastStep = currentStep === TOTAL_STEPS;
+  const dialogTitle = isLastStep ? "Finalizar Cadastro" : `Passo ${currentStep} de ${TOTAL_STEPS}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">{dialogTitle}</DialogTitle>
+
         <div className="flex flex-col">
+          {/* Header simples */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold">{dialogTitle}</h2>
-            
+
             <div className="flex space-x-1">
-              {Array.from({ length: totalSteps }, (_, i) => (
+              {Array.from({ length: TOTAL_STEPS }, (_, i) => (
                 <StepIndicator
                   key={i}
                   active={i + 1 === currentStep}
@@ -149,8 +120,12 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
             </div>
           </div>
 
-          <div className="mb-6">{renderStep()}</div>
+          {/* Conteúdo do step atual */}
+          <div className="mb-6">
+            {renderCurrentStep()}
+          </div>
 
+          {/* Botões de navegação simples */}
           <div className="flex justify-between">
             <Button
               variant="outline"
@@ -160,13 +135,9 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
               {currentStep === 1 ? "Cancelar" : "Anterior"}
             </Button>
 
-            {currentStep < totalSteps ? (
-              <Button onClick={handleNext} disabled={isSubmitting}>
-                Próximo
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleComplete} 
+            {isLastStep ? (
+              <Button
+                onClick={handleComplete}
                 disabled={isSubmitting}
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -184,6 +155,10 @@ const MultiStepRegistrationDialog: React.FC<MultiStepRegistrationDialogProps> = 
                     Finalizar Cadastro
                   </span>
                 )}
+              </Button>
+            ) : (
+              <Button onClick={handleNext} disabled={isSubmitting}>
+                Próximo
               </Button>
             )}
           </div>

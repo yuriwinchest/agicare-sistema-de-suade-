@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,12 +10,35 @@ const DestinationModal = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirecionar admins diretamente para a página de admin sem mostrar o modal
+  // Redirecionar usuários com base em seu perfil
   useEffect(() => {
-    if (user?.role === 'doctor') {
-      setShowDestinationModal(true);
-    } else if (user?.email === "admin@example.com") {
-      navigate("/admin");
+    if (!user) return;
+
+    // Fechar o modal de destino, pois vamos redirecionar automaticamente
+    setShowDestinationModal(false);
+
+    // Redirecionar com base no perfil/role
+    switch (user.role) {
+      case 'admin':
+        // Administradores vão para o painel administrativo
+        navigate("/admin");
+        break;
+      case 'doctor':
+        // Médicos vão para a página de atendimentos
+        navigate("/ambulatory");
+        break;
+      case 'nurse':
+        // Enfermeiros vão para a página de enfermagem
+        navigate("/nursing");
+        break;
+      case 'receptionist':
+        // Recepcionistas vão para a página de recepção
+        navigate("/reception");
+        break;
+      default:
+        // Perfil não específico ou não reconhecido vai para o menu principal
+        navigate("/menu");
+        break;
     }
   }, [user, navigate, setShowDestinationModal]);
 
@@ -25,11 +47,8 @@ const DestinationModal = () => {
     navigate(path);
   };
 
-  // Se for um admin, não mostrar o modal
-  if (user?.email === "admin@example.com") {
-    return null;
-  }
-
+  // O modal não será mais exibido, pois estamos redirecionando automaticamente
+  // Mantemos o componente apenas como fallback
   return (
     <Dialog open={showDestinationModal} onOpenChange={setShowDestinationModal}>
       <DialogContent className="sm:max-w-md">

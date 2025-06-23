@@ -1,0 +1,460 @@
+/**
+ * Estilos específicos da página Dashboard
+ * Responsabilidade: Estilizar apenas os elementos da página de dashboard
+ * Organiza layout de cards, gráficos e métricas de forma consistente
+ */
+
+/* ===================================================================
+ * SALUDOCARE - Dashboard Médico Premium
+ * Design azul elegante consistente com a página de login
+ * =================================================================== */
+
+/* Container principal do dashboard */
+.dashboard-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.03) 50%, rgba(147, 197, 253, 0.02) 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Efeitos de fundo */
+.dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Cabeçalho do dashboard */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e293b !important;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+  text-shadow: none !important;
+}
+
+.dashboard-subtitle {
+  color: #334155 !important;
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 1 !important;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Grid de módulos principais */
+.dashboard-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Cards de módulo */
+.dashboard-module-card {
+  position: relative;
+  padding: 2rem;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-module-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 60px rgba(30, 58, 138, 0.15),
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    0 12px 24px rgba(96, 165, 250, 0.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+}
+
+/* Cabeçalho do card */
+.dashboard-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b !important;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.dashboard-card-icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.08));
+  color: #3b82f6;
+  transition: all 0.3s ease;
+}
+
+.dashboard-module-card:hover .dashboard-card-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.1));
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+/* Conteúdo do card */
+.dashboard-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-card-description {
+  font-size: 0.95rem;
+  color: #475569 !important;
+  font-weight: 500 !important;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Botão de acesso */
+.dashboard-access-button {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.08));
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.dashboard-access-button:hover {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  border-color: #3b82f6;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Grid de gráficos */
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Card de gráfico principal */
+.dashboard-main-chart {
+  padding: 2rem;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-chart-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.1);
+}
+
+.dashboard-chart-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b !important;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-chart-content {
+  padding: 0;
+}
+
+.dashboard-chart-container {
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Sidebar de informações */
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Card de distribuição */
+.dashboard-distribution-card {
+  padding: 2rem;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-distribution-chart {
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Card de tarefas pendentes */
+.dashboard-tasks-card {
+  padding: 2rem;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-task-item:hover {
+  background: rgba(59, 130, 246, 0.05);
+  transform: translateX(4px);
+}
+
+.dashboard-task-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.dashboard-task-info {
+  flex: 1;
+}
+
+.dashboard-task-patient {
+  font-weight: 600;
+  color: #1e3a8a;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-task-type {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+}
+
+.dashboard-task-time {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Ações rápidas */
+.dashboard-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.dashboard-quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-align: center;
+}
+
+.dashboard-quick-action:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 16px 48px rgba(30, 58, 138, 0.15),
+    0 8px 24px rgba(59, 130, 246, 0.1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+}
+
+.dashboard-quick-action-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.75rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.08));
+  color: #3b82f6;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.dashboard-quick-action:hover .dashboard-quick-action-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.1));
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+.dashboard-quick-action-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .dashboard-title {
+    font-size: 2rem;
+  }
+
+  .dashboard-modules-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .dashboard-quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dashboard-chart-container {
+    height: 240px;
+  }
+
+  .dashboard-distribution-chart {
+    height: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.8rem;
+  }
+
+  .dashboard-quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-module-card,
+  .dashboard-main-chart,
+  .dashboard-distribution-card,
+  .dashboard-tasks-card,
+  .dashboard-quick-action {
+    padding: 1.5rem;
+  }
+}
+
+/* Tema escuro */
+.dark .dashboard-container {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.05) 50%, rgba(147, 197, 253, 0.03) 100%);
+}
+
+.dark .dashboard-module-card,
+.dark .dashboard-main-chart,
+.dark .dashboard-distribution-card,
+.dark .dashboard-tasks-card,
+.dark .dashboard-quick-action {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(51, 65, 85, 0.8));
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.dark .dashboard-title,
+.dark .dashboard-card-title,
+.dark .dashboard-chart-title,
+.dark .dashboard-task-patient,
+.dark .dashboard-quick-action-name {
+  color: #e2e8f0;
+}
+
+.dark .dashboard-subtitle,
+.dark .dashboard-card-description,
+.dark .dashboard-task-type {
+  color: #94a3b8;
+}
+
+.dark .dashboard-task-time {
+  color: #64748b;
+}
+
+.dark .dashboard-access-button {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.15));
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+}
+
+.dark .dashboard-access-button:hover {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+}

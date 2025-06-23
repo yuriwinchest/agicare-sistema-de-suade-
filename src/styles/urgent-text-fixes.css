@@ -1,0 +1,252 @@
+/**
+ * CORREÇÕES URGENTES DE CONTRASTE DE TEXTO - SALUDOCARE
+ * Aplicação imediata de correções de legibilidade
+ * Prioridade máxima para garantir que todos os textos sejam legíveis
+ */
+
+/* ===================================================================
+ * CORREÇÕES GLOBAIS URGENTES - MÁXIMA PRIORIDADE
+ * =================================================================== */
+
+/* TODOS OS TÍTULOS - Cor escura sólida */
+h1, h2, h3, h4, h5, h6,
+.page-title, .dashboard-title, .section-title, .card-title,
+.dashboard-card-title, .form-title, .modal-title, .dialog-title {
+  color: #0f172a !important;
+  background: none !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+/* TODOS OS SUBTÍTULOS E TEXTOS SECUNDÁRIOS */
+.page-subtitle, .dashboard-subtitle, .card-subtitle,
+.text-muted-foreground, .description-text, .form-description {
+  color: #1e293b !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+}
+
+/* TODOS OS PARÁGRAFOS E TEXTOS DE CONTEÚDO */
+p, span:not([class*="bg-"]):not([class*="gradient"]),
+.content-text, .card-content, .form-text, .card-description,
+.dashboard-card-description, div[class*="text-"] {
+  color: #334155 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+/* TODOS OS LABELS E TEXTOS DE FORMULÁRIO */
+label, .form-label, .field-label, .input-label, .select-label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+/* TODOS OS INPUTS E CAMPOS */
+input, textarea, select, .input-field, .form-control {
+  color: #0f172a !important;
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  font-weight: 500 !important;
+}
+
+input::placeholder, textarea::placeholder, .placeholder-text {
+  color: #64748b !important;
+  opacity: 0.8 !important;
+  font-weight: 400 !important;
+}
+
+/* ===================================================================
+ * CORREÇÕES ESPECÍFICAS PARA COMPONENTES
+ * =================================================================== */
+
+/* BOTÕES - Contraste adequado */
+.btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-secondary, .dashboard-access-button:not(:hover),
+button[class*="bg-gray"], button[class*="bg-white"] {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* TABELAS - Texto escuro */
+th, .table-header {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+td, .table-cell {
+  color: #1e293b !important;
+  font-weight: 500 !important;
+}
+
+/* BADGES E STATUS - Cores contrastantes */
+.badge, [class*="status-"], .tag {
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+
+.status-waiting {
+  background-color: rgba(251, 191, 36, 0.25) !important;
+  color: #78350f !important;
+}
+
+.status-in-progress {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  color: #1e40af !important;
+}
+
+.status-completed {
+  background-color: rgba(34, 197, 94, 0.25) !important;
+  color: #14532d !important;
+}
+
+.status-critical {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+  color: #7f1d1d !important;
+}
+
+/* TABS - Contraste adequado */
+[role="tab"]:not([data-state="active"]) {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+}
+
+[role="tab"][data-state="active"] {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* LINKS E NAVEGAÇÃO */
+a:not(.nav-link):not(.sidebar-logo) {
+  color: #1e40af !important;
+  font-weight: 600 !important;
+}
+
+a:not(.nav-link):not(.sidebar-logo):hover {
+  color: #1e3a8a !important;
+  text-decoration: underline !important;
+}
+
+/* ===================================================================
+ * CORREÇÕES PARA CARDS E CONTAINERS
+ * =================================================================== */
+
+/* Fundo dos cards mais opaco para melhor contraste */
+.card, .system-card, .dashboard-module-card,
+.ambulatory-section, .reception-section, .nursing-section,
+.hospitalization-section, .emr-section, .summary-section {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* ===================================================================
+ * CORREÇÕES ESPECÍFICAS PARA SIDEBAR
+ * =================================================================== */
+
+/* Sidebar mantém texto branco com sombra para contraste */
+.sidebar-container .nav-text,
+.sidebar-container .user-name,
+.sidebar-container .user-role,
+.sidebar-container .sidebar-logo-text {
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  font-weight: 700 !important;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.98) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+.nav-link:hover {
+  color: #ffffff !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+}
+
+.nav-link.active {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* ===================================================================
+ * CORREÇÕES PARA MODAIS E DIALOGS
+ * =================================================================== */
+
+.modal-content, .dialog-content,
+[role="dialog"] h1, [role="dialog"] h2, [role="dialog"] h3,
+[role="dialog"] p, [role="dialog"] span, [role="dialog"] label {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+/* ===================================================================
+ * CORREÇÕES RESPONSIVAS
+ * =================================================================== */
+
+@media (max-width: 768px) {
+  /* Em mobile, ainda mais contraste */
+  h1, h2, h3, .page-title, .dashboard-title {
+    color: #000000 !important;
+    font-weight: 900 !important;
+  }
+
+  p, span, .content-text, .card-description {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+  }
+
+  /* Cards ainda mais opacos em mobile */
+  .card, .system-card, .dashboard-module-card {
+    background: rgba(255, 255, 255, 0.99) !important;
+  }
+}
+
+/* ===================================================================
+ * OVERRIDE PARA GRADIENTES PROBLEMÁTICOS
+ * =================================================================== */
+
+/* Remove qualquer gradiente de texto que possa estar causando problemas */
+* {
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* Exceções para elementos que devem manter gradiente de fundo (não texto) */
+.card, .btn-primary, .sidebar-container,
+[class*="bg-gradient"], [class*="background"] {
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+}
+
+/* ===================================================================
+ * MODO ESCURO - AJUSTES
+ * =================================================================== */
+
+.dark h1, .dark h2, .dark h3, .dark .page-title,
+.dark .dashboard-title, .dark .card-title {
+  color: #f8fafc !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark p, .dark span, .dark .content-text,
+.dark .text-muted-foreground, .dark .card-description {
+  color: #e2e8f0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .card, .dark .system-card {
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #f8fafc !important;
+}

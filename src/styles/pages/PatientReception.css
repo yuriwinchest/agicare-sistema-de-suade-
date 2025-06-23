@@ -1,0 +1,291 @@
+/*
+ * PatientReception.css
+ * Estilos específicos para a página de recepção de pacientes
+ */
+
+/* ===================================================================
+ * SALUDOCARE - Recepção de Pacientes Premium
+ * Design azul elegante consistente
+ * =================================================================== */
+
+/* Container principal */
+.page-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.03) 50%, rgba(147, 197, 253, 0.02) 100%);
+  position: relative;
+}
+
+/* Efeitos de fundo */
+.page-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Títulos da página */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 30%, #60a5fa 60%, #93c5fd 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.text-muted-foreground {
+  color: #1e3a8a;
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Cards do sistema */
+.card {
+  position: relative;
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8)) !important;
+  border: 2px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 60px rgba(30, 58, 138, 0.15),
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    0 12px 24px rgba(96, 165, 250, 0.08) !important;
+}
+
+/* Botões personalizados */
+button {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-primary, [class*="bg-primary"] {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover, [class*="bg-primary"]:hover {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Inputs personalizados */
+input, textarea, select {
+  border-radius: 12px !important;
+  border: 2px solid rgba(59, 130, 246, 0.2) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(15px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Inter', sans-serif;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow:
+    0 8px 32px rgba(59, 130, 246, 0.15),
+    0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .page-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Cabeçalho da página */
+.reception-header {
+  @apply flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6;
+}
+
+.reception-title {
+  @apply text-2xl font-bold;
+}
+
+.reception-actions {
+  @apply flex flex-wrap gap-2;
+}
+
+/* Container principal */
+.reception-container {
+  @apply grid gap-6;
+}
+
+/* Formulário de recepção */
+.reception-form {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100
+  dark:bg-primary dark:border-gray-800;
+}
+
+.reception-form-header {
+  @apply flex justify-between items-center mb-6 pb-4 border-b dark:border-gray-700;
+}
+
+.reception-form-title {
+  @apply font-medium text-lg;
+}
+
+.reception-form-section {
+  @apply mb-8;
+}
+
+.reception-form-section-title {
+  @apply font-medium mb-4;
+}
+
+.reception-form-group {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 mb-6;
+}
+
+.reception-form-field {
+  @apply flex-1 min-w-[200px];
+}
+
+.reception-form-row {
+  @apply flex flex-wrap gap-4 mb-4;
+}
+
+/* Cartões de informação */
+.info-card {
+  @apply bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg mb-6;
+}
+
+.info-card-header {
+  @apply flex justify-between items-center mb-3;
+}
+
+.info-card-title {
+  @apply font-medium;
+}
+
+.info-detail {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4;
+}
+
+.info-item {
+  @apply flex flex-col;
+}
+
+.info-label {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.info-value {
+  @apply font-medium;
+}
+
+/* Pesquisa e filtros */
+.reception-search-container {
+  @apply flex flex-wrap gap-4 mb-6;
+}
+
+.reception-search {
+  @apply flex-1 min-w-[250px];
+}
+
+.reception-filters {
+  @apply flex flex-wrap gap-2;
+}
+
+/* Tabela de pacientes */
+.reception-table-container {
+  @apply overflow-x-auto;
+}
+
+.reception-table {
+  @apply w-full border-collapse;
+}
+
+.reception-table th {
+  @apply bg-gray-50 dark:bg-gray-800/50 text-left p-3 text-sm font-medium;
+}
+
+.reception-table td {
+  @apply border-t border-gray-100 dark:border-gray-800 p-3 text-sm;
+}
+
+.reception-table tr {
+  @apply hover:bg-gray-50 dark:hover:bg-gray-800/20;
+}
+
+.reception-table-actions {
+  @apply flex items-center gap-2;
+}
+
+/* Estilos dos status */
+.reception-status {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.reception-status-waiting {
+  @apply bg-accent/20 text-accent-dark dark:bg-accent/20 dark:text-accent-light;
+}
+
+.reception-status-registered {
+  @apply bg-blue-500/20 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400;
+}
+
+.reception-status-in-service {
+  @apply bg-secondary/20 text-secondary-dark dark:bg-secondary/20 dark:text-secondary-light;
+}
+
+.reception-status-completed {
+  @apply bg-green-500/20 text-green-700 dark:bg-green-500/20 dark:text-green-400;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .reception-form-group {
+    @apply grid-cols-1;
+  }
+
+  .reception-search-container {
+    @apply flex-col;
+  }
+
+  .reception-search {
+    @apply w-full;
+  }
+}

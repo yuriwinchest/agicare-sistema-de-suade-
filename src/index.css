@@ -1,52 +1,180 @@
+/* Importar tema global azul elegante */
+@import './styles/global-blue-theme.css';
+
+/* Importar estilos compartilhados */
+@import './styles/shared.css';
+
+/* Importar tema azul elegante global */
+@import './styles/global-blue-theme.css';
+
+/* Importar correções de contraste de texto */
+@import './styles/text-contrast-fix.css';
+
+/* Importar estilos específicos de páginas */
+@import './styles/pages/Login.css';
+@import './styles/pages/Dashboard.css';
+@import './styles/pages/MainMenu.css';
+
+@import './styles/pages/Layout.css';
+@import './styles/pages/AdminDashboard.css';
+@import './styles/pages/Reception.css';
+@import './styles/pages/ElectronicMedicalRecord.css';
+@import './styles/pages/Nursing.css';
+/* Adicionar outras páginas que estão faltando */
+@import './styles/pages/PatientFlow.css';
+@import './styles/pages/PatientRecord.css';
+@import './styles/pages/PatientReception.css';
+@import './styles/pages/Ambulatory.css';
+@import './styles/pages/Hospitalization.css';
+@import './styles/pages/PatientConsultation.css';
+@import './styles/pages/NursingAssessment.css';
+@import './styles/pages/SystemOverview.css';
+@import './styles/pages/SystemSummary.css';
+@import './styles/pages/Appointment.css';
+/* Novas páginas adicionadas */
+@import './styles/pages/Index.css';
+@import './styles/pages/CompanyRegistration.css';
+@import './styles/pages/PatientSimplifiedPage.css';
+@import './styles/pages/NotFound.css';
+@import './styles/pages/PatientRegistration.css';
+@import './styles/pages/SchedulePages.css';
+/* Componentes de layout e outros */
+@import './styles/pages/Layout.css';
+@import './styles/pages/StaffOverviewCards.css';
+@import './styles/pages/AuthComponents.css';
+@import './styles/pages/AdminComponents.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ===================================================================
+ * OVERRIDES CRÍTICOS PARA MAIN MENU LIMPO E LEGÍVEL
+ * =================================================================== */
+
+/* FORÇA FUNDO BRANCO ABSOLUTO */
+.main-menu-container {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  min-height: 100vh !important;
+}
+
+/* REMOVE QUALQUER TEMA ESCURO */
+body.dark .main-menu-container,
+[data-theme="dark"] .main-menu-container,
+.dark .main-menu-container {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* FORÇA TEXTOS LEGÍVEIS */
+.main-menu-container .main-menu-title {
+  color: #1f2937 !important;
+  background: none !important;
+  -webkit-text-fill-color: #1f2937 !important;
+}
+
+.main-menu-container .main-menu-subtitle {
+  color: #6b7280 !important;
+}
+
+.main-menu-container .module-title {
+  color: #1f2937 !important;
+}
+
+.main-menu-container .module-description {
+  color: #6b7280 !important;
+}
+
+.main-menu-container .section-title {
+  color: #1f2937 !important;
+}
+
+.main-menu-container .section-subtitle {
+  color: #6b7280 !important;
+}
+
+/* FORÇA CARDS LIMPOS */
+.main-menu-container .module-card {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  color: #1f2937 !important;
+}
+
+/* FORÇA CREDENCIAIS LIMPAS */
+.main-menu-container .credential-item {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.main-menu-container .credential-title {
+  color: #1f2937 !important;
+}
+
+.main-menu-container .credential-desc {
+  color: #6b7280 !important;
+}
+
+/**
+ * Estilos Globais da Aplicação
+ * Responsabilidade: Definir variáveis CSS, estilos base e configurações globais
+ * Mantém configuração centralizada de temas e variáveis
+ */
+
 @layer base {
   :root {
-    --background: 200 20% 98%;
-    --foreground: 200 50% 12%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 200 50% 12%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 200 50% 12%;
-    --primary: 203 75% 12%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 189 34% 37%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 270 4% 85%;
-    --muted-foreground: 200 20% 40%;
-    --accent: 35 62% 51%;
-    --accent-foreground: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 200 10% 90%;
-    --input: 200 10% 90%;
-    --ring: 189 34% 37%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 203 75% 12%;
-    --foreground: 0 0% 98%;
-    --card: 203 75% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 203 75% 12%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 203 75% 12%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 189 34% 37%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 200 20% 40%;
-    --muted-foreground: 200 10% 70%;
-    --accent: 35 62% 51%;
-    --accent-foreground: 0 0% 98%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 203 25% 25%;
-    --input: 203 25% 25%;
-    --ring: 189 34% 37%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 
   * {
@@ -57,6 +185,7 @@
     @apply bg-background text-foreground;
   }
 
+  /* Estilos de status específicos (mantidos para compatibilidade) */
   .status-waiting {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-light/30 text-accent-dark dark:bg-accent-dark/30 dark:text-accent-light;
   }
@@ -73,6 +202,7 @@
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-400/30 text-green-700 dark:bg-green-900/30 dark:text-green-400;
   }
 
+  /* Animação de seção */
   .section-fade {
     animation: fadeIn 0.3s ease-in-out;
   }
@@ -88,6 +218,7 @@
     }
   }
 
+  /* Cards do sistema (mantidos para compatibilidade) */
   .system-card {
     @apply bg-white shadow-sm border border-gray-100 rounded-lg dark:bg-primary dark:border-primary-light;
   }
@@ -96,6 +227,7 @@
     @apply bg-white shadow-sm border border-gray-100 rounded-lg dark:bg-primary dark:border-primary-light;
   }
 
+  /* Container de página padrão */
   .page-container {
     @apply container mx-auto py-6 px-4 max-w-7xl;
   }
@@ -104,16 +236,19 @@
     @apply mb-6 flex items-center justify-between;
   }
 
+  /* Hover effect teal */
   .teal-hover {
     @apply hover:bg-secondary-light/20 hover:text-secondary dark:hover:bg-secondary-dark/20 dark:hover:text-secondary-light;
   }
 
+  /* Responsividade */
   @media (max-width: 640px) {
     .page-container {
       @apply px-2 py-4;
     }
   }
 
+  /* Utilitários de largura específicos */
   .w-24 { width: 6rem !important; }
   .w-32 { width: 8rem !important; }
   .w-36 { width: 9rem !important; }
@@ -130,4 +265,537 @@
   .max-w-\[170px\] { max-width:170px !important; }
   .min-w-\[110px\] { min-width:110px !important;}
   .max-w-\[160px\] { max-width:160px !important;}
+}
+
+/* ===================================================================
+ * CORREÇÕES URGENTES DE CONTRASTE DE TEXTO - SALUDOCARE
+ * Aplicação imediata para garantir legibilidade em todo o sistema
+ * =================================================================== */
+
+/* TODOS OS TÍTULOS - Cor escura sólida para máxima legibilidade */
+h1, h2, h3, h4, h5, h6,
+.page-title, .dashboard-title, .section-title, .card-title,
+.page-subtitle, .dashboard-subtitle, .card-subtitle,
+.content-title, .form-title, .modal-title, .dialog-title {
+  color: #1e293b !important;
+  text-shadow: none !important;
+}
+
+/* TODOS OS TEXTOS - Cor escura para legibilidade */
+p, span:not([class*="bg-"]):not([class*="gradient"]),
+.content-text, .description, .text-content, .card-text,
+.form-text, .help-text, .info-text, .detail-text,
+.table-text, .list-text, .menu-text {
+  color: #374151 !important;
+}
+
+/* LABELS E CAMPOS DE FORMULÁRIO */
+label, .form-label, .field-label, .input-label, .select-label {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+}
+
+/* INPUTS E CONTROLES */
+input, textarea, select, .input-field, .form-control {
+  color: #1f2937 !important;
+  background-color: #ffffff !important;
+}
+
+/* PLACEHOLDERS */
+input::placeholder, textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 0.8 !important;
+}
+
+/* BOTÕES PRIMÁRIOS */
+.btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* BOTÕES SECUNDÁRIOS */
+.btn-secondary, .dashboard-access-button:not(:hover) {
+  color: #1f2937 !important;
+  font-weight: 500 !important;
+}
+
+/* TABELAS */
+th, .table-header {
+  color: #1f2937 !important;
+  font-weight: 700 !important;
+}
+
+td, .table-cell {
+  color: #374151 !important;
+}
+
+/* CARDS E CONTAINERS */
+.card, .system-card, .dashboard-module-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* SIDEBAR E NAVEGAÇÃO */
+.sidebar-container .nav-text,
+.sidebar-container .nav-link,
+.navigation-menu .nav-item,
+.menu-item .text {
+  color: #1f2937 !important;
+  font-weight: 500 !important;
+}
+
+/* LINKS DE NAVEGAÇÃO */
+.nav-link {
+  color: #374151 !important;
+}
+
+.nav-link:hover {
+  color: #1f2937 !important;
+  background-color: #f3f4f6 !important;
+}
+
+.nav-link.active {
+  color: #1e40af !important;
+  background-color: #dbeafe !important;
+  font-weight: 600 !important;
+}
+
+/* FORÇAR APLICAÇÃO GLOBAL */
+* {
+  box-sizing: border-box !important;
+}
+
+/* PRIORIDADE MÁXIMA PARA CARDS E ELEMENTOS PRINCIPAIS */
+.card, .btn-primary, .sidebar-container,
+.dashboard-module-card, .system-card, .page-container {
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* RESPONSIVIDADE PARA TEXTO */
+@media (max-width: 768px) {
+  h1, h2, h3, .page-title, .dashboard-title {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+  }
+
+  p, span, .content-text, .card-description {
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .card, .system-card, .dashboard-module-card {
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+  }
+}
+
+/* ===================================================================
+ * OVERRIDE ESPECÍFICO PARA MAINMENU - FORÇA MÁXIMA
+ * Garantir que o design premium seja aplicado
+ * =================================================================== */
+
+/* FORÇAR BACKGROUND ESCURO NO MAINMENU */
+.main-menu-container,
+.main-menu-container * {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #fefefe 25%,
+    #f8fafc 50%,
+    #f1f5f9 75%,
+    #e2e8f0 100%
+  ) !important;
+}
+
+/* FORÇAR TEXTOS CLAROS NO MAINMENU */
+.main-menu-container h1,
+.main-menu-container h2,
+.main-menu-container h3,
+.main-menu-container p,
+.main-menu-container span,
+.main-menu-container .module-title,
+.main-menu-container .module-description {
+  color: #1e3a8a !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* FORÇAR CARDS ESCUROS NO MAINMENU */
+.main-menu-container .module-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* FORÇAR ÍCONES COLORIDOS NO MAINMENU */
+.main-menu-container .module-card[data-category="reception"] .module-icon {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: white !important;
+}
+
+.main-menu-container .module-card[data-category="medical"] .module-icon {
+  background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+  color: white !important;
+}
+
+.main-menu-container .module-card[data-category="admin"] .module-icon {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  color: white !important;
+}
+
+.main-menu-container .module-card[data-category="main"] .module-icon {
+  background: linear-gradient(135deg, #d4af37, #f4d03f) !important;
+  color: #1e3a8a !important;
+}
+
+/* Forçar cabeçalho premium */
+.main-menu-container .main-menu-header {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.9) 100%
+  ) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1) !important;
+  padding: 4rem 2rem 3rem 2rem !important;
+}
+
+/* Forçar selo de excelência */
+.main-menu-container .main-menu-title::after {
+  content: '★ CLÍNICA PREMIADA 2025 ★' !important;
+  position: absolute !important;
+  top: -2rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #d4af37 !important;
+  letter-spacing: 2px !important;
+}
+
+/* Forçar credenciais */
+.main-menu-container .credential-item {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 2rem !important;
+  text-align: center !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Forçar seção da equipe médica */
+.main-menu-container .medical-team-section {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(248, 250, 252, 0.6) 100%
+  ) !important;
+  backdrop-filter: blur(15px) !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(212, 175, 55, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+  padding: 5rem 2rem !important;
+}
+
+/* Remover qualquer tema escuro que possa estar interferindo */
+.main-menu-container * {
+  color: inherit !important;
+}
+
+.main-menu-container .main-menu-title {
+  color: #1e3a8a !important;
+}
+
+.main-menu-container .main-menu-subtitle {
+  color: #64748b !important;
+}
+
+.main-menu-container .module-title {
+  color: #1e3a8a !important;
+}
+
+.main-menu-container .module-description {
+  color: #64748b !important;
+}
+
+.main-menu-container .section-title {
+  color: #1e3a8a !important;
+}
+
+.main-menu-container .section-subtitle {
+  color: #64748b !important;
+}
+
+/* Override para garantir que o layout seja premium */
+body {
+  background: #ffffff !important;
+}
+
+html {
+  background: #ffffff !important;
+}
+
+/* ===================================================================
+ * DESIGN PREMIUM MÉDICO - OVERRIDES CRÍTICOS
+ * =================================================================== */
+
+/* Importar fontes premium */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Forçar fundo premium no body */
+body {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #fefefe 25%,
+    #f8fafc 50%,
+    #f1f5f9 75%,
+    #e2e8f0 100%
+  ) !important;
+  min-height: 100vh !important;
+}
+
+/* Container principal premium */
+.main-menu-container {
+  background: linear-gradient(135deg,
+    #ffffff 0%,
+    #fefefe 25%,
+    #f8fafc 50%,
+    #f1f5f9 75%,
+    #e2e8f0 100%
+  ) !important;
+  min-height: 100vh !important;
+  font-family: 'Inter', 'Segoe UI', sans-serif !important;
+  position: relative !important;
+  overflow-x: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Cabeçalho premium */
+.main-menu-header {
+  text-align: center !important;
+  padding: 4rem 2rem 3rem 2rem !important;
+  position: relative !important;
+  z-index: 1 !important;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.9) 100%
+  ) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1) !important;
+}
+
+/* Título premium */
+.main-menu-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 4rem !important;
+  font-weight: 800 !important;
+  color: #1e3a8a !important;
+  margin-bottom: 0.5rem !important;
+  letter-spacing: -1px !important;
+  text-shadow: 0 2px 4px rgba(30, 58, 138, 0.1) !important;
+  position: relative !important;
+}
+
+/* Selo de excelência */
+.main-menu-title::after {
+  content: '★ CLÍNICA PREMIADA 2025 ★' !important;
+  position: absolute !important;
+  top: -2rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #d4af37 !important;
+  letter-spacing: 2px !important;
+}
+
+/* Subtítulo premium */
+.main-menu-subtitle {
+  font-family: 'Inter', sans-serif !important;
+  color: #64748b !important;
+  font-size: 1.4rem !important;
+  font-weight: 400 !important;
+  margin-bottom: 2rem !important;
+  line-height: 1.6 !important;
+  max-width: 600px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Cards premium */
+.module-card {
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  border-radius: 24px !important;
+  padding: 2.5rem !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  height: auto !important;
+  min-height: 200px !important;
+}
+
+.module-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(212, 175, 55, 0.15) !important;
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Ícones premium por categoria */
+.module-card[data-category="reception"] .module-icon {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: white !important;
+  box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3) !important;
+}
+
+.module-card[data-category="medical"] .module-icon {
+  background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+  color: white !important;
+  box-shadow: 0 8px 25px rgba(30, 64, 175, 0.3) !important;
+}
+
+.module-card[data-category="admin"] .module-icon {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  color: white !important;
+  box-shadow: 0 8px 25px rgba(217, 119, 6, 0.3) !important;
+}
+
+.module-card[data-category="main"] .module-icon {
+  background: linear-gradient(135deg, #d4af37, #f4d03f) !important;
+  color: #1e3a8a !important;
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4) !important;
+}
+
+/* Ícones premium */
+.module-icon {
+  width: 70px !important;
+  height: 70px !important;
+  border-radius: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.8rem !important;
+  transition: all 0.4s ease !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.module-card:hover .module-icon {
+  transform: scale(1.1) rotate(5deg) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Títulos premium */
+.module-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  color: #1e3a8a !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.3 !important;
+}
+
+.module-description {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.95rem !important;
+  color: #64748b !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Seções premium */
+.section-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 2.8rem !important;
+  font-weight: 700 !important;
+  color: #1e3a8a !important;
+  margin-bottom: 1rem !important;
+  position: relative !important;
+}
+
+.section-title::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -0.5rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 80px !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, #d4af37, #f4d03f) !important;
+  border-radius: 2px !important;
+}
+
+.section-subtitle {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 1.2rem !important;
+  color: #64748b !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  line-height: 1.6 !important;
+}
+
+/* Grid de módulos */
+.modules-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)) !important;
+  gap: 2rem !important;
+  margin-top: 2rem !important;
+}
+
+/* Credenciais premium */
+.credential-item {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 2rem !important;
+  text-align: center !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+.credential-item:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Equipe médica premium */
+.medical-team-section {
+  padding: 5rem 2rem !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(248, 250, 252, 0.6) 100%
+  ) !important;
+  backdrop-filter: blur(15px) !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(212, 175, 55, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .main-menu-title {
+    font-size: 2.8rem !important;
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .module-card {
+    padding: 2rem !important;
+  }
 }

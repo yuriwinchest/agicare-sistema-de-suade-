@@ -1,0 +1,215 @@
+/**
+ * Tema Azul Elegante Global - SALUDOCARE
+ * Design premium aplicado globalmente em todas as páginas
+ */
+
+/* ===================================================================
+ * SALUDOCARE - Tema Azul Elegante Global
+ * Design premium consistente para todas as páginas
+ * =================================================================== */
+
+/* Container principal global */
+.page-container {
+  padding: 2rem !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  min-height: calc(100vh - 4rem) !important;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.03) 50%, rgba(147, 197, 253, 0.02) 100%) !important;
+  position: relative !important;
+}
+
+/* Efeitos de fundo globais */
+.page-container::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(96, 165, 250, 0.03) 0%, transparent 50%) !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+/* Títulos globais - CORRIGIDO PARA MELHOR LEGIBILIDADE */
+h1, .page-title {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  /* Removido gradiente que prejudicava legibilidade */
+  color: #1e293b !important;
+  margin-bottom: 0.5rem !important;
+  font-family: 'Inter', sans-serif !important;
+  letter-spacing: 0.5px !important;
+  text-shadow: none !important;
+}
+
+.text-muted-foreground, .page-subtitle {
+  color: #334155 !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  opacity: 1 !important; /* Removido opacity que prejudicava legibilidade */
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Cards do sistema globais */
+.card, .system-card, .ambulatory-section, .reception-section, .nursing-section,
+.hospitalization-section, .emr-section, .summary-section, .metrics-panel,
+.report-card, .department-card {
+  position: relative !important;
+  border-radius: 20px !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(20px) !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
+  border: 2px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow:
+    0 8px 32px rgba(30, 58, 138, 0.1),
+    0 4px 16px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.card:hover, .system-card:hover, .ambulatory-section:hover, .reception-section:hover,
+.nursing-section:hover, .hospitalization-section:hover, .emr-section:hover,
+.summary-section:hover, .metrics-panel:hover, .report-card:hover, .department-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow:
+    0 20px 60px rgba(30, 58, 138, 0.15),
+    0 8px 32px rgba(59, 130, 246, 0.1),
+    0 12px 24px rgba(96, 165, 250, 0.08) !important;
+}
+
+/* Botões globais */
+button, .btn-primary, .btn-secondary {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+}
+
+.btn-primary:hover, button[class*="bg-primary"]:hover, button[class*="bg-blue"]:hover {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Inputs globais */
+input, textarea, select {
+  border-radius: 12px !important;
+  border: 2px solid rgba(59, 130, 246, 0.2) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(15px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-family: 'Inter', sans-serif !important;
+  color: #1e293b !important; /* Texto escuro para boa legibilidade */
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow:
+    0 8px 32px rgba(59, 130, 246, 0.15),
+    0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Tabs globais */
+[role="tablist"] {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.08)) !important;
+  border-radius: 16px !important;
+  padding: 0.5rem !important;
+  border: 2px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow: inset 0 2px 8px rgba(59, 130, 246, 0.05) !important;
+}
+
+[role="tab"] {
+  border-radius: 12px !important;
+  padding: 0.8rem 1.5rem !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  color: #475569 !important; /* Cor mais escura para melhor legibilidade */
+}
+
+[role="tab"][data-state="active"] {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+  color: white !important;
+  box-shadow:
+    0 4px 16px rgba(59, 130, 246, 0.3),
+    0 2px 8px rgba(59, 130, 246, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+[role="tab"]:hover:not([data-state="active"]) {
+  background: rgba(59, 130, 246, 0.05) !important;
+  color: #1e293b !important; /* Cor mais escura no hover */
+}
+
+/* Tabelas globais */
+table {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
+  border: 2px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(30, 58, 138, 0.1) !important;
+}
+
+th {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.08)) !important;
+  color: #1e293b !important; /* Cor escura para melhor legibilidade */
+  font-weight: 700 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+td {
+  color: #374151 !important; /* Cor escura para melhor legibilidade */
+  font-weight: 400 !important;
+}
+
+tr:hover {
+  background: rgba(59, 130, 246, 0.05) !important;
+  transform: scale(1.01) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Animações de entrada */
+.section-fade {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividade global */
+@media (max-width: 1024px) {
+  .page-container {
+    padding: 1.5rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  h1, .page-title {
+    font-size: 2rem !important;
+    color: #0f172a !important; /* Ainda mais escuro em mobile */
+  }
+
+  [role="tab"] {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+}

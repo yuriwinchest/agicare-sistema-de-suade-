@@ -1,78 +1,208 @@
-# Welcome to your Lovable project
+# 🏥 AgiCare - Sistema de Gestão de Saúde
 
-## Atualizações Recentes
+![AgiCare Logo](public/logo-favicon.html)
 
-**2024-10-19**: 
-- Implementada API centralizada com sistema de cache (`src/services/api/index.ts`)
-- Corrigido problema de carregamento lento na tela de recepção
-- Adicionada conversão automática de IDs para nomes nas tabelas
-- Melhorada a experiência do usuário com atualizações automáticas
-- Consulte o CHANGELOG.md para mais detalhes das alterações
+## 📋 Sobre o Sistema
 
-## Project info
+O **AgiCare** é um sistema completo de gestão médica e hospitalar desenvolvido para otimizar o atendimento e administração de clínicas e hospitais. Com interface moderna e intuitiva, oferece uma solução integrada para todas as necessidades de gestão em saúde.
 
-**URL**: https://lovable.dev/projects/183d77c4-b0e1-4e78-bf16-2ac67f909cf5
+## 🚀 Funcionalidades Principais
 
-## How can I edit this code?
+### 📋 **Recepção & Atendimento (5 Módulos)**
+- **Recepção de Pacientes** - Gestão completa da recepção
+- **Cadastro Individual** - Acolhimento personalizado
+- **Agendamento** - Sistema de consultas e horários
+- **Agendamento Rápido** - Marcação express de consultas
+- **Consulta de Pacientes** - Busca avançada de dados
 
-There are several ways of editing your application.
+### 🩺 **Módulos Médicos (5 Módulos)**
+- **Ambulatório** - Atendimentos ambulatoriais
+- **Prontuário Eletrônico** - Registro médico completo
+- **Sistema de Prontuário** - Anamnese, evolução e laudos
+- **Cadastro de Pacientes** - Registro completo com alergias
+- **Fluxo de Pacientes** - Acompanhamento em tempo real
 
-**Use Lovable**
+### 👩‍⚕️ **Enfermagem (3 Módulos)**
+- **Módulo de Enfermagem** - Cuidados completos
+- **Avaliação SAE** - Sistematização da Assistência
+- **Internação** - Gestão de leitos e cuidados
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/183d77c4-b0e1-4e78-bf16-2ac67f909cf5) and start prompting.
+### ⚙️ **Administração (4 Módulos)**
+- **Gestão de Usuários** - Controle de acesso
+- **Dashboard** - Indicadores e métricas
+- **Faturamento** - Controle financeiro e cobrança
+- **Cadastro Empresarial** - Dados corporativos
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🖥️ **Sistema (2 Módulos)**
+- **Resumo Completo** - Visão geral do sistema
+- **Monitoramento** - Alertas e status em tempo real
 
-**Use your preferred IDE**
+## 🏆 Certificações e Conformidade
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- ✅ **ISO 27001** - Segurança da informação
+- ✅ **LGPD** - Proteção de dados pessoais
+- ✅ **CFM** - Aprovado pelo Conselho Federal de Medicina
+- ✅ **ANVISA** - Conformidade sanitária
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Tecnologias Utilizadas
 
-Follow these steps:
+- **Frontend:** React 18 + TypeScript
+- **UI Framework:** Tailwind CSS + Shadcn/UI
+- **Roteamento:** React Router DOM
+- **Formulários:** React Hook Form + Zod
+- **Backend:** Supabase (PostgreSQL)
+- **Build Tool:** Vite
+- **Ícones:** Lucide React
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 📦 Instalação e Configuração
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Pré-requisitos
+- Node.js 18+
+- NPM ou Yarn
+- Git
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Passos de Instalação
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+1. **Clone o repositório:**
+```bash
+git clone https://github.com/yuriwinchest/agicare-sistema-de-suade-.git
+cd agicare-sistema-de-suade-
+```
+
+2. **Instale as dependências:**
+```bash
+npm install
+```
+
+3. **Configure as variáveis de ambiente:**
+```bash
+cp prisma/env-example .env
+```
+
+4. **Inicie o servidor de desenvolvimento:**
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+5. **Acesse o sistema:**
+```
+http://localhost:5173
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🎯 Estrutura do Projeto
 
-**Use GitHub Codespaces**
+```
+agicare-sistema-de-suade/
+├── src/
+│   ├── components/          # Componentes reutilizáveis
+│   │   ├── admin/          # Componentes administrativos
+│   │   ├── auth/           # Autenticação
+│   │   ├── nursing/        # Enfermagem
+│   │   ├── patient-*/      # Módulos de pacientes
+│   │   └── ui/             # Componentes de interface
+│   ├── pages/              # Páginas principais
+│   ├── services/           # Serviços e APIs
+│   ├── hooks/              # Custom hooks
+│   ├── styles/             # Estilos CSS
+│   └── utils/              # Utilitários
+├── docs/                   # Documentação
+├── diagrams/               # Diagramas do sistema
+├── prisma/                 # Schema do banco de dados
+└── tools/                  # Scripts e ferramentas
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔧 Scripts Disponíveis
 
-## What technologies are used for this project?
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Build de produção
+- `npm run preview` - Preview do build
+- `npm run lint` - Executa o linter
 
-This project is built with .
+## 📊 Módulos do Sistema
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+| Categoria | Módulos | Descrição |
+|-----------|---------|-----------|
+| **Recepção** | 5 módulos | Atendimento e agendamento |
+| **Médico** | 5 módulos | Prontuários e consultas |
+| **Enfermagem** | 3 módulos | Cuidados e internação |
+| **Admin** | 4 módulos | Gestão e faturamento |
+| **Sistema** | 2 módulos | Monitoramento e relatórios |
 
-## How can I deploy this project?
+**Total: 19 módulos funcionais completos!**
 
-Simply open [Lovable](https://lovable.dev/projects/183d77c4-b0e1-4e78-bf16-2ac67f909cf5) and click on Share -> Publish.
+## 🎨 Interface e Design
 
-## I want to use a custom domain - is that possible?
+- **Design System:** Baseado em princípios de UX médica
+- **Responsivo:** Adaptado para desktop, tablet e mobile
+- **Acessibilidade:** Conformidade com WCAG 2.1
+- **Tema:** Paleta profissional para ambiente médico
+- **Tipografia:** Inter font para máxima legibilidade
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## 🔐 Segurança
+
+- **Autenticação:** Sistema robusto com controle de sessão
+- **Autorização:** Controle de acesso por perfis
+- **Criptografia:** Dados sensíveis protegidos
+- **Auditoria:** Log de todas as ações do sistema
+- **Backup:** Rotinas automatizadas de backup
+
+## 📈 Performance
+
+- **Otimizado:** Bundle splitting e lazy loading
+- **Cache:** Estratégias de cache inteligente
+- **SEO:** Meta tags e estrutura otimizada
+- **Monitoramento:** Métricas de performance
+
+## 🚀 Deploy
+
+O sistema está pronto para deploy em:
+- **Vercel** (Recomendado)
+- **Netlify**
+- **AWS**
+- **Azure**
+- **Google Cloud**
+
+## 🤝 Contribuição
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 📞 Suporte
+
+Para suporte técnico ou dúvidas:
+- **Email:** suporte@agicare.com
+- **Documentação:** [docs/](docs/)
+- **Issues:** [GitHub Issues](https://github.com/yuriwinchest/agicare-sistema-de-suade-/issues)
+
+## 🎯 Roadmap
+
+- [ ] App móvel nativo
+- [ ] Integração com equipamentos médicos
+- [ ] IA para diagnósticos
+- [ ] Telemedicina integrada
+- [ ] API pública para integrações
+
+---
+
+**AgiCare** - Transformando a gestão de saúde com agilidade e tecnologia 🏥✨
+
+## 📱 Screenshots
+
+### Dashboard Principal
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Módulo de Recepção
+![Recepção](docs/screenshots/recepcao.png)
+
+### Prontuário Eletrônico
+![Prontuário](docs/screenshots/prontuario.png)
+
+### Sistema de Enfermagem
+![Enfermagem](docs/screenshots/enfermagem.png)

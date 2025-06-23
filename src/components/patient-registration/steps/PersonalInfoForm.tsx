@@ -1,8 +1,15 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { DateInput } from "@/components/ui/date-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { StandardLabel } from "@/components/ui/FormLabel";
+import { GENDER_OPTIONS } from "@/constants/formOptions";
+
+/**
+ * PersonalInfoForm
+ * Responsabilidade: Formulário de informações pessoais do paciente
+ * Princípios: DRY - Usa componentes e constantes reutilizáveis
+ */
 
 interface PersonalInfoFormProps {
   data: any;
@@ -17,7 +24,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+        <StandardLabel required>Nome Completo</StandardLabel>
         <Input
           value={data.name || ""}
           onChange={(e) => handleChange("name", e.target.value)}
@@ -26,7 +33,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+        <StandardLabel>Data de Nascimento</StandardLabel>
         <DateInput
           value={data.birth_date || ""}
           onChange={(value) => handleChange("birth_date", value)}
@@ -35,20 +42,23 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ data, onUpdate }) =
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+        <StandardLabel>Sexo</StandardLabel>
         <Select value={data.gender} onValueChange={(value) => handleChange("gender", value)}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione o sexo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Masculino">Masculino</SelectItem>
-            <SelectItem value="Feminino">Feminino</SelectItem>
+            {GENDER_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+        <StandardLabel>CPF</StandardLabel>
         <Input
           value={data.cpf || ""}
           onChange={(e) => handleChange("cpf", e.target.value)}

@@ -10,8 +10,6 @@ import PatientTable from "./reception/PatientTable";
 import { getDisplayStatus } from "./reception/patientStatusUtils";
 import { parseISO, isAfter, isBefore, isEqual, startOfDay } from "date-fns";
 
-const PAGE_BACKGROUND = "bg-gradient-to-br from-[#F6FDFF] via-[#D0F0FA] to-[#F3FAF8] dark:from-[#1d2332] dark:via-[#222a3a] dark:to-[#171b26]";
-
 const Reception = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,14 +30,14 @@ const Reception = () => {
       console.log("Dados carregados recentemente, pulando recarregamento");
       return;
     }
-    
+
     setIsLoading(true);
     try {
       console.log("Iniciando carregamento de pacientes...");
       // Usando a nova API com suporte a cache
       const patientsData = await PatientsApi.getAll(forceRefresh);
       console.log("Dados de pacientes carregados:", patientsData.length);
-      
+
       setPatients(patientsData);
       setLastUpdated(new Date());
     } catch (error) {
@@ -59,16 +57,16 @@ const Reception = () => {
   useEffect(() => {
     loadPatientList(false); // Não força atualização, usa cache se disponível
   }, [location.pathname]);
-  
+
   // Configurar atualizações periódicas
   useEffect(() => {
     // Adiciona listener para evento de foco na janela
     const handleFocus = () => loadPatientList(false);
     window.addEventListener('focus', handleFocus);
-    
+
     // Atualiza os dados a cada 1 minuto para manter tudo atual
     const intervalId = setInterval(() => loadPatientList(true), 60000);
-    
+
     return () => {
       window.removeEventListener('focus', handleFocus);
       clearInterval(intervalId);
@@ -82,7 +80,7 @@ const Reception = () => {
 
   const filteredPatients = patients.filter((patient) => {
     if (!patient) return false;
-    
+
     // Filtro de nome ou CPF
     const matchesSearch =
       (patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
@@ -91,11 +89,11 @@ const Reception = () => {
     // Filtro de status
     const patientDisplayStatus = getDisplayStatus(patient);
     const matchesStatus = statusFilter ? patientDisplayStatus === statusFilter : true;
-    
+
     // Filtros de especialidade e profissional
     const matchesSpecialty = specialtyFilter ? patient.specialty === specialtyFilter : true;
     const matchesProfessional = professionalFilter ? patient.professional === professionalFilter : true;
-    
+
     // Filtros de data
     let matchesDateRange = true;
     if (patient.date && (startDate || endDate)) {
@@ -106,23 +104,23 @@ const Reception = () => {
         } catch (e) {
           console.warn("Date parse error:", e);
           matchesDateRange = true;
-          return matchesDateRange && matchesSearch && matchesStatus && 
+          return matchesDateRange && matchesSearch && matchesStatus &&
                  matchesSpecialty && matchesProfessional;
         }
-        
+
         if (startDate && endDate) {
           // Ambas as datas fornecidas - verificar se o agendamento está entre elas
           const start = startOfDay(startDate);
           const end = startOfDay(endDate);
-          matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) && 
+          matchesDateRange = (isAfter(appointmentDate, start) || isEqual(appointmentDate, start)) &&
                              (isBefore(appointmentDate, end) || isEqual(appointmentDate, end));
         } else if (startDate) {
           // Apenas data inicial - verificar se o agendamento é igual ou posterior
-          matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) || 
+          matchesDateRange = isAfter(appointmentDate, startOfDay(startDate)) ||
                              isEqual(appointmentDate, startOfDay(startDate));
         } else if (endDate) {
           // Apenas data final - verificar se o agendamento é igual ou anterior
-          matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) || 
+          matchesDateRange = isBefore(appointmentDate, startOfDay(endDate)) ||
                              isEqual(appointmentDate, startOfDay(endDate));
         }
       } catch (error) {
@@ -130,19 +128,19 @@ const Reception = () => {
         matchesDateRange = true;
       }
     }
-    
+
     return matchesSearch && matchesStatus && matchesDateRange && matchesSpecialty && matchesProfessional;
   });
 
   return (
-    <div className={`min-h-screen w-full ${PAGE_BACKGROUND} transition-colors`}>
+    <div className="reception-background">
       <Layout>
-        <div className="page-container">
+        <div className="reception-container">
           <div className="flex flex-col space-y-6">
-            <div className="flex justify-start items-center">
-              <Button 
-                variant="teal" 
-                className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all mr-auto" 
+            <div className="reception-header">
+              <Button
+                variant="teal"
+                className="reception-action-button reception-primary-button"
                 onClick={() => navigate("/patient-registration")}
               >
                 <UserPlus size={18} />
@@ -150,7 +148,7 @@ const Reception = () => {
               </Button>
               <Button
                 variant="outline"
-                className="mr-4 flex items-center gap-2"
+                className="reception-action-button reception-outline-button"
                 onClick={handleRefresh}
                 disabled={isLoading}
               >
@@ -159,33 +157,37 @@ const Reception = () => {
                 </svg>
                 {isLoading ? 'Atualizando...' : 'Atualizar'}
               </Button>
-              <h1 className="text-xl font-semibold text-teal-700 dark:text-teal-300 bg-teal-50/80 dark:bg-teal-900/20 px-4 py-2 rounded-md shadow-sm">
+              <h1 className="reception-title">
                 CONTROLE DE ATENDIMENTOS ELETIVOS
               </h1>
             </div>
-            <ReceptionFilters
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              startDate={startDate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-              specialtyFilter={specialtyFilter}
-              setSpecialtyFilter={setSpecialtyFilter}
-              professionalFilter={professionalFilter}
-              setProfessionalFilter={setProfessionalFilter}
-            />
-            <PatientTable
-              patients={filteredPatients}
-              isLoading={isLoading}
-            />
+            <div className="reception-filters">
+              <ReceptionFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                startDate={startDate}
+                setStartDate={setStartDate}
+                endDate={endDate}
+                setEndDate={setEndDate}
+                specialtyFilter={specialtyFilter}
+                setSpecialtyFilter={setSpecialtyFilter}
+                professionalFilter={professionalFilter}
+                setProfessionalFilter={setProfessionalFilter}
+              />
+            </div>
+            <div className="reception-table-container">
+              <PatientTable
+                patients={filteredPatients}
+                isLoading={isLoading}
+              />
+            </div>
 
             {/* Contador de pacientes para depuração */}
-            <div className="text-xs text-gray-500">
-              Total de pacientes carregados: {patients.length} | 
-              Filtros aplicados: {searchTerm ? `Busca: "${searchTerm}"` : "Sem busca"}, 
+            <div className="reception-debug-info">
+              Total de pacientes carregados: {patients.length} |
+              Filtros aplicados: {searchTerm ? `Busca: "${searchTerm}"` : "Sem busca"},
               {statusFilter ? `Status: "${statusFilter}"` : "Sem filtro de status"},
               {specialtyFilter ? `Especialidade: "${specialtyFilter}"` : "Sem filtro de especialidade"},
               {professionalFilter ? `Profissional: "${professionalFilter}"` : "Sem filtro de profissional"}

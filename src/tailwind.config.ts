@@ -47,6 +47,16 @@ export default {
           darker: "#B8B4BA",
           foreground: "hsl(var(--muted-foreground))",
         },
+        // Premium Medical Theme Colors
+        premium: {
+          gold: '#d4af37',
+          'gold-light': '#f4d03f',
+          'gold-dark': '#b8941f',
+          'medical-green': '#10b981',
+          'medical-blue': '#3b82f6',
+          'dark-slate': '#1e293b',
+          'darker-slate': '#0f1419',
+        },
         // Theme colors for clinical systems
         teal: {
           400: '#2DD4BF',

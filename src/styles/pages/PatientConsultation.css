@@ -1,0 +1,182 @@
+/*
+ * PatientConsultation.css
+ * Estilos específicos para a página de consulta de pacientes
+ */
+
+/* Cabeçalho da consulta */
+.consultation-header {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.consultation-patient-info {
+  @apply flex flex-col md:flex-row justify-between items-start md:items-center gap-4;
+}
+
+.consultation-patient-main {
+  @apply flex items-center gap-4;
+}
+
+.consultation-patient-avatar {
+  @apply w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center;
+}
+
+.consultation-patient-name {
+  @apply text-xl font-bold;
+}
+
+.consultation-patient-id {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.consultation-meta {
+  @apply text-right;
+}
+
+.consultation-type {
+  @apply font-medium;
+}
+
+.consultation-date {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+/* Contêiner principal */
+.consultation-container {
+  @apply grid gap-6 grid-cols-1 lg:grid-cols-4;
+}
+
+/* Seção principal da consulta */
+.consultation-main {
+  @apply lg:col-span-3;
+}
+
+/* Barra lateral */
+.consultation-sidebar {
+  @apply lg:col-span-1 space-y-6;
+}
+
+/* Abas do prontuário */
+.consultation-tabs {
+  @apply mb-6;
+}
+
+/* Estilos de seção */
+.consultation-section {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.consultation-section-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.consultation-section-title {
+  @apply font-medium text-lg;
+}
+
+/* Formulários na consulta */
+.consultation-form-group {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4 mb-4;
+}
+
+.consultation-form-row {
+  @apply flex flex-wrap gap-4 mb-4;
+}
+
+.consultation-form-field {
+  @apply flex-1 min-w-[200px];
+}
+
+.consultation-form-label {
+  @apply block text-sm font-medium mb-1;
+}
+
+/* Histórico do paciente */
+.consultation-history {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100
+  dark:bg-primary dark:border-gray-800;
+}
+
+.consultation-history-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.consultation-history-title {
+  @apply font-medium text-lg;
+}
+
+.consultation-timeline {
+  @apply space-y-4 p-4;
+}
+
+.consultation-timeline-item {
+  @apply flex gap-4;
+}
+
+.consultation-timeline-point {
+  @apply w-2 h-2 mt-2 rounded-full bg-secondary flex-shrink-0;
+}
+
+.consultation-timeline-content {
+  @apply bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md flex-1;
+}
+
+.consultation-timeline-date {
+  @apply text-xs text-gray-500 dark:text-gray-400 mb-1;
+}
+
+/* Informações resumidas */
+.consultation-info-card {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-100
+  dark:bg-primary dark:border-gray-800 mb-4;
+}
+
+.consultation-info-title {
+  @apply font-medium mb-2 pb-2 border-b dark:border-gray-700;
+}
+
+.consultation-info-content {
+  @apply space-y-2;
+}
+
+.consultation-info-item {
+  @apply flex justify-between text-sm;
+}
+
+.consultation-info-label {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.consultation-info-value {
+  @apply font-medium;
+}
+
+/* Resumo e finalização */
+.consultation-summary {
+  @apply bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6
+  dark:bg-primary dark:border-gray-800;
+}
+
+.consultation-summary-header {
+  @apply flex justify-between items-center mb-4 pb-3 border-b dark:border-gray-700;
+}
+
+.consultation-summary-title {
+  @apply font-medium text-lg;
+}
+
+.consultation-actions {
+  @apply flex justify-end gap-3 mt-6;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .consultation-container {
+    @apply grid-cols-1;
+  }
+
+  .consultation-form-group {
+    @apply grid-cols-1;
+  }
+}
