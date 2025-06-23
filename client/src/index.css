@@ -1,0 +1,355 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 214 84% 56%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 214 84% 56%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 214 84% 56%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 214 84% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+}
+
+/* AgiCare Healthcare Theme */
+@layer components {
+  .agicare-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .agicare-card {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .agicare-button {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .agicare-input {
+    @apply flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .agicare-header {
+    @apply bg-blue-600 text-white shadow-lg;
+  }
+  
+  .agicare-sidebar {
+    @apply bg-white border-r border-gray-200;
+  }
+  
+  .agicare-module-card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200;
+  }
+  
+  .agicare-module-icon {
+    @apply w-12 h-12 text-blue-600;
+  }
+  
+  .agicare-loading {
+    @apply animate-spin rounded-full border-b-2 border-blue-600;
+  }
+  
+  .agicare-text-primary {
+    @apply text-gray-900;
+  }
+  
+  .agicare-text-secondary {
+    @apply text-gray-600;
+  }
+  
+  .agicare-text-muted {
+    @apply text-gray-500;
+  }
+}
+
+/* Reception Module Styles */
+.reception-module {
+  @apply min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50;
+}
+
+.reception-container {
+  @apply max-w-7xl mx-auto p-6;
+}
+
+.reception-header {
+  @apply flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-8;
+  @apply bg-white rounded-xl shadow-sm border border-blue-100 p-6;
+}
+
+.reception-title {
+  @apply text-2xl font-bold text-blue-900 order-2 lg:order-1;
+}
+
+.reception-actions {
+  @apply flex flex-wrap gap-3 order-1 lg:order-2;
+}
+
+.reception-btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg;
+  @apply transition-all duration-200 ease-in-out shadow-sm hover:shadow-md;
+  @apply flex items-center gap-2;
+}
+
+.reception-btn-secondary {
+  @apply bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 font-medium px-6 py-2.5 rounded-lg;
+  @apply transition-all duration-200 ease-in-out shadow-sm hover:shadow-md;
+  @apply flex items-center gap-2;
+}
+
+.reception-filters-card {
+  @apply bg-white rounded-xl shadow-sm border border-blue-100 mb-6;
+}
+
+.reception-filters-header {
+  @apply flex items-center justify-between p-6 border-b border-blue-100;
+}
+
+.reception-filters-title {
+  @apply text-lg font-semibold text-blue-900 flex items-center gap-2;
+}
+
+.reception-filters-content {
+  @apply p-6;
+}
+
+.reception-filters-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+.reception-form-field {
+  @apply space-y-2;
+}
+
+.reception-form-label {
+  @apply text-sm font-medium text-gray-700 block;
+}
+
+.reception-form-input {
+  @apply w-full px-4 py-3 border border-gray-200 rounded-lg;
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply transition-all duration-200 ease-in-out;
+  @apply bg-white placeholder-gray-400;
+}
+
+.reception-form-input:hover {
+  @apply border-gray-300;
+}
+
+.reception-form-input:focus {
+  @apply outline-none border-blue-500 ring-2 ring-blue-500/20;
+}
+
+.reception-search-input {
+  @apply relative;
+}
+
+.reception-search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5;
+}
+
+.reception-search-field {
+  @apply pl-10 w-full px-4 py-3 border border-gray-200 rounded-lg;
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply transition-all duration-200 ease-in-out bg-white;
+}
+
+.reception-select-trigger {
+  @apply w-full px-4 py-3 border border-gray-200 rounded-lg bg-white;
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply transition-all duration-200 ease-in-out;
+  @apply text-left font-normal;
+}
+
+.reception-select-content {
+  @apply bg-white border border-gray-200 rounded-lg shadow-lg;
+  @apply max-h-60 overflow-auto;
+}
+
+.reception-select-item {
+  @apply px-4 py-2 hover:bg-blue-50 cursor-pointer;
+  @apply transition-colors duration-150;
+}
+
+.reception-date-picker {
+  @apply w-full px-4 py-3 border border-gray-200 rounded-lg bg-white;
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply transition-all duration-200 ease-in-out;
+  @apply flex items-center justify-start gap-2 text-left font-normal;
+}
+
+.reception-date-icon {
+  @apply h-4 w-4 text-gray-400;
+}
+
+.reception-table-card {
+  @apply bg-white rounded-xl shadow-sm border border-blue-100;
+}
+
+.reception-table-header {
+  @apply flex items-center justify-between p-6 border-b border-blue-100;
+}
+
+.reception-table-title {
+  @apply text-lg font-semibold text-blue-900;
+}
+
+.reception-table-stats {
+  @apply text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full;
+}
+
+.reception-table-content {
+  @apply overflow-x-auto;
+}
+
+.reception-table {
+  @apply w-full;
+}
+
+.reception-table-head {
+  @apply bg-blue-50 border-b border-blue-100;
+}
+
+.reception-table-th {
+  @apply px-6 py-4 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider;
+}
+
+.reception-table-row {
+  @apply border-b border-gray-100 hover:bg-blue-50/50 transition-colors duration-150;
+}
+
+.reception-table-td {
+  @apply px-6 py-4 text-sm text-gray-900;
+}
+
+.status-badge {
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-waiting {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-in-progress {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-completed {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-cancelled {
+  @apply bg-red-100 text-red-800;
+}
+
+.patient-form-container {
+  @apply bg-white rounded-xl shadow-sm border border-blue-100 p-6;
+}
+
+.patient-form-section {
+  @apply space-y-6;
+}
+
+.patient-form-section-title {
+  @apply text-lg font-semibold text-blue-900 border-b border-blue-100 pb-3 mb-4;
+  @apply flex items-center gap-2;
+}
+
+.patient-form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.patient-form-grid-full {
+  @apply grid grid-cols-1 gap-4;
+}
+
+.reception-action-buttons {
+  @apply flex flex-wrap gap-3 pt-4 border-t border-gray-200;
+}
+
+.btn-save {
+  @apply bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2.5 rounded-lg;
+  @apply transition-all duration-200 ease-in-out shadow-sm hover:shadow-md;
+  @apply flex items-center gap-2;
+}
+
+.btn-cancel {
+  @apply bg-gray-600 hover:bg-gray-700 text-white font-medium px-6 py-2.5 rounded-lg;
+  @apply transition-all duration-200 ease-in-out shadow-sm hover:shadow-md;
+  @apply flex items-center gap-2;
+}
+
+.reception-loading {
+  @apply flex items-center justify-center p-8;
+}
+
+.reception-loading-spinner {
+  @apply animate-spin h-8 w-8 text-blue-600;
+}
+
+.reception-loading-text {
+  @apply ml-3 text-gray-600;
+}
+
+.reception-empty-state {
+  @apply text-center p-8;
+}
+
+.reception-empty-icon {
+  @apply h-12 w-12 text-gray-400 mx-auto mb-4;
+}
+
+.reception-empty-title {
+  @apply text-lg font-medium text-gray-900 mb-2;
+}
+
+.reception-empty-description {
+  @apply text-gray-600;
+}
