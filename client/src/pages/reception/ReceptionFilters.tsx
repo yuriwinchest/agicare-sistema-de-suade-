@@ -48,27 +48,31 @@ const ReceptionFilters = ({
   setProfessionalFilter
 }: ReceptionFiltersProps) => {
   return (
-    <div className="reception-filters-grid">
-          <div className="reception-form-field">
-            <label className="reception-form-label">Paciente / CPF</label>
-            <div className="reception-search-input">
-              <Search className="reception-search-icon" />
+    <div className="reception-filters-container">
+      <div className="reception-filters-header-new">
+        <h3>Filtros</h3>
+      </div>
+      <div className="reception-filters-grid-new">
+          <div className="reception-form-field-new">
+            <label className="reception-form-label-new">Paciente / CPF</label>
+            <div className="reception-search-input-new">
+              <Search className="reception-search-icon-new" />
               <input
                 type="text"
                 placeholder="Buscar por nome ou CPF"
-                className="reception-search-field"
+                className="reception-search-field-new"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
           
-          <div className="reception-form-field">
-            <label className="reception-form-label">Data Inicial</label>
+          <div className="reception-form-field-new">
+            <label className="reception-form-label-new">Data Inicial</label>
             <Popover>
               <PopoverTrigger asChild>
-                <button className="reception-date-picker">
-                  <Calendar className="reception-date-icon" />
+                <button className="reception-date-picker-new">
+                  <Calendar className="reception-date-icon-new" />
                   {startDate ? format(startDate, 'dd/MM/yyyy', { locale: ptBR }) : 'Selecionar data'}
                 </button>
               </PopoverTrigger>
@@ -83,13 +87,12 @@ const ReceptionFilters = ({
             </Popover>
           </div>
           
-          <div className="reception-form-field">
-            <label className="reception-form-label">Data Final</label>
+          <div className="reception-form-field-new">
+            <label className="reception-form-label-new">Data Final</label>
             <Popover>
               <PopoverTrigger asChild>
-                <button className="reception-date-picker"
-                >
-                  <Calendar className="reception-date-icon" />
+                <button className="reception-date-picker-new">
+                  <Calendar className="reception-date-icon-new" />
                   {endDate ? format(endDate, 'dd/MM/yyyy', { locale: ptBR }) : 'Selecionar data'}
                 </button>
               </PopoverTrigger>
@@ -105,10 +108,10 @@ const ReceptionFilters = ({
             </Popover>
           </div>
           
-          <div className="reception-form-field">
-            <label className="reception-form-label">Status</label>
+          <div className="reception-form-field-new">
+            <label className="reception-form-label-new">Status</label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="reception-select-trigger">
+              <SelectTrigger className="reception-select-trigger-new">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="reception-select-content">
@@ -121,10 +124,10 @@ const ReceptionFilters = ({
             </Select>
           </div>
           
-          <div className="reception-form-field">
-            <label className="reception-form-label">Especialidade</label>
+          <div className="reception-form-field-new">
+            <label className="reception-form-label-new">Especialidade</label>
             <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-              <SelectTrigger className="reception-select-trigger">
+              <SelectTrigger className="reception-select-trigger-new">
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent className="reception-select-content">
@@ -138,10 +141,10 @@ const ReceptionFilters = ({
             </Select>
           </div>
           
-          <div className="reception-form-field">
-            <label className="reception-form-label">Profissional</label>
+          <div className="reception-form-field-new">
+            <label className="reception-form-label-new">Profissional</label>
             <Select value={professionalFilter} onValueChange={setProfessionalFilter}>
-              <SelectTrigger className="reception-select-trigger">
+              <SelectTrigger className="reception-select-trigger-new">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent className="reception-select-content">
@@ -155,6 +158,7 @@ const ReceptionFilters = ({
             </Select>
           </div>
         </div>
+    </div>
   );
 };
 
